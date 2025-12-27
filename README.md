@@ -40,7 +40,7 @@ The application manages meal ordering for film crews working on location, with f
 
 ### F. Analytics & Financial Intelligence (3 features)
 17. **Production Dashboard**: Comprehensive spending analytics and budget forecasting
-18. **Smart Contracts with Restaurants**: Blockchain-based contracts with automatic discounts
+18. **Smart Contracts with Restaurants**: Blockchain-based automated contracts with guaranteed discounts and quality
 19. **Waste Analysis**: Track uneaten meals and provide cost-saving recommendations
 
 ### G. Culture & Team Building (3 features)
