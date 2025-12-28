@@ -9,20 +9,34 @@ const { captureException } = require('../utils/monitoring');
  * @param {Function} next - الوظيفة التالية
  */
 const errorHandler = (err, req, res, next) => {
-  // تسجيل الخطأ
+  // تسجيل الخطأ - إخفاء البيانات الحساسة من req.body
+  const sanitizedBody = req.body ? {
+    ...Object.keys(req.body).reduce((acc, key) => {
+      // إخفاء الحقول الحساسة
+      if (['password', 'passwordHash', 'token', 'secret', 'apiKey', 'creditCard', 'cvv'].includes(key.toLowerCase())) {
+        acc[key] = '[REDACTED]';
+      } else if (typeof req.body[key] === 'object' && req.body[key] !== null) {
+        acc[key] = '[OBJECT]';
+      } else {
+        acc[key] = req.body[key];
+      }
+      return acc;
+    }, {})
+  } : undefined;
+
   logger.error({
     message: err.message,
     stack: err.stack,
     path: req.path,
     method: req.method,
-    body: req.body
+    ...(sanitizedBody && { body: sanitizedBody })
   });
 
   // Monitoring (Sentry)
   captureException(err, {
     path: req.path,
     method: req.method,
-    body: req.body
+    ...(sanitizedBody && { body: sanitizedBody })
   });
 
   // Prisma errors

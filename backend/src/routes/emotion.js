@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const emotionController = require('../controllers/emotionController');
+const { authenticateToken } = require('../middleware/auth');
+
+// جميع المسارات تحتاج إلى مصادقة
+router.use(authenticateToken);
 
 // Mood Routes
 router.post('/log', emotionController.logMood);

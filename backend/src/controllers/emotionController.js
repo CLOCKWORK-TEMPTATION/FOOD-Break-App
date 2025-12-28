@@ -6,10 +6,8 @@ class EmotionController {
   async logMood(req, res) {
     try {
       const { mood, intensity, notes, context } = req.body;
-      // Assuming req.user is populated by auth middleware
-      const userId = req.user?.id || req.body.userId; // Fallback for dev
-
-      if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+      // req.user is guaranteed by authenticateToken middleware
+      const userId = req.user.id;
 
       const log = await emotionService.logMood(userId, { mood, intensity, notes, context });
       res.json({ success: true, data: log });
@@ -23,7 +21,8 @@ class EmotionController {
   async getRecommendations(req, res) {
     try {
       const { mood } = req.query;
-      const userId = req.user?.id || req.query.userId;
+      // req.user is guaranteed by authenticateToken middleware
+      const userId = req.user.id;
 
       if (!mood) return res.status(400).json({ message: 'Mood is required' });
 
@@ -39,7 +38,8 @@ class EmotionController {
   async updateConsent(req, res) {
     try {
       const { type, status, version } = req.body;
-      const userId = req.user?.id || req.body.userId;
+      // req.user is guaranteed by authenticateToken middleware
+      const userId = req.user.id;
 
       const meta = {
         ip: req.ip,

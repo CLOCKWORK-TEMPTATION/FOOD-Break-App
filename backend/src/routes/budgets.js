@@ -1,7 +1,7 @@
 const express = require('express');
 const { body, param, query } = require('express-validator');
 const costAlertController = require('../controllers/costAlertController');
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 const { validateRequest } = require('../middleware/validation');
 
 const router = express.Router();
@@ -13,8 +13,8 @@ const router = express.Router();
 // إنشاء ميزانية جديدة (Admin/Producer فقط)
 router.post(
   '/',
-  authenticate,
-  authorize(['ADMIN', 'PRODUCER']),
+  authenticateToken,
+  authorizeRoles('ADMIN', 'PRODUCER'),
   [
     body('name')
       .trim()
@@ -46,7 +46,7 @@ router.post(
 // الحصول على جميع الميزانيات
 router.get(
   '/',
-  authenticate,
+  authenticateToken,
   [
     query('page')
       .optional()
@@ -76,7 +76,7 @@ router.get(
 // الحصول على ميزانية محددة
 router.get(
   '/:budgetId',
-  authenticate,
+  authenticateToken,
   [
     param('budgetId')
       .isUUID()
@@ -89,8 +89,8 @@ router.get(
 // تحديث الميزانية
 router.put(
   '/:budgetId',
-  authenticate,
-  authorize(['ADMIN', 'PRODUCER']),
+  authenticateToken,
+  authorizeRoles('ADMIN', 'PRODUCER'),
   [
     param('budgetId')
       .isUUID()
@@ -124,7 +124,7 @@ router.put(
 // فحص الميزانية وإضافة مبلغ
 router.post(
   '/:budgetId/check',
-  authenticate,
+  authenticateToken,
   [
     param('budgetId')
       .isUUID()
@@ -140,7 +140,7 @@ router.post(
 // الحصول على تنبيهات الميزانية
 router.get(
   '/:budgetId/alerts',
-  authenticate,
+  authenticateToken,
   [
     param('budgetId')
       .isUUID()
@@ -173,8 +173,8 @@ router.get(
 // حل التنبيه
 router.put(
   '/alerts/:alertId/resolve',
-  authenticate,
-  authorize(['ADMIN', 'PRODUCER']),
+  authenticateToken,
+  authorizeRoles('ADMIN', 'PRODUCER'),
   [
     param('alertId')
       .isUUID()
@@ -187,8 +187,8 @@ router.put(
 // إنشاء ميزانية افتراضية للمستخدم
 router.post(
   '/default',
-  authenticate,
-  authorize(['ADMIN']),
+  authenticateToken,
+  authorizeRoles('ADMIN'),
   [
     body('userId')
       .isUUID()
@@ -204,8 +204,8 @@ router.post(
 // إعادة تعيين الميزانية
 router.put(
   '/:budgetId/reset',
-  authenticate,
-  authorize(['ADMIN', 'PRODUCER']),
+  authenticateToken,
+  authorizeRoles('ADMIN', 'PRODUCER'),
   [
     param('budgetId')
       .isUUID()
@@ -218,7 +218,7 @@ router.put(
 // إنشاء تقرير الميزانية
 router.get(
   '/:budgetId/report',
-  authenticate,
+  authenticateToken,
   [
     param('budgetId')
       .isUUID()
@@ -239,8 +239,8 @@ router.get(
 // الحصول على إحصائيات شاملة
 router.get(
   '/analytics/summary',
-  authenticate,
-  authorize(['ADMIN', 'PRODUCER']),
+  authenticateToken,
+  authorizeRoles('ADMIN', 'PRODUCER'),
   [
     query('startDate')
       .optional()

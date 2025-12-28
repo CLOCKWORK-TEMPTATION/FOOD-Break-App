@@ -7,7 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { body, param, query } = require('express-validator');
 const projectController = require('../controllers/projectController');
-const { auth, admin, producer } = require('../middleware/auth');
+const { authenticateToken, requireAdmin, requireProducer } = require('../middleware/auth');
 
 /**
  * 1. %F4'! E41H9 ,/J/
@@ -15,8 +15,8 @@ const { auth, admin, producer } = require('../middleware/auth');
  * J*7D( 5D'-J'* ADMIN #H PRODUCER
  */
 router.post('/', [
-  auth,
-  admin,
+  authenticateToken,
+  requireAdmin,
   body('name').notEmpty().withMessage(''3E 'DE41H9 E7DH('),
   body('startDate').isISO8601().withMessage('*'1J. 'D(/! J,( #F JCHF 5-J-'K'),
   body('location').optional().isString(),
@@ -31,7 +31,7 @@ router.post('/', [
  * GET /api/v1/projects?page=1&limit=10&isActive=true
  */
 router.get('/', [
-  auth,
+  authenticateToken,
   query('page').optional().isInt({ min: 1 }),
   query('limit').optional().isInt({ min: 1, max: 100 }),
   query('isActive').optional().isBoolean()
@@ -51,7 +51,7 @@ router.post('/access-by-qr', [
  * GET /api/v1/projects/:projectId
  */
 router.get('/:projectId', [
-  auth,
+  authenticateToken,
   param('projectId').isUUID().withMessage('E91A 'DE41H9 :J1 5-J-')
 ], projectController.getProject);
 
@@ -61,8 +61,8 @@ router.get('/:projectId', [
  * J*7D( 5D'-J'* ADMIN #H PRODUCER
  */
 router.patch('/:projectId', [
-  auth,
-  producer,
+  authenticateToken,
+  requireProducer,
   param('projectId').isUUID().withMessage('E91A 'DE41H9 :J1 5-J-'),
   body('name').optional().isString(),
   body('location').optional().isString(),
@@ -79,8 +79,8 @@ router.patch('/:projectId', [
  * J*7D( 5D'-J'* ADMIN #H PRODUCER
  */
 router.post('/:projectId/regenerate-qr', [
-  auth,
-  producer,
+  authenticateToken,
+  requireProducer,
   param('projectId').isUUID().withMessage('E91A 'DE41H9 :J1 5-J-')
 ], projectController.regenerateQRCode);
 
@@ -89,7 +89,7 @@ router.post('/:projectId/regenerate-qr', [
  * GET /api/v1/projects/:projectId/order-window
  */
 router.get('/:projectId/order-window', [
-  auth,
+  authenticateToken,
   param('projectId').isUUID().withMessage('E91A 'DE41H9 :J1 5-J-')
 ], projectController.checkOrderWindow);
 
@@ -99,8 +99,8 @@ router.get('/:projectId/order-window', [
  * J*7D( 5D'-J'* ADMIN AB7
  */
 router.delete('/:projectId', [
-  auth,
-  admin,
+  authenticateToken,
+  requireAdmin,
   param('projectId').isUUID().withMessage('E91A 'DE41H9 :J1 5-J-')
 ], projectController.deleteProject);
 

@@ -6,10 +6,10 @@
 const express = require('express');
 const router = express.Router();
 const nutritionController = require('../controllers/nutritionController');
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 
 // جميع المسارات تتطلب المصادقة
-router.use(authenticate);
+router.use(authenticateToken);
 
 // ===========================
 // Nutrition Logs (سجلات التغذية)
@@ -85,7 +85,7 @@ router.get('/reports/weekly', nutritionController.getReports);
  */
 router.post(
   '/challenges',
-  authorize(['ADMIN', 'PRODUCER']),
+  authorizeRoles('ADMIN', 'PRODUCER'),
   nutritionController.createChallenge
 );
 
