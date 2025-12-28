@@ -3,6 +3,7 @@ const router = express.Router();
 
 // استيراد Routes
 const authRoutes = require('./auth');
+const adminRoutes = require('./admin');
 const menuRoutes = require('./menus');
 const restaurantRoutes = require('./restaurants');
 const exceptionRoutes = require('./exceptions');
@@ -50,6 +51,7 @@ router.get('/', (req, res) => {
     version: process.env.API_VERSION || 'v1',
     endpoints: {
       auth: '/auth',
+      admin: '/admin',
       menus: '/menus',
       restaurants: '/restaurants',
       exceptions: '/exceptions',

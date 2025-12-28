@@ -29,13 +29,15 @@ const errorHandler = (err, req, res, next) => {
     stack: err.stack,
     path: req.path,
     method: req.method,
+    query: req.query,
     ...(sanitizedBody && { body: sanitizedBody })
   });
 
-  // Monitoring (Sentry)
+  // Monitoring (Sentry) - بدون البيانات الحساسة
   captureException(err, {
     path: req.path,
     method: req.method,
+    query: req.query,
     ...(sanitizedBody && { body: sanitizedBody })
   });
 

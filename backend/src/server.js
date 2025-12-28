@@ -19,23 +19,12 @@ initMonitoring();
 app.use(helmet());
 app.use(compression());
 app.use(cors({
-  origin: function(origin, callback) {
-    const allowedOrigins = [
-      process.env.CORS_ORIGIN,
-      'http://localhost:3001',
-      'http://localhost:3000',
-      'http://localhost:5173'
-    ];
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1 && !process.env.CORS_ALLOW_ALL) {
-      // In development, you might want to allow all, but strictly:
-      // return callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'), false);
-      // For now, let's be permissive if dev
-      if (process.env.NODE_ENV !== 'production') return callback(null, true);
-    }
-    return callback(null, true);
-  },
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    process.env.FRONTEND_URL,
+    process.env.CORS_ORIGIN
+  ].filter(Boolean),
   credentials: true
 }));
 app.use(express.json());

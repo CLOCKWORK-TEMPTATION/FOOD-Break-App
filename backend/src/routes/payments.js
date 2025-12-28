@@ -7,6 +7,7 @@ const express = require('express');
 const { body, query, param } = require('express-validator');
 const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 const { validateRequest } = require('../middleware/validation');
+const { paymentLimiter } = require('../middleware/rateLimiter');
 const {
   createPaymentIntent,
   confirmPayment,
@@ -27,6 +28,7 @@ const router = express.Router();
  */
 router.post(
   '/create-intent',
+  paymentLimiter,
   authenticateToken,
   [
     body('amount')

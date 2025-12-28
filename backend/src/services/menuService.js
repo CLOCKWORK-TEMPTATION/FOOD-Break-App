@@ -149,6 +149,7 @@ const deleteMenuItem = async (menuItemId) => {
  */
 const getCoreMenu = async () => {
   try {
+    // استعلام منفصل: جلب عناصر القائمة مع المطاعم الشريكة النشطة فقط
     const menuItems = await prisma.menuItem.findMany({
       where: {
         menuType: 'CORE',
@@ -169,8 +170,7 @@ const getCoreMenu = async () => {
         }
       },
       orderBy: [
-        { qualityScore: 'desc' },
-        { restaurant: { rating: 'desc' } }
+        { qualityScore: 'desc' }
       ]
     });
 

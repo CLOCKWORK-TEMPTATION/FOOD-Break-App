@@ -96,22 +96,22 @@ export interface PredictiveInsight {
 export const statsService = {
   // جلب إحصائيات لوحة التحكم
   async getDashboardStats(): Promise<DashboardStats> {
-    const response = await apiClient.get('/admin/dashboard/stats');
+    const response = await apiClient.get('/admin/dashboard');
     return response.data.data;
   },
 
   // جلب إحصائيات لفترة زمنية محددة
   async getStatsByDateRange(startDate: string, endDate: string): Promise<DashboardStats> {
-    const response = await apiClient.get('/admin/dashboard/stats', {
+    const response = await apiClient.get('/admin/dashboard', {
       params: { startDate, endDate },
     });
     return response.data.data;
   },
 
-  // جلب تقارير الأداء
-  async getPerformanceReport(period: 'day' | 'week' | 'month'): Promise<unknown> {
-    const response = await apiClient.get('/admin/reports/performance', {
-      params: { period },
+  // جلب تقارير المبيعات
+  async getSalesReport(startDate?: string, endDate?: string, groupBy?: string): Promise<unknown> {
+    const response = await apiClient.get('/admin/reports/sales', {
+      params: { startDate, endDate, groupBy },
     });
     return response.data.data;
   },
@@ -127,7 +127,7 @@ export const ordersService = {
     limit?: number;
     search?: string;
   }): Promise<{ orders: Order[]; total: number; page: number; totalPages: number }> {
-    const response = await apiClient.get('/orders', { params });
+    const response = await apiClient.get('/admin/orders', { params });
     return response.data.data;
   },
 
@@ -154,14 +154,16 @@ export const ordersService = {
 
   // جلب الطلبات المعلقة (Real-time)
   async getPendingOrders(): Promise<Order[]> {
-    const response = await apiClient.get('/admin/orders/pending');
+    const response = await apiClient.get('/admin/orders', { 
+      params: { status: 'PENDING' } 
+    });
     return response.data.data;
   },
 };
 
 // خدمات المطاعم
 export const restaurantsService = {
-  // جلب جميع المطاعم
+  // جلب جميع المطاعم (استخدام /restaurants endpoint العادي مع pagination)
   async getRestaurants(params?: {
     isActive?: boolean;
     page?: number;
@@ -169,41 +171,44 @@ export const restaurantsService = {
     search?: string;
   }): Promise<{ restaurants: Restaurant[]; total: number }> {
     const response = await apiClient.get('/restaurants', { params });
-    return response.data.data;
+    return {
+      restaurants: response.data.data?.restaurants || response.data.data || [],
+      total: response.data.meta?.pagination?.total || 0
+    };
   },
 
   // جلب مطعم محدد
   async getRestaurantById(restaurantId: string): Promise<Restaurant> {
-    const response = await apiClient.get(`/admin/restaurants/${restaurantId}`);
+    const response = await apiClient.get(`/restaurants/${restaurantId}`);
     return response.data.data;
   },
 
   // إنشاء مطعم جديد
   async createRestaurant(data: Partial<Restaurant>): Promise<Restaurant> {
-    const response = await apiClient.post('/admin/restaurants', data);
+    const response = await apiClient.post('/restaurants', data);
     return response.data.data;
   },
 
   // تحديث مطعم
   async updateRestaurant(restaurantId: string, data: Partial<Restaurant>): Promise<Restaurant> {
-    const response = await apiClient.put(`/admin/restaurants/${restaurantId}`, data);
+    const response = await apiClient.put(`/restaurants/${restaurantId}`, data);
     return response.data.data;
   },
 
   // تفعيل/تعطيل مطعم
   async toggleRestaurantStatus(restaurantId: string): Promise<Restaurant> {
-    const response = await apiClient.patch(`/admin/restaurants/${restaurantId}/toggle-status`);
+    const response = await apiClient.patch(`/restaurants/${restaurantId}/toggle-status`);
     return response.data.data;
   },
 
   // حذف مطعم
   async deleteRestaurant(restaurantId: string): Promise<void> {
-    await apiClient.delete(`/admin/restaurants/${restaurantId}`);
+    await apiClient.delete(`/restaurants/${restaurantId}`);
   },
 
   // جلب إحصائيات مطعم
   async getRestaurantStats(restaurantId: string): Promise<unknown> {
-    const response = await apiClient.get(`/admin/restaurants/${restaurantId}/stats`);
+    const response = await apiClient.get(`/restaurants/${restaurantId}/stats`);
     return response.data.data;
   },
 };
@@ -212,36 +217,41 @@ export const restaurantsService = {
 export const menuService = {
   // جلب قائمة مطعم
   async getMenuItems(restaurantId: string): Promise<MenuItem[]> {
-    const response = await apiClient.get(`/admin/restaurants/${restaurantId}/menu`);
-    return response.data.data;
+    const response = await apiClient.get(`/menus`, {
+      params: { restaurantId }
+    });
+    return response.data.data?.menuItems || response.data.data || [];
   },
 
   // إضافة عنصر للقائمة
   async createMenuItem(restaurantId: string, data: Partial<MenuItem>): Promise<MenuItem> {
-    const response = await apiClient.post(`/admin/restaurants/${restaurantId}/menu`, data);
+    const response = await apiClient.post(`/menus`, {
+      ...data,
+      restaurantId
+    });
     return response.data.data;
   },
 
   // تحديث عنصر في القائمة
   async updateMenuItem(menuItemId: string, data: Partial<MenuItem>): Promise<MenuItem> {
-    const response = await apiClient.put(`/admin/menu/${menuItemId}`, data);
+    const response = await apiClient.put(`/menus/${menuItemId}`, data);
     return response.data.data;
   },
 
   // حذف عنصر من القائمة
   async deleteMenuItem(menuItemId: string): Promise<void> {
-    await apiClient.delete(`/admin/menu/${menuItemId}`);
+    await apiClient.delete(`/menus/${menuItemId}`);
   },
 
   // تبديل توفر العنصر
   async toggleAvailability(menuItemId: string): Promise<MenuItem> {
-    const response = await apiClient.patch(`/admin/menu/${menuItemId}/toggle-availability`);
+    const response = await apiClient.patch(`/menus/${menuItemId}/availability`);
     return response.data.data;
   },
 
   // تحديث أسعار متعددة
   async bulkUpdatePrices(updates: Array<{ id: string; price: number }>): Promise<void> {
-    await apiClient.post('/admin/menu/bulk-update-prices', { updates });
+    await apiClient.post('/menus/bulk-update', { updates });
   },
 };
 
@@ -256,7 +266,7 @@ export const notificationsService = {
     title: string;
     message: string;
   }): Promise<{ sent: number }> {
-    const response = await apiClient.post('/notifications/send', data);
+    const response = await apiClient.post('/admin/notifications/send', data);
     return response.data.data;
   },
 

@@ -1,13 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const qrCodeService = require('../services/qrCodeService');
-const { authenticateToken } = require('../middleware/auth');
-const { qrLimiter } = require('../middleware/rateLimit');
-
-router.use(qrLimiter);
+const { authenticateToken, requireAdminOrProducer } = require('../middleware/auth');
+const { qrGenerationLimiter } = require('../middleware/rateLimiter');
 
 // توليد QR Code للمشروع
-router.post('/project/:projectId', authenticateToken, async (req, res) => {
+router.post('/project/:projectId', qrGenerationLimiter, authenticateToken, requireAdminOrProducer, async (req, res) => {
   try {
     const { projectId } = req.params;
     

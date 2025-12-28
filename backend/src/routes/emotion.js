@@ -6,11 +6,6 @@ const { authenticateToken } = require('../middleware/auth');
 // جميع المسارات تحتاج إلى مصادقة
 router.use(authenticateToken);
 
-const { authenticateToken } = require('../middleware/auth');
-
-// جميع المسارات تحتاج إلى مصادقة
-router.use(authenticateToken);
-
 // Mood Routes
 router.post('/log', emotionController.logMood);
 router.get('/recommendations', emotionController.getRecommendations);
