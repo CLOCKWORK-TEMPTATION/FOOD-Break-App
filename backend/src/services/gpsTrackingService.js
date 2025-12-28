@@ -99,13 +99,43 @@ const getOrderTracking = async (orderId, limit = 20) => {
   const latest = points[0] || null;
   return {
     latest,
-    history: points.reverse() // للأمام زمنياً للخرائط
+    history: points.reverse()
   };
+};
+
+const getActiveOrdersWithLocations = async (projectId = null) => {
+  const where = {
+    status: { in: ['CONFIRMED', 'PREPARING', 'OUT_FOR_DELIVERY'] }
+  };
+  if (projectId) where.projectId = projectId;
+
+  const orders = await prisma.order.findMany({
+    where,
+    include: {
+      user: { select: { id: true, firstName: true, lastName: true } },
+      restaurant: { select: { id: true, name: true, latitude: true, longitude: true } },
+      trackingPoints: {
+        orderBy: { recordedAt: 'desc' },
+        take: 1
+      }
+    }
+  });
+
+  return orders.map(order => ({
+    orderId: order.id,
+    status: order.status,
+    user: order.user,
+    restaurant: order.restaurant,
+    destination: { lat: order.deliveryLat, lng: order.deliveryLng },
+    currentLocation: order.trackingPoints[0] || null,
+    estimatedTime: order.estimatedTime
+  }));
 };
 
 module.exports = {
   calculateDistance,
   calculateETA,
   recordOrderTrackingPoint,
-  getOrderTracking
+  getOrderTracking,
+  getActiveOrdersWithLocations
 };

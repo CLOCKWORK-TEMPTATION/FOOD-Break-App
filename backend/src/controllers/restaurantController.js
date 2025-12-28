@@ -44,7 +44,7 @@ const createRestaurant = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      message: 'تم إنشاء المطعم بنجاح',
+      message: req.t('menu.restaurantAdded'),
       data: restaurant
     });
   } catch (error) {
@@ -62,7 +62,7 @@ const updateRestaurant = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: 'تم تحديث المطعم بنجاح',
+      message: req.t('menu.restaurantUpdated'),
       data: restaurant
     });
   } catch (error) {
@@ -80,7 +80,7 @@ const deleteRestaurant = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: 'تم حذف المطعم بنجاح'
+      message: req.t('menu.restaurantDeleted')
     });
   } catch (error) {
     next(error);
@@ -98,7 +98,7 @@ const getNearbyRestaurants = async (req, res, next) => {
     if (!latitude || !longitude) {
       return res.status(400).json({
         success: false,
-        error: 'يجب توفير الإحداثيات (latitude, longitude)'
+        error: req.t('validation.coordinatesRequired')
       });
     }
 

@@ -18,7 +18,7 @@ const orderController = {
       if (!items || items.length === 0) {
         return res.status(400).json({
           success: false,
-          error: 'يجب إضافة عنصر واحد على الأقل للطلب'
+          error: req.t('orders.itemsRequired')
         });
       }
 
@@ -38,13 +38,13 @@ const orderController = {
       res.status(201).json({
         success: true,
         data: order,
-        message: 'تم إنشاء الطلب بنجاح'
+        message: req.t('orders.orderCreated')
       });
     } catch (error) {
       console.error('❌ خطأ في إنشاء الطلب:', error);
       res.status(500).json({
         success: false,
-        error: 'فشل في إنشاء الطلب',
+        error: req.t('orders.orderCreationFailed'),
         message: error.message
       });
     }
@@ -78,7 +78,7 @@ const orderController = {
       console.error('❌ خطأ في جلب الطلبات:', error);
       res.status(500).json({
         success: false,
-        error: 'فشل في جلب الطلبات',
+        error: req.t('orders.ordersFetchFailed'),
         message: error.message
       });
     }
@@ -98,7 +98,7 @@ const orderController = {
       if (req.user.role === 'REGULAR' && order.userId !== req.user.id) {
         return res.status(403).json({
           success: false,
-          error: 'غير مصرح لك بالوصول إلى هذا الطلب'
+          error: req.t('orders.orderAccessDenied')
         });
       }
 
@@ -110,7 +110,7 @@ const orderController = {
       console.error('❌ خطأ في جلب الطلب:', error);
       res.status(404).json({
         success: false,
-        error: 'الطلب غير موجود',
+        error: req.t('orders.orderNotFound'),
         message: error.message
       });
     }
@@ -130,14 +130,14 @@ const orderController = {
       if (!['ADMIN', 'PRODUCER'].includes(req.user.role)) {
         return res.status(403).json({
           success: false,
-          error: 'غير مصرح لك بتحديث حالة الطلب'
+          error: req.t('orders.orderStatusUpdateDenied')
         });
       }
 
       if (!status) {
         return res.status(400).json({
           success: false,
-          error: 'حالة الطلب مطلوبة'
+          error: req.t('orders.orderStatusRequired')
         });
       }
 
@@ -151,13 +151,13 @@ const orderController = {
       res.json({
         success: true,
         data: order,
-        message: `تم تحديث حالة الطلب إلى ${status}`
+        message: req.t('orders.orderStatusUpdated', { status })
       });
     } catch (error) {
       console.error('❌ خطأ في تحديث حالة الطلب:', error);
       res.status(500).json({
         success: false,
-        error: 'فشل في تحديث حالة الطلب',
+        error: req.t('orders.orderStatusUpdateFailed'),
         message: error.message
       });
     }
@@ -178,13 +178,13 @@ const orderController = {
       res.json({
         success: true,
         data: order,
-        message: 'تم إلغاء الطلب بنجاح'
+        message: req.t('orders.orderCancelled')
       });
     } catch (error) {
       console.error('❌ خطأ في إلغاء الطلب:', error);
       res.status(500).json({
         success: false,
-        error: 'فشل في إلغاء الطلب',
+        error: req.t('orders.orderCancellationFailed'),
         message: error.message
       });
     }
@@ -203,7 +203,7 @@ const orderController = {
       if (!['ADMIN', 'PRODUCER'].includes(req.user.role)) {
         return res.status(403).json({
           success: false,
-          error: 'غير مصرح لك بالوصول إلى تجميع الطلبات'
+          error: req.t('orders.aggregationAccessDenied')
         });
       }
 
@@ -215,13 +215,13 @@ const orderController = {
       res.json({
         success: true,
         data: aggregation,
-        message: 'تم تجميع الطلبات بنجاح'
+        message: req.t('orders.aggregationSuccess')
       });
     } catch (error) {
       console.error('❌ خطأ في تجميع الطلبات:', error);
       res.status(500).json({
         success: false,
-        error: 'فشل في تجميع الطلبات',
+        error: req.t('orders.aggregationFailed'),
         message: error.message
       });
     }
@@ -239,7 +239,7 @@ const orderController = {
       if (!['ADMIN', 'PRODUCER'].includes(req.user.role)) {
         return res.status(403).json({
           success: false,
-          error: 'غير مصرح لك بالوصول إلى ملخص الطلبات'
+          error: req.t('orders.summaryAccessDenied')
         });
       }
 
@@ -253,7 +253,7 @@ const orderController = {
       console.error('❌ خطأ في جلب ملخص اليوم:', error);
       res.status(500).json({
         success: false,
-        error: 'فشل في جلب ملخص اليوم',
+        error: req.t('orders.summaryFetchFailed'),
         message: error.message
       });
     }
@@ -272,7 +272,7 @@ const orderController = {
       if (!['ADMIN', 'PRODUCER'].includes(req.user.role)) {
         return res.status(403).json({
           success: false,
-          error: 'غير مصرح لك بتصدير التقارير'
+          error: req.t('orders.exportAccessDenied')
         });
       }
 
@@ -284,13 +284,13 @@ const orderController = {
       res.json({
         success: true,
         data: report,
-        message: 'تم تصدير التقرير بنجاح'
+        message: req.t('orders.exportSuccess')
       });
     } catch (error) {
       console.error('❌ خطأ في تصدير التقرير:', error);
       res.status(500).json({
         success: false,
-        error: 'فشل في تصدير التقرير',
+        error: req.t('orders.exportFailed'),
         message: error.message
       });
     }
@@ -308,7 +308,7 @@ const orderController = {
       if (!['ADMIN', 'PRODUCER'].includes(req.user.role)) {
         return res.status(403).json({
           success: false,
-          error: 'غير مصرح لك بالوصول إلى الإحصائيات'
+          error: req.t('orders.statsAccessDenied')
         });
       }
 
@@ -327,7 +327,7 @@ const orderController = {
       console.error('❌ خطأ في جلب الإحصائيات:', error);
       res.status(500).json({
         success: false,
-        error: 'فشل في جلب الإحصائيات',
+        error: req.t('orders.statsFetchFailed'),
         message: error.message
       });
     }
@@ -345,7 +345,7 @@ const orderController = {
       if (!['ADMIN', 'PRODUCER'].includes(req.user.role)) {
         return res.status(403).json({
           success: false,
-          error: 'غير مصرح لك بالوصول إلى هذه المعلومات'
+          error: req.t('orders.usersInfoAccessDenied')
         });
       }
 
@@ -360,7 +360,7 @@ const orderController = {
       console.error('❌ خطأ في جلب المستخدمين:', error);
       res.status(500).json({
         success: false,
-        error: 'فشل في جلب المستخدمين',
+        error: req.t('orders.usersFetchFailed'),
         message: error.message
       });
     }

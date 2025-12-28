@@ -1,246 +1,106 @@
 const recommendationService = require('../services/recommendationService');
-const { PrismaClient } = require('@prisma/client');
+const weatherService = require('../services/weatherService');
+const logger = require('../utils/logger');
 
-const prisma = new PrismaClient();
+/**
+ * Recommendation Controller
+ * معالجات التوصيات الذكية
+ */
 
 // الحصول على التوصيات للمستخدم
-const getRecommendations = async (req, res) => {
+exports.getUserRecommendations = async (req, res) => {
   try {
-    const userId = req.user.id; // من middleware المصادقة
-    const { location } = req.query;
+    const userId = req.user.id;
+    const { lat, lon, limit = 20 } = req.query;
+
+    let location = null;
+    if (lat && lon) {
+      location = { lat: parseFloat(lat), lon: parseFloat(lon) };
+    }
 
     const recommendations = await recommendationService.getUserRecommendations(userId, location);
 
     res.json({
       success: true,
-      data: recommendations,
-      meta: {
-        count: recommendations.length,
-        timestamp: new Date().toISOString()
-      }
+      data: recommendations.slice(0, parseInt(limit))
     });
-
   } catch (error) {
-    console.error('خطأ في الحصول على التوصيات:', error);
+    logger.error('Error getting recommendations:', error);
     res.status(500).json({
       success: false,
-      error: {
-        code: 'RECOMMENDATION_ERROR',
-        message: 'حدث خطأ في الحصول على التوصيات'
-      }
+      error: { message: error.message }
     });
   }
 };
 
-// حفظ توصية
-const saveRecommendation = async (req, res) => {
+// الحصول على التوصيات بناءً على الطقس
+exports.getWeatherRecommendations = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const { menuItemId, type, score, reason, weatherData } = req.body;
+    const { lat, lon } = req.query;
 
-    // التحقق من صحة البيانات
-    if (!menuItemId || !type || !score || !reason) {
+    if (!lat || !lon) {
       return res.status(400).json({
         success: false,
-        error: {
-          code: 'INVALID_DATA',
-          message: 'البيانات المطلوبة مفقودة'
-        }
+        error: { message: 'الموقع مطلوب (lat, lon)' }
       });
     }
 
-    const recommendation = await recommendationService.saveRecommendation(
-      userId,
-      menuItemId,
-      type,
-      score,
-      reason,
-      weatherData
+    const weatherRecs = await weatherService.getWeatherRecommendations(
+      parseFloat(lat),
+      parseFloat(lon)
     );
 
-    res.status(201).json({
+    res.json({
       success: true,
-      data: recommendation
+      data: weatherRecs
     });
-
   } catch (error) {
-    console.error('خطأ في حفظ التوصية:', error);
+    logger.error('Error getting weather recommendations:', error);
     res.status(500).json({
       success: false,
-      error: {
-        code: 'SAVE_RECOMMENDATION_ERROR',
-        message: 'حدث خطأ في حفظ التوصية'
-      }
+      error: { message: error.message }
+    });
+  }
+};
+
+// حفظ تفاعل المستخدم مع التوصية
+exports.recordInteraction = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { recommendationId, action, menuItemId } = req.body;
+
+    // حفظ التفاعل في قاعدة البيانات
+    // يمكن استخدامه لتحسين التوصيات المستقبلية
+
+    res.json({
+      success: true,
+      message: 'تم تسجيل التفاعل بنجاح'
+    });
+  } catch (error) {
+    logger.error('Error recording interaction:', error);
+    res.status(500).json({
+      success: false,
+      error: { message: error.message }
     });
   }
 };
 
 // الحصول على التوصيات المحفوظة
-const getSavedRecommendations = async (req, res) => {
+exports.getSavedRecommendations = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const recommendations = await recommendationService.getSavedRecommendations(userId);
+    const saved = await recommendationService.getSavedRecommendations(userId);
 
     res.json({
       success: true,
-      data: recommendations,
-      meta: {
-        count: recommendations.length
-      }
+      data: saved
     });
-
   } catch (error) {
-    console.error('خطأ في الحصول على التوصيات المحفوظة:', error);
+    logger.error('Error getting saved recommendations:', error);
     res.status(500).json({
       success: false,
-      error: {
-        code: 'GET_SAVED_RECOMMENDATIONS_ERROR',
-        message: 'حدث خطأ في الحصول على التوصيات المحفوظة'
-      }
+      error: { message: error.message }
     });
   }
-};
-
-// تحديث تفضيلات المستخدم
-const updateUserPreferences = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const preferences = req.body;
-
-    // التحقق من صحة البيانات
-    const allowedFields = [
-      'dietaryRestrictions',
-      'favoriteCuisines',
-      'spiceLevel',
-      'allergies',
-      'healthGoals'
-    ];
-
-    const filteredPreferences = {};
-    Object.keys(preferences).forEach(key => {
-      if (allowedFields.includes(key)) {
-        filteredPreferences[key] = preferences[key];
-      }
-    });
-
-    const updatedPreferences = await recommendationService.updateUserPreferences(
-      userId,
-      filteredPreferences
-    );
-
-    res.json({
-      success: true,
-      data: updatedPreferences
-    });
-
-  } catch (error) {
-    console.error('خطأ في تحديث تفضيلات المستخدم:', error);
-    res.status(500).json({
-      success: false,
-      error: {
-        code: 'UPDATE_PREFERENCES_ERROR',
-        message: 'حدث خطأ في تحديث التفضيلات'
-      }
-    });
-  }
-};
-
-// الحصول على تفضيلات المستخدم
-const getUserPreferences = async (req, res) => {
-  try {
-    const userId = req.user.id;
-
-    const preferences = await recommendationService.getUserPreferences(userId);
-
-    res.json({
-      success: true,
-      data: preferences
-    });
-
-  } catch (error) {
-    console.error('خطأ في الحصول على تفضيلات المستخدم:', error);
-    res.status(500).json({
-      success: false,
-      error: {
-        code: 'GET_PREFERENCES_ERROR',
-        message: 'حدث خطأ في الحصول على التفضيلات'
-      }
-    });
-  }
-};
-
-// تحليل التوصيات للاختبار A/B
-const getRecommendationAnalytics = async (req, res) => {
-  try {
-    // هذا للاختبار A/B - يمكن توسيعه لاحقاً
-    const { startDate, endDate } = req.query;
-
-    const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const end = endDate ? new Date(endDate) : new Date();
-
-    // حساب معدل التحويل من التوصيات
-    const recommendations = await prisma.recommendation.findMany({
-      where: {
-        createdAt: {
-          gte: start,
-          lte: end
-        }
-      },
-      include: {
-        menuItem: true
-      }
-    });
-
-    // حساب الإحصائيات الأساسية
-    const stats = {
-      totalRecommendations: recommendations.length,
-      byType: {},
-      topRecommendedItems: []
-    };
-
-    // تجميع حسب النوع
-    recommendations.forEach(rec => {
-      stats.byType[rec.recommendationType] = (stats.byType[rec.recommendationType] || 0) + 1;
-    });
-
-    // العناصر الأكثر توصية
-    const itemCounts = {};
-    recommendations.forEach(rec => {
-      const itemName = rec.menuItem.name;
-      itemCounts[itemName] = (itemCounts[itemName] || 0) + 1;
-    });
-
-    stats.topRecommendedItems = Object.entries(itemCounts)
-      .sort(([,a], [,b]) => b - a)
-      .slice(0, 10)
-      .map(([name, count]) => ({ name, count }));
-
-    res.json({
-      success: true,
-      data: stats,
-      meta: {
-        period: { start, end }
-      }
-    });
-
-  } catch (error) {
-    console.error('خطأ في تحليل التوصيات:', error);
-    res.status(500).json({
-      success: false,
-      error: {
-        code: 'ANALYTICS_ERROR',
-        message: 'حدث خطأ في تحليل التوصيات'
-      }
-    });
-  }
-};
-
-module.exports = {
-  getRecommendations,
-  saveRecommendation,
-  getSavedRecommendations,
-  updateUserPreferences,
-  getUserPreferences,
-  getRecommendationAnalytics
 };

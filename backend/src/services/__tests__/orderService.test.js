@@ -1,485 +1,160 @@
-/**
- * اختبارات خدمة الطلبات (OrderService)
- * Unit Tests لخدمة إدارة الطلبات
- */
-
-const orderService = require('../orderService');
+const orderService = require('../../orderService');
 const { PrismaClient } = require('@prisma/client');
-
-// Mock Prisma Client
-jest.mock('@prisma/client', () => {
-  const mockPrismaClient = {
-    order: {
-      create: jest.fn(),
-      findMany: jest.fn(),
-      findUnique: jest.fn(),
-      update: jest.fn(),
-      count: jest.fn(),
-      groupBy: jest.fn(),
-    },
-  };
-  return {
-    PrismaClient: jest.fn(() => mockPrismaClient),
-  };
-});
 
 const prisma = new PrismaClient();
 
-describe('OrderService - اختبارات خدمة الطلبات', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+describe('OrderService', () => {
+  let testUser, testProject, testRestaurant, testMenuItem;
+
+  beforeAll(async () => {
+    testUser = await prisma.user.create({
+      data: { email: 'test@test.com', passwordHash: 'hash', firstName: 'Test', lastName: 'User', role: 'REGULAR' }
+    });
+    testProject = await prisma.project.create({
+      data: { name: 'Test Project', qrCode: 'TEST123', startDate: new Date(), orderWindow: 60 }
+    });
+    testRestaurant = await prisma.restaurant.create({
+      data: { name: 'Test Restaurant', address: 'Test Address', latitude: 0, longitude: 0 }
+    });
+    testMenuItem = await prisma.menuItem.create({
+      data: { restaurantId: testRestaurant.id, name: 'Test Item', price: 50 }
+    });
   });
 
-  describe('createOrder - إنشاء طلب جديد', () => {
-    const mockOrderData = {
-      userId: 'user_123',
-      projectId: 'project_456',
-      restaurantId: 'restaurant_789',
-      totalAmount: 150.5,
-      deliveryAddress: 'القاهرة، شارع العمال',
-      items: [
-        {
-          menuItemId: 'menu_1',
-          quantity: 2,
-          price: 50,
-          specialInstructions: 'بدون بصلاً',
-        },
-        {
-          menuItemId: 'menu_2',
-          quantity: 1,
-          price: 50.5,
-        },
-      ],
-    };
+  afterAll(async () => {
+    await prisma.order.deleteMany();
+    await prisma.menuItem.deleteMany();
+    await prisma.restaurant.deleteMany();
+    await prisma.project.deleteMany();
+    await prisma.user.deleteMany();
+    await prisma.$disconnect();
+  });
 
-    it('يجب أن ينشئ طلباً جديداً بنجاح', async () => {
-      const createdOrder = {
-        id: 'order_123',
-        status: 'PENDING',
-        ...mockOrderData,
-        user: { id: mockOrderData.userId, firstName: 'محمد' },
-        restaurant: { id: mockOrderData.restaurantId, name: 'مطعم حسن' },
-        project: { id: mockOrderData.projectId, name: 'مشروع الأسبوع' },
+  describe('createOrder', () => {
+    it('should create order successfully', async () => {
+      const orderData = {
+        userId: testUser.id,
+        projectId: testProject.id,
+        restaurantId: testRestaurant.id,
+        totalAmount: 100,
+        items: [{ menuItemId: testMenuItem.id, quantity: 2, price: 50 }]
       };
 
-      prisma.order.create.mockResolvedValue(createdOrder);
-
-      const result = await orderService.createOrder(mockOrderData);
-
-      expect(result).toEqual(createdOrder);
-      expect(prisma.order.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
-          userId: mockOrderData.userId,
-          projectId: mockOrderData.projectId,
-          restaurantId: mockOrderData.restaurantId,
-          totalAmount: mockOrderData.totalAmount,
-          status: 'PENDING',
-          deliveryAddress: mockOrderData.deliveryAddress,
-          items: {
-            create: [
-              {
-                menuItemId: 'menu_1',
-                quantity: 2,
-                price: 50,
-                specialInstructions: 'بدون بصلاً',
-              },
-              {
-                menuItemId: 'menu_2',
-                quantity: 1,
-                price: 50.5,
-                specialInstructions: null,
-              },
-            ],
-          },
-        }),
-        include: expect.any(Object),
-      });
+      const order = await orderService.createOrder(orderData);
+      expect(order).toBeDefined();
+      expect(order.userId).toBe(testUser.id);
+      expect(order.status).toBe('PENDING');
     });
 
-    it('يجب أن يعالج المصفوفة الفارغة للعناصر', async () => {
-      const orderWithEmptyItems = { ...mockOrderData, items: [] };
-      prisma.order.create.mockResolvedValue({
-        id: 'order_123',
-        items: [],
+    it('should throw error if outside order window', async () => {
+      const closedProject = await prisma.project.create({
+        data: { name: 'Closed', qrCode: 'CLOSED', startDate: new Date(Date.now() - 2 * 60 * 60 * 1000), orderWindow: 60 }
       });
 
-      await orderService.createOrder(orderWithEmptyItems);
+      await expect(orderService.createOrder({
+        userId: testUser.id,
+        projectId: closedProject.id,
+        items: [{ menuItemId: testMenuItem.id, quantity: 1, price: 50 }]
+      })).rejects.toThrow('نافذة الطلب مغلقة');
 
-      expect(prisma.order.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            items: { create: [] },
-          }),
-        })
-      );
-    });
-
-    it('يجب أن يعالج العناصر بدون تعليمات خاصة', async () => {
-      const itemsWithoutInstructions = [
-        { menuItemId: 'menu_1', quantity: 1, price: 50 },
-      ];
-      const orderData = { ...mockOrderData, items: itemsWithoutInstructions };
-
-      prisma.order.create.mockResolvedValue({ id: 'order_123' });
-
-      await orderService.createOrder(orderData);
-
-      expect(prisma.order.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            items: {
-              create: [
-                expect.objectContaining({
-                  specialInstructions: null,
-                }),
-              ],
-            },
-          }),
-        })
-      );
-    });
-
-    it('يجب أن يرمي خطأ عند فشل إنشاء الطلب', async () => {
-      prisma.order.create.mockRejectedValue(
-        new Error('Database error')
-      );
-
-      await expect(orderService.createOrder(mockOrderData)).rejects.toThrow(
-        'خطأ في إنشاء الطلب:'
-      );
+      await prisma.project.delete({ where: { id: closedProject.id } });
     });
   });
 
-  describe('getOrders - جلب الطلبات مع التصفية', () => {
-    const mockOrders = [
-      {
-        id: 'order_1',
-        status: 'PENDING',
-        user: { id: 'user_123', firstName: 'محمد' },
-        restaurant: { id: 'rest_1', name: 'مطعم حسن' },
-      },
-      {
-        id: 'order_2',
-        status: 'DELIVERED',
-        user: { id: 'user_123', firstName: 'محمد' },
-        restaurant: { id: 'rest_1', name: 'مطعم حسن' },
-      },
-    ];
-
-    it('يجب أن يرجع جميع الطلبات بدون فلاتر', async () => {
-      prisma.order.findMany.mockResolvedValue(mockOrders);
-      prisma.order.count.mockResolvedValue(2);
-
-      const result = await orderService.getOrders();
-
-      expect(result.orders).toEqual(mockOrders);
-      expect(result.pagination).toEqual({
-        page: 1,
-        limit: 10,
-        total: 2,
-        pages: 1,
-      });
+  describe('getOrders', () => {
+    it('should return paginated orders', async () => {
+      const result = await orderService.getOrders({ userId: testUser.id, page: 1, limit: 10 });
+      expect(result).toHaveProperty('orders');
+      expect(result).toHaveProperty('pagination');
+      expect(Array.isArray(result.orders)).toBe(true);
     });
 
-    it('يجب أن يصفّي الطلبات حسب المستخدم', async () => {
-      prisma.order.findMany.mockResolvedValue([mockOrders[0]]);
-      prisma.order.count.mockResolvedValue(1);
-
-      await orderService.getOrders({ userId: 'user_123' });
-
-      expect(prisma.order.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { userId: 'user_123' },
-        })
-      );
-    });
-
-    it('يجب أن يصفّي الطلبات حسب الحالة', async () => {
-      prisma.order.findMany.mockResolvedValue([mockOrders[0]]);
-      prisma.order.count.mockResolvedValue(1);
-
-      await orderService.getOrders({ status: 'PENDING' });
-
-      expect(prisma.order.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { status: 'PENDING' },
-        })
-      );
-    });
-
-    it('يجب أن يطبق الترقيم (pagination) بشكل صحيح', async () => {
-      prisma.order.findMany.mockResolvedValue(mockOrders);
-      prisma.order.count.mockResolvedValue(25);
-
-      const result = await orderService.getOrders({ page: 2, limit: 10 });
-
-      expect(prisma.order.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          skip: 10,
-          take: 10,
-        })
-      );
-      expect(result.pagination).toEqual({
-        page: 2,
-        limit: 10,
-        total: 25,
-        pages: 3,
-      });
-    });
-
-    it('يجب أن يطبق فلاتر متعددة معاً', async () => {
-      prisma.order.findMany.mockResolvedValue([mockOrders[0]]);
-      prisma.order.count.mockResolvedValue(1);
-
-      await orderService.getOrders({
-        userId: 'user_123',
-        projectId: 'project_456',
-        status: 'PENDING',
-        page: 1,
-        limit: 5,
-      });
-
-      expect(prisma.order.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: {
-            userId: 'user_123',
-            projectId: 'project_456',
-            status: 'PENDING',
-          },
-          skip: 0,
-          take: 5,
-        })
-      );
-    });
-
-    it('يجب أن يرتب الطلبات من الأحدث للأقدم', async () => {
-      prisma.order.findMany.mockResolvedValue(mockOrders);
-      prisma.order.count.mockResolvedValue(2);
-
-      await orderService.getOrders();
-
-      expect(prisma.order.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          orderBy: { createdAt: 'desc' },
-        })
-      );
+    it('should filter by status', async () => {
+      const result = await orderService.getOrders({ status: 'PENDING' });
+      expect(result.orders.every(o => o.status === 'PENDING')).toBe(true);
     });
   });
 
-  describe('getOrderById - جلب طلب محدد', () => {
-    const mockOrder = {
-      id: 'order_123',
-      status: 'PENDING',
-      totalAmount: 150,
-      user: { id: 'user_123', firstName: 'محمد' },
-      restaurant: { id: 'rest_1', name: 'مطعم حسن' },
-      project: { id: 'proj_1', name: 'مشروع الأسبوع' },
-    };
-
-    it('يجب أن يرجع الطلب الموجود', async () => {
-      prisma.order.findUnique.mockResolvedValue(mockOrder);
-
-      const result = await orderService.getOrderById('order_123');
-
-      expect(result).toEqual(mockOrder);
-      expect(prisma.order.findUnique).toHaveBeenCalledWith({
-        where: { id: 'order_123' },
-        include: expect.any(Object),
+  describe('getOrderById', () => {
+    it('should return order by id', async () => {
+      const created = await orderService.createOrder({
+        userId: testUser.id,
+        totalAmount: 50,
+        items: [{ menuItemId: testMenuItem.id, quantity: 1, price: 50 }]
       });
+
+      const order = await orderService.getOrderById(created.id);
+      expect(order.id).toBe(created.id);
     });
 
-    it('يجب أن يرمي خطأ للطلب غير الموجود', async () => {
-      prisma.order.findUnique.mockResolvedValue(null);
-
-      await expect(orderService.getOrderById('non_existent')).rejects.toThrow(
-        'الطلب غير موجود'
-      );
+    it('should throw error if order not found', async () => {
+      await expect(orderService.getOrderById('invalid-id')).rejects.toThrow();
     });
   });
 
-  describe('updateOrderStatus - تحديث حالة الطلب', () => {
-    const mockOrder = {
-      id: 'order_123',
-      status: 'CONFIRMED',
-      user: { id: 'user_123', firstName: 'محمد' },
-      restaurant: { id: 'rest_1', name: 'مطعم حسن' },
-    };
-
-    it('يجب أن يحدث الحالة إلى قيمة صحيحة', async () => {
-      prisma.order.update.mockResolvedValue(mockOrder);
-
-      const result = await orderService.updateOrderStatus(
-        'order_123',
-        'CONFIRMED',
-        'admin_123'
-      );
-
-      expect(result.status).toBe('CONFIRMED');
-      expect(prisma.order.update).toHaveBeenCalledWith({
-        where: { id: 'order_123' },
-        data: {
-          status: 'CONFIRMED',
-          updatedAt: expect.any(Date),
-        },
-        include: expect.any(Object),
+  describe('updateOrderStatus', () => {
+    it('should update order status', async () => {
+      const created = await orderService.createOrder({
+        userId: testUser.id,
+        totalAmount: 50,
+        items: [{ menuItemId: testMenuItem.id, quantity: 1, price: 50 }]
       });
+
+      const updated = await orderService.updateOrderStatus(created.id, 'CONFIRMED', testUser.id);
+      expect(updated.status).toBe('CONFIRMED');
     });
 
-    it('يجب أن يقبل جميع الحالات الصحيحة', () => {
-      const validStatuses = [
-        'PENDING',
-        'CONFIRMED',
-        'PREPARING',
-        'READY',
-        'DELIVERED',
-        'CANCELLED',
-      ];
-
-      validStatuses.forEach((status) => {
-        expect(() => {
-          // لا يمكننا اختبار async مباشرة، لكن يمكننا التحقق من المنطق
-          const orderService = require('../orderService');
-        }).not.toThrow();
+    it('should throw error for invalid status', async () => {
+      const created = await orderService.createOrder({
+        userId: testUser.id,
+        totalAmount: 50,
+        items: [{ menuItemId: testMenuItem.id, quantity: 1, price: 50 }]
       });
-    });
 
-    it('يجب أن يرفض الحالات غير الصحيحة', async () => {
-      await expect(
-        orderService.updateOrderStatus('order_123', 'INVALID_STATUS')
-      ).rejects.toThrow('حالة الطلب غير صحيحة');
-
-      expect(prisma.order.update).not.toHaveBeenCalled();
-    });
-
-    it('يجب أن يحدث تاريخ التحديث', async () => {
-      prisma.order.update.mockResolvedValue(mockOrder);
-
-      await orderService.updateOrderStatus('order_123', 'PREPARING');
-
-      const updateCall = prisma.order.update.mock.calls[0][0];
-      expect(updateCall.data.updatedAt).toBeInstanceOf(Date);
+      await expect(orderService.updateOrderStatus(created.id, 'INVALID', testUser.id)).rejects.toThrow();
     });
   });
 
-  describe('cancelOrder - إلغاء الطلب', () => {
-    const mockPendingOrder = {
-      id: 'order_123',
-      userId: 'user_123',
-      status: 'PENDING',
-    };
-
-    const mockDeliveredOrder = {
-      id: 'order_456',
-      userId: 'user_123',
-      status: 'DELIVERED',
-    };
-
-    it('يجب أن يلغي طلباً في حالة PENDING', async () => {
-      prisma.order.findUnique.mockResolvedValue(mockPendingOrder);
-      prisma.order.update.mockResolvedValue({
-        ...mockPendingOrder,
-        status: 'CANCELLED',
+  describe('cancelOrder', () => {
+    it('should cancel order', async () => {
+      const created = await orderService.createOrder({
+        userId: testUser.id,
+        totalAmount: 50,
+        items: [{ menuItemId: testMenuItem.id, quantity: 1, price: 50 }]
       });
 
-      const result = await orderService.cancelOrder(
-        'order_123',
-        'user_123',
-        'رغبة المستخدم'
-      );
-
-      expect(result.status).toBe('CANCELLED');
-      expect(prisma.order.update).toHaveBeenCalledWith({
-        where: { id: 'order_123' },
-        data: {
-          status: 'CANCELLED',
-          updatedAt: expect.any(Date),
-        },
-      });
+      const cancelled = await orderService.cancelOrder(created.id, testUser.id, 'Test reason');
+      expect(cancelled.status).toBe('CANCELLED');
     });
 
-    it('يجب أن يرفض إلغاء طلب غير موجود', async () => {
-      prisma.order.findUnique.mockResolvedValue(null);
-
-      await expect(
-        orderService.cancelOrder('non_existent', 'user_123', 'سبب')
-      ).rejects.toThrow('الطلب غير موجود');
-    });
-
-    it('يجب أن يرفض إلغاء طلب لمستخدم آخر', async () => {
-      prisma.order.findUnique.mockResolvedValue({
-        ...mockPendingOrder,
-        userId: 'different_user',
+    it('should throw error if not owner', async () => {
+      const otherUser = await prisma.user.create({
+        data: { email: 'other@test.com', passwordHash: 'hash', firstName: 'Other', lastName: 'User' }
       });
 
-      await expect(
-        orderService.cancelOrder('order_123', 'user_123', 'سبب')
-      ).rejects.toThrow('غير مصرح لك بإلغاء هذا الطلب');
-    });
+      const created = await orderService.createOrder({
+        userId: testUser.id,
+        totalAmount: 50,
+        items: [{ menuItemId: testMenuItem.id, quantity: 1, price: 50 }]
+      });
 
-    it('يجب أن يرفض إلغاء طلب تم تسليمه', async () => {
-      prisma.order.findUnique.mockResolvedValue(mockDeliveredOrder);
-
-      await expect(
-        orderService.cancelOrder('order_456', 'user_123', 'سبب')
-      ).rejects.toThrow('لا يمكن إلغاء طلب تم تسليمه');
+      await expect(orderService.cancelOrder(created.id, otherUser.id, 'Test')).rejects.toThrow();
+      await prisma.user.delete({ where: { id: otherUser.id } });
     });
   });
 
-  describe('getOrderStats - حساب إحصائيات الطلبات', () => {
-    const mockStats = [
-      { status: 'PENDING', _count: { id: 10 }, _sum: { totalAmount: 500 } },
-      { status: 'DELIVERED', _count: { id: 25 }, _sum: { totalAmount: 2500 } },
-    ];
-
-    it('يجب أن يحسب إحصائيات الطلبات لمشروع', async () => {
-      prisma.order.groupBy.mockResolvedValue(mockStats);
-
-      const result = await orderService.getOrderStats('project_123');
-
-      expect(result).toEqual(mockStats);
-      expect(prisma.order.groupBy).toHaveBeenCalledWith({
-        by: ['status'],
-        where: { projectId: 'project_123' },
-        _count: { id: true },
-        _sum: { totalAmount: true },
+  describe('aggregateOrdersByRestaurant', () => {
+    it('should aggregate orders by restaurant', async () => {
+      await orderService.createOrder({
+        userId: testUser.id,
+        projectId: testProject.id,
+        restaurantId: testRestaurant.id,
+        totalAmount: 100,
+        items: [{ menuItemId: testMenuItem.id, quantity: 2, price: 50 }]
       });
-    });
 
-    it('يجب أن يطبق فلتر النطاق الزمني', async () => {
-      prisma.order.groupBy.mockResolvedValue(mockStats);
-
-      const dateRange = {
-        start: '2024-01-01',
-        end: '2024-12-31',
-      };
-
-      await orderService.getOrderStats('project_123', dateRange);
-
-      expect(prisma.order.groupBy).toHaveBeenCalledWith({
-        by: ['status'],
-        where: {
-          projectId: 'project_123',
-          createdAt: {
-            gte: new Date(dateRange.start),
-            lte: new Date(dateRange.end),
-          },
-        },
-        _count: { id: true },
-        _sum: { totalAmount: true },
-      });
-    });
-
-    it('يجب أن يعالج عدم وجود نطاق زمني', async () => {
-      prisma.order.groupBy.mockResolvedValue(mockStats);
-
-      await orderService.getOrderStats('project_123', null);
-
-      expect(prisma.order.groupBy).toHaveBeenCalledWith({
-        by: ['status'],
-        where: { projectId: 'project_123' },
-        _count: { id: true },
-        _sum: { totalAmount: true },
-      });
+      const result = await orderService.aggregateOrdersByRestaurant(testProject.id, new Date().toISOString().split('T')[0]);
+      expect(Array.isArray(result)).toBe(true);
     });
   });
 });

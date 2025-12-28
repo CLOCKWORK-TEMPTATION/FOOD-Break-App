@@ -31,14 +31,14 @@ module.exports = {
   
   coverageDirectory: 'coverage',
   
-  // Note: Coverage thresholds are set low because tests use mocks
-  // When running with real database integration, thresholds should be higher
+  // Note: Coverage thresholds are set to 80% for production quality
+  // تشجيع مستوى تغطية إنتاجي عالي الجودة
   coverageThreshold: {
     global: {
-      branches: 0,
-      functions: 0,
-      lines: 0,
-      statements: 0,
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
     },
   },
   

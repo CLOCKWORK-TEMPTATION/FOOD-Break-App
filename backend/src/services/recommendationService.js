@@ -1,50 +1,86 @@
 const { PrismaClient } = require('@prisma/client');
 const axios = require('axios');
-const tf = require('@tensorflow/tfjs-node');
+const OpenAI = require('openai');
+const { Anthropic } = require('@anthropic-ai/sdk');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
+const Together = require('together-ai');
 
 const prisma = new PrismaClient();
 
-// تهيئة نموذج التعلم الآلي للتوصيات
+// تهيئة جميع النماذج
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY
+});
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY
+});
+
+// OpenRouter (يستخدم OpenAI SDK)
+const openrouter = new OpenAI({
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey: process.env.OPENROUTER_API_KEY,
+});
+
+// Together AI
+const together = new Together({
+  apiKey: process.env.TOGETHER_API_KEY
+});
+
+// محرك التوصيات الذكي باستخدام النماذج الكبيرة
 class RecommendationEngine {
   constructor() {
-    this.model = null;
+    this.userProfiles = new Map();
     this.itemEmbeddings = new Map();
-    this.userEmbeddings = new Map();
+    this.availableModels = this._checkAvailableModels();
   }
 
-  // تحميل أو تدريب النموذج
+  // فحص النماذج المتاحة
+  _checkAvailableModels() {
+    const models = {
+      openai: !!process.env.OPENAI_API_KEY,
+      anthropic: !!process.env.ANTHROPIC_API_KEY,
+      gemini: !!process.env.GEMINI_API_KEY,
+      groq: !!process.env.GROQ_API_KEY,
+      openrouter: !!process.env.OPENROUTER_API_KEY,
+      together: !!process.env.TOGETHER_API_KEY
+    };
+    
+    console.log('النماذج المتاحة:', models);
+    return models;
+  }
+
+  // اختيار أفضل نموذج متاح
+  _selectBestModel() {
+    // ترتيب الأولوية: السرعة والتكلفة والجودة
+    if (this.availableModels.groq) return 'groq'; // الأسرع ومجاني
+    if (this.availableModels.together) return 'together'; // نماذج متنوعة وسريعة
+    if (this.availableModels.openrouter) return 'openrouter'; // وصول لجميع النماذج
+    if (this.availableModels.gemini) return 'gemini'; // مجاني من Google
+    if (this.availableModels.openai) return 'openai'; // الأكثر موثوقية
+    if (this.availableModels.anthropic) return 'anthropic'; // الأذكى
+    return null;
+  }
+
+  // تهيئة النظام
   async initializeModel() {
     try {
-      // محاولة تحميل النموذج المدرب مسبقاً
-      this.model = await tf.loadLayersModel('file://./models/recommendation-model.json');
+      const availableCount = Object.values(this.availableModels).filter(Boolean).length;
+      console.log(`تهيئة نظام التوصيات الذكي مع ${availableCount} نموذج متاح...`);
+      
+      if (availableCount === 0) {
+        console.warn('⚠️ لا توجد مفاتيح API للنماذج الكبيرة - سيتم استخدام النظام التقليدي');
+      }
     } catch (error) {
-      console.log('لم يتم العثور على نموذج مدرب، سيتم إنشاء نموذج جديد');
-      this.model = this.createModel();
+      console.log('خطأ في تهيئة النظام:', error);
     }
-  }
-
-  // إنشاء نموذج التعلم الآلي
-  createModel() {
-    const model = tf.sequential();
-
-    // طبقة الإدخال
-    model.add(tf.layers.dense({ inputShape: [100], units: 64, activation: 'relu' }));
-    model.add(tf.layers.dropout({ rate: 0.2 }));
-
-    // طبقات مخفية
-    model.add(tf.layers.dense({ units: 32, activation: 'relu' }));
-    model.add(tf.layers.dropout({ rate: 0.2 }));
-
-    // طبقة الإخراج
-    model.add(tf.layers.dense({ units: 1, activation: 'sigmoid' }));
-
-    model.compile({
-      optimizer: tf.train.adam(0.001),
-      loss: 'binary_crossentropy',
-      metrics: ['accuracy']
-    });
-
-    return model;
   }
 
   // حساب تشابه العناصر
@@ -75,7 +111,7 @@ class RecommendationEngine {
     return embedding.slice(0, 100);
   }
 
-  // الحصول على التوصيات الشخصية
+  // الحصول على التوصيات الشخصية باستخدام OpenAI
   async getPersonalizedRecommendations(userId, limit = 10) {
     try {
       // الحصول على تاريخ الطلبات للمستخدم
@@ -85,16 +121,9 @@ class RecommendationEngine {
           items: {
             include: { menuItem: true }
           }
-        }
-      });
-
-      // استخراج العناصر المفضلة
-      const favoriteItems = new Map();
-      userOrders.forEach(order => {
-        order.items.forEach(item => {
-          const itemId = item.menuItemId;
-          favoriteItems.set(itemId, (favoriteItems.get(itemId) || 0) + item.quantity);
-        });
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 20 // آخر 20 طلب
       });
 
       // الحصول على جميع العناصر المتاحة
@@ -103,42 +132,286 @@ class RecommendationEngine {
         include: { nutritionalInfo: true }
       });
 
-      // حساب التشابه مع العناصر المفضلة
-      const recommendations = [];
-      const favoriteEmbeddings = Array.from(favoriteItems.keys()).map(itemId => {
-        const item = allItems.find(i => i.id === itemId);
-        return item ? this.createItemEmbedding(item) : null;
-      }).filter(e => e);
+      // إنشاء ملف تعريف المستخدم
+      const userProfile = this._createUserProfile(userOrders);
+      
+      // استخدام OpenAI للحصول على التوصيات
+      const recommendations = await this._getAIRecommendations(userProfile, allItems, limit);
 
-      allItems.forEach(item => {
-        if (favoriteItems.has(item.id)) return; // لا توصية بالعناصر المطلوبة مسبقاً
-
-        const itemEmbedding = this.createItemEmbedding(item);
-        let maxSimilarity = 0;
-
-        favoriteEmbeddings.forEach(favEmbedding => {
-          const similarity = this.cosineSimilarity(itemEmbedding, favEmbedding);
-          maxSimilarity = Math.max(maxSimilarity, similarity);
-        });
-
-        if (maxSimilarity > 0.3) { // حد أدنى للتشابه
-          recommendations.push({
-            menuItem: item,
-            score: maxSimilarity,
-            reason: 'مشابه للعناصر المفضلة لديك'
-          });
-        }
-      });
-
-      // ترتيب حسب النتيجة وإرجاع العدد المطلوب
-      return recommendations
-        .sort((a, b) => b.score - a.score)
-        .slice(0, limit);
+      return recommendations;
 
     } catch (error) {
       console.error('خطأ في الحصول على التوصيات الشخصية:', error);
       return [];
     }
+  }
+
+  // إنشاء ملف تعريف المستخدم
+  _createUserProfile(userOrders) {
+    const favoriteItems = new Map();
+    const categories = new Map();
+    const cuisineTypes = new Map();
+    let totalSpent = 0;
+    let avgOrderValue = 0;
+
+    userOrders.forEach(order => {
+      totalSpent += order.totalAmount;
+      order.items.forEach(item => {
+        const itemId = item.menuItemId;
+        favoriteItems.set(itemId, (favoriteItems.get(itemId) || 0) + item.quantity);
+        
+        if (item.menuItem.category) {
+          categories.set(item.menuItem.category, (categories.get(item.menuItem.category) || 0) + 1);
+        }
+      });
+    });
+
+    avgOrderValue = userOrders.length > 0 ? totalSpent / userOrders.length : 0;
+
+    return {
+      favoriteItems: Array.from(favoriteItems.entries()).sort((a, b) => b[1] - a[1]).slice(0, 10),
+      favoriteCategories: Array.from(categories.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5),
+      avgOrderValue,
+      totalOrders: userOrders.length,
+      recentOrdersCount: userOrders.length
+    };
+  }
+
+  // الحصول على التوصيات من AI
+  async _getAIRecommendations(userProfile, allItems, limit) {
+    try {
+      const selectedModel = this._selectBestModel();
+      
+      if (!selectedModel) {
+        console.warn('لا توجد مفاتيح API للنماذج الكبيرة، سيتم استخدام التوصيات التقليدية');
+        return this._getFallbackRecommendations(userProfile, allItems, limit);
+      }
+
+      console.log(`استخدام نموذج: ${selectedModel}`);
+
+      // إعداد البيانات للنموذج
+      const userContext = `
+المستخدم لديه التفضيلات التالية:
+- الأطباق المفضلة: ${userProfile.favoriteItems.map(([id, count]) => `${id} (${count} مرات)`).join(', ')}
+- الفئات المفضلة: ${userProfile.favoriteCategories.map(([cat, count]) => `${cat} (${count} مرات)`).join(', ')}
+- متوسط قيمة الطلب: ${userProfile.avgOrderValue} ريال
+- عدد الطلبات السابقة: ${userProfile.totalOrders}
+      `;
+
+      const availableItems = allItems.slice(0, 50).map(item => ({
+        id: item.id,
+        name: item.name,
+        category: item.category,
+        price: item.price,
+        description: item.description
+      }));
+
+      const prompt = `
+أنت خبير في التوصيات الغذائية. بناءً على تفضيلات المستخدم التالية:
+
+${userContext}
+
+والأطباق المتاحة:
+${JSON.stringify(availableItems, null, 2)}
+
+اقترح ${limit} أطباق مناسبة للمستخدم مع تبرير كل اقتراح.
+
+أرجع الإجابة بصيغة JSON فقط:
+{
+  "recommendations": [
+    {
+      "menuItemId": "id",
+      "score": 0.9,
+      "reason": "سبب التوصية"
+    }
+  ]
+}
+      `;
+
+      let response;
+      
+      switch (selectedModel) {
+        case 'groq':
+          response = await this._getGroqRecommendations(prompt);
+          break;
+        case 'together':
+          response = await this._getTogetherRecommendations(prompt);
+          break;
+        case 'openrouter':
+          response = await this._getOpenRouterRecommendations(prompt);
+          break;
+        case 'gemini':
+          response = await this._getGeminiRecommendations(prompt);
+          break;
+        case 'openai':
+          response = await this._getOpenAIRecommendations(prompt);
+          break;
+        case 'anthropic':
+          response = await this._getAnthropicRecommendations(prompt);
+          break;
+        default:
+          throw new Error(`نموذج غير مدعوم: ${selectedModel}`);
+      }
+
+      const aiRecommendations = JSON.parse(response);
+
+      // تحويل التوصيات إلى الصيغة المطلوبة
+      const recommendations = [];
+      for (const rec of aiRecommendations.recommendations) {
+        const menuItem = allItems.find(item => item.id === rec.menuItemId);
+        if (menuItem) {
+          recommendations.push({
+            menuItem,
+            score: rec.score,
+            reason: rec.reason,
+            type: `AI_${selectedModel.toUpperCase()}`
+          });
+        }
+      }
+
+      return recommendations;
+
+    } catch (error) {
+      console.error('خطأ في استخدام AI:', error);
+      return this._getFallbackRecommendations(userProfile, allItems, limit);
+    }
+  }
+
+  // Groq API
+  async _getGroqRecommendations(prompt) {
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.1-70b-versatile", // أو "mixtral-8x7b-32768"
+      messages: [
+        {
+          role: "system",
+          content: "أنت خبير في التوصيات الغذائية. أرجع إجابات بصيغة JSON صحيحة فقط."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 1000
+    });
+
+    return completion.choices[0].message.content;
+  }
+
+  // Together AI
+  async _getTogetherRecommendations(prompt) {
+    const completion = await together.chat.completions.create({
+      model: "meta-llama/Llama-3-70b-chat-hf", // أو "mistralai/Mixtral-8x7B-Instruct-v0.1"
+      messages: [
+        {
+          role: "system",
+          content: "أنت خبير في التوصيات الغذائية. أرجع إجابات بصيغة JSON صحيحة فقط."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 1000
+    });
+
+    return completion.choices[0].message.content;
+  }
+
+  // OpenRouter API
+  async _getOpenRouterRecommendations(prompt) {
+    const completion = await openrouter.chat.completions.create({
+      model: "anthropic/claude-3-haiku", // أو "meta-llama/llama-3.1-8b-instruct:free"
+      messages: [
+        {
+          role: "system",
+          content: "أنت خبير في التوصيات الغذائية. أرجع إجابات بصيغة JSON صحيحة فقط."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 1000
+    });
+
+    return completion.choices[0].message.content;
+  }
+
+  // Google Gemini
+  async _getGeminiRecommendations(prompt) {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    
+    const systemPrompt = "أنت خبير في التوصيات الغذائية. أرجع إجابات بصيغة JSON صحيحة فقط.";
+    const fullPrompt = `${systemPrompt}\n\n${prompt}`;
+    
+    const result = await model.generateContent(fullPrompt);
+    const response = await result.response;
+    return response.text();
+  }
+
+  // OpenAI API
+  async _getOpenAIRecommendations(prompt) {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: "أنت خبير في التوصيات الغذائية. أرجع إجابات بصيغة JSON صحيحة فقط."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 1000
+    });
+
+    return completion.choices[0].message.content;
+  }
+
+  // Anthropic Claude
+  async _getAnthropicRecommendations(prompt) {
+    const message = await anthropic.messages.create({
+      model: "claude-3-haiku-20240307",
+      max_tokens: 1000,
+      temperature: 0.7,
+      system: "أنت خبير في التوصيات الغذائية. أرجع إجابات بصيغة JSON صحيحة فقط.",
+      messages: [
+        {
+          role: "user",
+          content: prompt
+        }
+      ]
+    });
+
+    return message.content[0].text;
+  }
+
+  // التوصيات الاحتياطية (بدون AI)
+  _getFallbackRecommendations(userProfile, allItems, limit) {
+    const recommendations = [];
+    
+    // التوصية بناءً على الفئات المفضلة
+    const favoriteCategories = userProfile.favoriteCategories.map(([cat]) => cat);
+    
+    const categoryItems = allItems.filter(item => 
+      favoriteCategories.includes(item.category)
+    );
+
+    categoryItems.slice(0, limit).forEach(item => {
+      recommendations.push({
+        menuItem: item,
+        score: 0.8,
+        reason: `من فئة ${item.category} المفضلة لديك`,
+        type: 'CATEGORY_BASED'
+      });
+    });
+
+    return recommendations;
   }
 
   // الحصول على التوصيات بناءً على الطقس

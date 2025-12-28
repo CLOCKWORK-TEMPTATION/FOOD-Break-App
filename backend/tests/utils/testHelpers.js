@@ -129,6 +129,76 @@ function generateTestToken(userId, role = 'REGULAR') {
 }
 
 /**
+ * إنشاء JWT token منتهي الصلاحية
+ */
+function generateExpiredToken(payload) {
+  return jwt.sign(
+    payload,
+    process.env.JWT_SECRET || 'test-secret-key',
+    { expiresIn: '-1h' } // منتهي الصلاحية
+  );
+}
+
+/**
+ * إنشاء token للمستخدم
+ */
+function generateUserToken(user) {
+  return jwt.sign(
+    { userId: user.id, role: user.role || 'REGULAR' },
+    process.env.JWT_SECRET || 'test-secret-key',
+    { expiresIn: '1h' }
+  );
+}
+
+/**
+ * إنشاء UUID تجريبي
+ */
+function generateUUID() {
+  return 'test-uuid-' + Math.random().toString(36).substr(2, 9);
+}
+
+/**
+ * إنشاء بريد إلكتروني عشوائي
+ */
+function generateRandomEmail() {
+  return `test${Math.random().toString(36).substr(2, 9)}@test.com`;
+}
+
+/**
+ * إنشاء mock request object
+ */
+function createMockRequest(overrides = {}) {
+  return {
+    body: {},
+    params: {},
+    query: {},
+    user: { id: 'test-user-id', role: 'REGULAR' },
+    t: jest.fn((key) => key), // Mock localization function
+    ...overrides
+  };
+}
+
+/**
+ * إنشاء mock response object
+ */
+function createMockResponse() {
+  const res = {};
+  res.status = jest.fn().mockReturnValue(res);
+  res.json = jest.fn().mockReturnValue(res);
+  res.send = jest.fn().mockReturnValue(res);
+  res.cookie = jest.fn().mockReturnValue(res);
+  res.clearCookie = jest.fn().mockReturnValue(res);
+  return res;
+}
+
+/**
+ * إنشاء mock next function
+ */
+function createMockNext() {
+  return jest.fn();
+}
+
+/**
  * تنظيف قاعدة البيانات التجريبية
  */
 async function cleanupTestData() {
@@ -153,6 +223,13 @@ module.exports = {
   createTestMenuItem,
   createTestOrder,
   generateTestToken,
+  generateExpiredToken,
+  generateUserToken,
+  generateUUID,
+  generateRandomEmail,
+  createMockRequest,
+  createMockResponse,
+  createMockNext,
   cleanupTestData,
   closePrisma,
   prisma

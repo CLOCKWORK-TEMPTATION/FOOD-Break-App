@@ -21,6 +21,13 @@ const orderRoutes = require('./orders');
 const projectRoutes = require('./projects');
 const mlRoutes = require('./mlRoutes');
 const reminderRoutes = require('./reminders');
+const analyticsRoutes = require('./analytics');
+const productionIntegrationRoutes = require('./production');
+
+// Phase 4 Innovation Routes - مسارات المرحلة الرابعة المتقدمة
+const emergencyRoutes = require('./emergency');
+const medicalRoutes = require('./medical');
+const voiceRoutes = require('./voice');
 
 // ربط Routes
 router.use('/auth', authRoutes);
@@ -42,6 +49,13 @@ router.use('/orders', orderRoutes);
 router.use('/projects', projectRoutes);
 router.use('/ml', mlRoutes);
 router.use('/reminders', reminderRoutes);
+router.use('/analytics', analyticsRoutes);
+router.use('/production-integration', productionIntegrationRoutes);
+
+// Phase 4 Innovation Routes - مسارات المرحلة الرابعة المتقدمة
+router.use('/emergency', emergencyRoutes);
+router.use('/medical', medicalRoutes);
+router.use('/voice', voiceRoutes);
 
 // Route رئيسي
 router.get('/', (req, res) => {
@@ -67,7 +81,17 @@ router.get('/', (req, res) => {
       projects: '/projects',
       ml: '/ml',
       reminders: '/reminders',
-      admin: '/admin'
+      analytics: '/analytics',
+      productionIntegration: '/production-integration',
+      // Phase 4 Innovation Features - المميزات المتقدمة للمرحلة الرابعة
+      emergency: '/emergency',
+      medical: '/medical',
+      voice: '/voice'
+    },
+    phase4Features: {
+      emergency: 'وضع الطوارئ - Emergency Mode',
+      medical: 'التنبيهات الطبية - Medical Alerts',
+      voice: 'الطلب الصوتي - Voice Ordering'
     }
   });
 });

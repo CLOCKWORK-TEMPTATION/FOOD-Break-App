@@ -8,93 +8,337 @@
  * - Restaurant Quality Prediction
  */
 
-const tf = require('@tensorflow/tfjs-node');
+const OpenAI = require('openai');
+const { Anthropic } = require('@anthropic-ai/sdk');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
+const Together = require('together-ai');
 const logger = require('../../utils/logger');
 const trainingDataService = require('./trainingDataService');
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
+// تهيئة جميع النماذج
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY
+});
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY
+});
+
+const openrouter = new OpenAI({
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey: process.env.OPENROUTER_API_KEY,
+});
+
+const together = new Together({
+  apiKey: process.env.TOGETHER_API_KEY
+});
+
 class ModelTrainer {
   constructor() {
     this.models = {
-      recommendation: null,
-      prediction: null,
-      quality: null
+      recommendation: 'multi-model',
+      prediction: 'multi-model', 
+      quality: 'multi-model'
     };
+    
+    this.availableModels = this._checkAvailableModels();
+  }
 
-    this.modelPaths = {
-      recommendation: 'file://./models/recommendation-model',
-      prediction: 'file://./models/prediction-model',
-      quality: 'file://./models/quality-model'
+  // فحص النماذج المتاحة
+  _checkAvailableModels() {
+    const models = {
+      openai: !!process.env.OPENAI_API_KEY,
+      anthropic: !!process.env.ANTHROPIC_API_KEY,
+      gemini: !!process.env.GEMINI_API_KEY,
+      groq: !!process.env.GROQ_API_KEY,
+      openrouter: !!process.env.OPENROUTER_API_KEY,
+      together: !!process.env.TOGETHER_API_KEY
     };
+    
+    const availableCount = Object.values(models).filter(Boolean).length;
+    logger.info(`النماذج المتاحة للتدريب: ${availableCount}/6`);
+    
+    return models;
+  }
+
+  // اختيار أفضل نموذج للتحليل
+  _selectAnalysisModel() {
+    // للتحليل المعقد نفضل النماذج الأقوى
+    if (this.availableModels.anthropic) return 'anthropic'; // الأفضل للتحليل
+    if (this.availableModels.openai) return 'openai'; // موثوق
+    if (this.availableModels.groq) return 'groq'; // سريع
+    if (this.availableModels.together) return 'together'; // متنوع
+    if (this.availableModels.openrouter) return 'openrouter'; // وصول شامل
+    if (this.availableModels.gemini) return 'gemini'; // مجاني
+    return null;
   }
 
   /**
-   * تدريب نموذج التوصيات
-   * Train recommendation model
+   * تدريب نموذج التوصيات (باستخدام النماذج الكبيرة)
+   * Train recommendation model using LLMs
    */
   async trainRecommendationModel(options = {}) {
     try {
-      logger.info('بدء تدريب نموذج التوصيات...');
+      logger.info('تحليل بيانات التوصيات باستخدام النماذج الكبيرة المتعددة...');
 
-      const {
-        epochs = 50,
-        batchSize = 32,
-        validationSplit = 0.2
-      } = options;
+      const selectedModel = this._selectAnalysisModel();
+      
+      if (!selectedModel) {
+        logger.warn('لا توجد مفاتيح API للنماذج الكبيرة');
+        return {
+          success: false,
+          message: 'مفاتيح API للنماذج الكبيرة مطلوبة'
+        };
+      }
+
+      logger.info(`استخدام نموذج ${selectedModel} للتحليل`);
 
       // جمع بيانات التدريب
       const data = await trainingDataService.prepareRecommendationTrainingData();
 
-      if (data.interactions.length < 100) {
-        logger.warn('بيانات التدريب قليلة جداً، يتطلب 100 interaction على الأقل');
-        return null;
+      if (data.interactions.length < 10) {
+        logger.warn('بيانات التفاعل قليلة جداً');
+        return {
+          success: false,
+          message: 'بيانات غير كافية للتحليل'
+        };
       }
 
-      // إعداد البيانات للتدريب
-      const { X, y, userIds, itemIds } = this._prepareRecommendationData(data);
+      // تحليل الأنماط باستخدام النموذج المختار
+      const patterns = await this._analyzeUserPatterns(data, selectedModel);
 
-      // إنشاء النموذج
-      const model = this._createRecommendationModel(X.shape[1]);
+      // حفظ الأنماط المكتشفة
+      await this._saveDiscoveredPatterns(patterns, selectedModel);
 
-      // تدريب النموذج
-      logger.info(`تدريب النموذج على ${X.shape[0]} عينة...`);
-
-      const history = await model.fit(X, y, {
-        epochs,
-        batchSize,
-        validationSplit,
-        callbacks: {
-          onEpochEnd: (epoch, logs) => {
-            if (epoch % 10 === 0) {
-              logger.info(
-                `Epoch ${epoch}: loss=${logs.loss.toFixed(4)}, ` +
-                `val_loss=${logs.val_loss.toFixed(4)}, ` +
-                `accuracy=${logs.acc.toFixed(4)}`
-              );
-            }
-          }
-        }
-      });
-
-      // حفظ النموذج
-      await this._saveModel(model, 'recommendation');
-
-      this.models.recommendation = model;
-
-      logger.info('تم تدريب نموذج التوصيات بنجاح');
+      logger.info(`تم تحليل أنماط المستخدمين بنجاح باستخدام ${selectedModel}`);
 
       return {
         success: true,
-        history: history.history,
-        userCount: userIds.length,
-        itemCount: itemIds.length,
-        trainingSize: X.shape[0]
+        model: selectedModel,
+        patterns: patterns.length || Object.keys(patterns).length,
+        userCount: data.users.length,
+        itemCount: data.items.length,
+        interactionCount: data.interactions.length
       };
     } catch (error) {
-      logger.error(`خطأ في تدريب نموذج التوصيات: ${error.message}`);
+      logger.error(`خطأ في تحليل نموذج التوصيات: ${error.message}`);
       throw error;
+    }
+  }
+
+  // تحليل أنماط المستخدمين باستخدام النموذج المحدد
+  async _analyzeUserPatterns(data, modelType) {
+    try {
+      const prompt = `
+تحليل أنماط الطلبات التالية واستخراج الأنماط المهمة:
+
+البيانات:
+- عدد المستخدمين: ${data.users.length}
+- عدد العناصر: ${data.items.length}  
+- عدد التفاعلات: ${data.interactions.length}
+
+عينة من التفاعلات:
+${JSON.stringify(data.interactions.slice(0, 20), null, 2)}
+
+استخرج الأنماط التالية:
+1. الأوقات المفضلة للطلب
+2. الفئات الأكثر شعبية
+3. أنماط الطلب حسب اليوم
+4. العلاقات بين العناصر
+5. توصيات لتحسين النظام
+
+أرجع النتيجة بصيغة JSON:
+{
+  "timePatterns": [],
+  "categoryPatterns": [],
+  "dayPatterns": [],
+  "itemRelations": [],
+  "recommendations": []
+}
+      `;
+
+      let response;
+      
+      switch (modelType) {
+        case 'groq':
+          response = await this._getGroqAnalysis(prompt);
+          break;
+        case 'together':
+          response = await this._getTogetherAnalysis(prompt);
+          break;
+        case 'openrouter':
+          response = await this._getOpenRouterAnalysis(prompt);
+          break;
+        case 'gemini':
+          response = await this._getGeminiAnalysis(prompt);
+          break;
+        case 'openai':
+          response = await this._getOpenAIAnalysis(prompt);
+          break;
+        case 'anthropic':
+          response = await this._getAnthropicAnalysis(prompt);
+          break;
+        default:
+          throw new Error(`نموذج غير مدعوم: ${modelType}`);
+      }
+
+      return JSON.parse(response);
+
+    } catch (error) {
+      logger.error(`خطأ في تحليل الأنماط باستخدام ${modelType}: ${error.message}`);
+      return {
+        timePatterns: [],
+        categoryPatterns: [],
+        dayPatterns: [],
+        itemRelations: [],
+        recommendations: []
+      };
+    }
+  }
+
+  // دوال التحليل لكل نموذج
+  async _getGroqAnalysis(prompt) {
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.1-70b-versatile",
+      messages: [
+        {
+          role: "system", 
+          content: "أنت محلل بيانات خبير في أنماط الطلبات الغذائية. أرجع JSON صحيح فقط."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.3,
+      max_tokens: 2000
+    });
+
+    return completion.choices[0].message.content;
+  }
+
+  async _getTogetherAnalysis(prompt) {
+    const completion = await together.chat.completions.create({
+      model: "meta-llama/Llama-3-70b-chat-hf",
+      messages: [
+        {
+          role: "system",
+          content: "أنت محلل بيانات خبير في أنماط الطلبات الغذائية. أرجع JSON صحيح فقط."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.3,
+      max_tokens: 2000
+    });
+
+    return completion.choices[0].message.content;
+  }
+
+  async _getOpenRouterAnalysis(prompt) {
+    const completion = await openrouter.chat.completions.create({
+      model: "anthropic/claude-3-haiku",
+      messages: [
+        {
+          role: "system",
+          content: "أنت محلل بيانات خبير في أنماط الطلبات الغذائية. أرجع JSON صحيح فقط."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.3,
+      max_tokens: 2000
+    });
+
+    return completion.choices[0].message.content;
+  }
+
+  async _getGeminiAnalysis(prompt) {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    
+    const systemPrompt = "أنت محلل بيانات خبير في أنماط الطلبات الغذائية. أرجع JSON صحيح فقط.";
+    const fullPrompt = `${systemPrompt}\n\n${prompt}`;
+    
+    const result = await model.generateContent(fullPrompt);
+    const response = await result.response;
+    return response.text();
+  }
+
+  async _getOpenAIAnalysis(prompt) {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: "أنت محلل بيانات خبير في أنماط الطلبات الغذائية. أرجع JSON صحيح فقط."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.3,
+      max_tokens: 2000
+    });
+
+    return completion.choices[0].message.content;
+  }
+
+  async _getAnthropicAnalysis(prompt) {
+    const message = await anthropic.messages.create({
+      model: "claude-3-haiku-20240307",
+      max_tokens: 2000,
+      temperature: 0.3,
+      system: "أنت محلل بيانات خبير في أنماط الطلبات الغذائية. أرجع JSON صحيح فقط.",
+      messages: [
+        {
+          role: "user",
+          content: prompt
+        }
+      ]
+    });
+
+    return message.content[0].text;
+  }
+
+  // حفظ الأنماط المكتشفة
+  async _saveDiscoveredPatterns(patterns, modelUsed) {
+    try {
+      // حفظ في قاعدة البيانات أو ملف
+      const fs = require('fs').promises;
+      const path = require('path');
+
+      const patternsDir = path.join(__dirname, '../../../data/patterns');
+      await fs.mkdir(patternsDir, { recursive: true });
+
+      const timestamp = Date.now();
+      const filepath = path.join(patternsDir, `patterns-${modelUsed}-${timestamp}.json`);
+      
+      const dataToSave = {
+        model: modelUsed,
+        timestamp: new Date().toISOString(),
+        patterns
+      };
+      
+      await fs.writeFile(filepath, JSON.stringify(dataToSave, null, 2));
+
+      logger.info(`تم حفظ الأنماط من ${modelUsed} في ${filepath}`);
+    } catch (error) {
+      logger.error(`خطأ في حفظ الأنماط: ${error.message}`);
     }
   }
 

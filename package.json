@@ -1,41 +1,43 @@
 {
-  "name": "breakapp",
+  "name": "breakapp-full-stack",
   "version": "1.0.0",
-  "description": "BreakApp - Food ordering and delivery management system for production teams",
-  "private": true,
-  "workspaces": [
-    "backend",
-    "mobile"
-  ],
+  "description": "BreakApp - نظام إدارة الوجبات للإنتاج مع التعريب العربي الكامل",
+  "main": "start-full-stack.js",
   "scripts": {
-    "install:all": "npm install && npm install --workspace=backend && npm install --workspace=mobile",
-    "dev:backend": "npm run dev --workspace=backend",
-    "dev:mobile": "npm run start --workspace=mobile",
-    "test": "npm run test --workspaces",
-    "test:unit": "npm run test --workspace=backend",
-    "test:unit:watch": "npm run test:watch --workspace=backend",
-    "test:unit:coverage": "npm run test --workspace=backend -- --coverage",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
-    "test:e2e:headed": "playwright test --headed",
-    "test:e2e:debug": "playwright test --debug",
-    "test:all": "npm run test:unit && npm run test:e2e",
-    "test:report": "playwright show-report e2e-report"
+    "start": "node start-full-stack.js",
+    "dev": "node start-full-stack.js",
+    "backend": "cd backend && npm run dev",
+    "frontend": "cd frontend && npm run dev",
+    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "build": "cd backend && npm run build && cd ../frontend && npm run build",
+    "test": "cd backend && npm test && cd ../frontend && npm test",
+    "lint": "cd backend && npm run lint && cd ../frontend && npm run lint"
   },
   "keywords": [
-    "food-delivery",
+    "breakapp",
+    "meal-management",
     "production",
-    "menu-management",
-    "restaurant"
+    "arabic",
+    "localization",
+    "rtl",
+    "full-stack",
+    "react",
+    "nodejs",
+    "prisma",
+    "typescript"
   ],
-  "author": "",
+  "author": "BreakApp Team",
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0",
-    "npm": ">=9.0.0"
+    "npm": ">=8.0.0"
   },
-  "devDependencies": {
-    "@playwright/test": "^1.57.0",
-    "playwright": "^1.57.0"
-  }
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/breakapp/breakapp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/breakapp/breakapp/issues"
+  },
+  "homepage": "https://github.com/breakapp/breakapp#readme"
 }

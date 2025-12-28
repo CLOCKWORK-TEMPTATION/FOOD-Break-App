@@ -17,13 +17,13 @@ const { authenticateToken, requireAdmin, requireProducer } = require('../middlew
 router.post('/', [
   authenticateToken,
   requireAdmin,
-  body('name').notEmpty().withMessage(''3E 'DE41H9 E7DH('),
-  body('startDate').isISO8601().withMessage('*'1J. 'D(/! J,( #F JCHF 5-J-'K'),
+  body('name').notEmpty().withMessage('اسم المشروع مطلوب'),
+  body('startDate').isISO8601().withMessage('تاريخ البدء يجب أن يكون صحيحاً'),
   body('location').optional().isString(),
   body('latitude').optional().isFloat(),
   body('longitude').optional().isFloat(),
   body('endDate').optional().isISO8601(),
-  body('orderWindow').optional().isInt({ min: 1, max: 480 }).withMessage('F'A0) 'D7D( J,( #F *CHF (JF 1 H 480 /BJB)')
+  body('orderWindow').optional().isInt({ min: 1, max: 480 }).withMessage('نافذة الطلب يجب أن تكون بين 1 و 480 دقيقة')
 ], projectController.createProject);
 
 /**
@@ -43,7 +43,7 @@ router.get('/', [
  * E*'- DD,EJ9 (/HF E5'/B)
  */
 router.post('/access-by-qr', [
-  body('qrToken').notEmpty().withMessage('QR Token E7DH(')
+  body('qrToken').notEmpty().withMessage('QR Token مطلوب')
 ], projectController.accessProjectByQR);
 
 /**
@@ -52,7 +52,7 @@ router.post('/access-by-qr', [
  */
 router.get('/:projectId', [
   authenticateToken,
-  param('projectId').isUUID().withMessage('E91A 'DE41H9 :J1 5-J-')
+  param('projectId').isUUID().withMessage('معرف المشروع غير صحيح')
 ], projectController.getProject);
 
 /**
@@ -63,7 +63,7 @@ router.get('/:projectId', [
 router.patch('/:projectId', [
   authenticateToken,
   requireProducer,
-  param('projectId').isUUID().withMessage('E91A 'DE41H9 :J1 5-J-'),
+  param('projectId').isUUID().withMessage('معرف المشروع غير صحيح'),
   body('name').optional().isString(),
   body('location').optional().isString(),
   body('latitude').optional().isFloat(),
@@ -81,7 +81,7 @@ router.patch('/:projectId', [
 router.post('/:projectId/regenerate-qr', [
   authenticateToken,
   requireProducer,
-  param('projectId').isUUID().withMessage('E91A 'DE41H9 :J1 5-J-')
+  param('projectId').isUUID().withMessage('معرف المشروع غير صحيح')
 ], projectController.regenerateQRCode);
 
 /**
@@ -90,7 +90,7 @@ router.post('/:projectId/regenerate-qr', [
  */
 router.get('/:projectId/order-window', [
   authenticateToken,
-  param('projectId').isUUID().withMessage('E91A 'DE41H9 :J1 5-J-')
+  param('projectId').isUUID().withMessage('معرف المشروع غير صحيح')
 ], projectController.checkOrderWindow);
 
 /**
@@ -101,7 +101,7 @@ router.get('/:projectId/order-window', [
 router.delete('/:projectId', [
   authenticateToken,
   requireAdmin,
-  param('projectId').isUUID().withMessage('E91A 'DE41H9 :J1 5-J-')
+  param('projectId').isUUID().withMessage('معرف المشروع غير صحيح')
 ], projectController.deleteProject);
 
 module.exports = router;

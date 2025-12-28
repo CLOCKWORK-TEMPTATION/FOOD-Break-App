@@ -7,9 +7,10 @@
  * - Comprehensive Reports
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './ProducerDashboard.module.css';
 import MoodTracker from '../components/MoodTracker';
+import { productionService } from '../services/productionService';
 
 // --- Types ---
 
@@ -40,38 +41,39 @@ interface BudgetCategory {
   projected: number;
 }
 
-// --- Mock Data ---
-
-const MOCK_SCHEDULE: ShootingDay[] = [
-  { id: '1', date: '2025-12-28', dayNumber: 12, startTime: '06:00', endTime: '18:00', location: 'Studio A', status: 'SHOOTING', scenes: ['S12', 'S14', 'S15'] },
-  { id: '2', date: '2025-12-29', dayNumber: 13, startTime: '07:00', endTime: '19:00', location: 'Outdoor - Park', status: 'SCHEDULED', scenes: ['S20', 'S22'] },
-  { id: '3', date: '2025-12-30', dayNumber: 14, startTime: '12:00', endTime: '22:00', location: 'Studio B', status: 'SCHEDULED', scenes: ['S33', 'S34'] },
-  { id: '4', date: '2025-12-31', dayNumber: 0, startTime: '', endTime: '', location: '', status: 'OFF_DAY', scenes: [] },
-  { id: '5', date: '2026-01-01', dayNumber: 15, startTime: '08:00', endTime: '17:00', location: 'Studio A', status: 'SCHEDULED', scenes: ['S40'] },
-];
-
-const MOCK_CREW: CrewMember[] = [
-  { id: '1', name: 'أحمد علي', role: 'Director', avatar: 'أ', status: 'PRESENT', checkInTime: '05:45' },
-  { id: '2', name: 'سارة خالد', role: 'DOP', avatar: 'س', status: 'PRESENT', checkInTime: '05:50' },
-  { id: '3', name: 'عمر حسن', role: 'Sound', avatar: 'ع', status: 'LATE', checkInTime: '06:15' },
-  { id: '4', name: 'ليلى محمد', role: 'Makeup', avatar: 'ل', status: 'ABSENT' },
-  { id: '5', name: 'خالد يوسف', role: 'Gaffer', avatar: 'خ', status: 'PRESENT', checkInTime: '05:30' },
-];
-
-const MOCK_BUDGET: BudgetCategory[] = [
-  { name: 'Catering (التموين)', allocated: 50000, spent: 32000, projected: 48000 },
-  { name: 'Locations (المواقع)', allocated: 120000, spent: 60000, projected: 110000 },
-  { name: 'Equipment (المعدات)', allocated: 200000, spent: 180000, projected: 195000 },
-  { name: 'Transportation (النقل)', allocated: 30000, spent: 15000, projected: 35000 }, // Over budget projection
-];
+// --- State Management ---
 
 export default function ProducerDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'schedule' | 'budget' | 'attendance'>('overview');
-  const [schedule] = useState<ShootingDay[]>(MOCK_SCHEDULE);
-  const [crew] = useState<CrewMember[]>(MOCK_CREW);
+  const [schedule, setSchedule] = useState<ShootingDay[]>([]);
+  const [crew, setCrew] = useState<CrewMember[]>([]);
+  const [budget, setBudget] = useState<BudgetCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // State for simulated actions
   const [showExportOptions, setShowExportOptions] = useState(false);
+
+  // Load data from API
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const [scheduleData, crewData, budgetData] = await Promise.all([
+          productionService.getSchedule(),
+          productionService.getCrew(),
+          productionService.getBudget()
+        ]);
+        setSchedule(scheduleData);
+        setCrew(crewData);
+        setBudget(budgetData);
+      } catch (err: any) {
+        setError(err.message || 'فشل تحميل البيانات');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
 
   // --- Helpers ---
 
@@ -105,6 +107,27 @@ export default function ProducerDashboard() {
     alert(`Generating ${format.toUpperCase()} report...`);
     setShowExportOptions(false);
   };
+
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+          <div>جاري التحميل...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.container}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ color: '#f44336' }}>خطأ: {error}</div>
+          <button onClick={() => window.location.reload()}>إعادة المحاولة</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -314,7 +337,7 @@ export default function ProducerDashboard() {
                         </tr>
                       </thead>
                       <tbody>
-                        {MOCK_BUDGET.map((cat, i) => {
+                        {budget.map((cat, i) => {
                           const util = (cat.spent / cat.allocated) * 100;
                           const health = calculateBudgetHealth(cat);
                           return (

@@ -12,10 +12,20 @@ class EmotionController {
       const userId = req.user.id;
 
       const log = await emotionService.logMood(userId, { mood, intensity, notes, context });
-      res.json({ success: true, data: log });
+      res.json({ 
+        success: true, 
+        data: log,
+        message: req.t('emotion.moodLogSuccess')
+      });
     } catch (error) {
       logger.error('خطأ في تسجيل الحالة المزاجية:', error.message);
-      res.status(500).json({ success: false, message: 'Failed to log mood' });
+      res.status(500).json({ 
+        success: false, 
+        error: {
+          code: 'MOOD_LOG_FAILED',
+          message: req.t('emotion.moodLogFailed')
+        }
+      });
     }
   }
 
@@ -26,13 +36,27 @@ class EmotionController {
       // Security: استخدام userId من الـ token فقط
       const userId = req.user.id;
 
-      if (!mood) return res.status(400).json({ message: 'Mood is required' });
+      if (!mood) {
+        return res.status(400).json({ 
+          success: false,
+          error: {
+            code: 'MOOD_REQUIRED',
+            message: req.t('emotion.moodRequired')
+          }
+        });
+      }
 
       const recs = await emotionService.getMoodRecommendations(userId, mood);
       res.json({ success: true, data: recs });
     } catch (error) {
       logger.error('خطأ في جلب التوصيات:', error.message);
-      res.status(500).json({ success: false, message: 'Failed to get recommendations' });
+      res.status(500).json({ 
+        success: false, 
+        error: {
+          code: 'RECOMMENDATIONS_FAILED',
+          message: req.t('emotion.recommendationsFailed')
+        }
+      });
     }
   }
 
@@ -50,10 +74,20 @@ class EmotionController {
       };
 
       const record = await emotionService.recordConsent(userId, type, status, meta);
-      res.json({ success: true, data: record });
+      res.json({ 
+        success: true, 
+        data: record,
+        message: req.t('emotion.consentUpdated')
+      });
     } catch (error) {
       logger.error('خطأ في تحديث الموافقة:', error.message);
-      res.status(500).json({ success: false, message: 'Failed to update consent' });
+      res.status(500).json({ 
+        success: false, 
+        error: {
+          code: 'CONSENT_UPDATE_FAILED',
+          message: req.t('emotion.consentUpdateFailed')
+        }
+      });
     }
   }
 }

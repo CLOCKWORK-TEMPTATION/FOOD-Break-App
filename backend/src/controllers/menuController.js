@@ -44,7 +44,7 @@ const createMenuItem = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      message: 'تم إنشاء عنصر القائمة بنجاح',
+      message: req.t('menu.menuItemAdded'),
       data: menuItem
     });
   } catch (error) {
@@ -62,7 +62,7 @@ const updateMenuItem = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: 'تم تحديث عنصر القائمة بنجاح',
+      message: req.t('menu.menuItemUpdated'),
       data: menuItem
     });
   } catch (error) {
@@ -80,7 +80,7 @@ const deleteMenuItem = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: 'تم حذف عنصر القائمة بنجاح'
+      message: req.t('menu.menuItemDeleted')
     });
   } catch (error) {
     next(error);
@@ -115,7 +115,7 @@ const getGeographicMenu = async (req, res, next) => {
     if (!latitude || !longitude) {
       return res.status(400).json({
         success: false,
-        error: 'يجب توفير الإحداثيات (latitude, longitude)'
+        error: req.t('validation.coordinatesRequired')
       });
     }
 
@@ -145,7 +145,7 @@ const searchMenuItems = async (req, res, next) => {
     if (!q) {
       return res.status(400).json({
         success: false,
-        error: 'يجب توفير نص البحث (q)'
+        error: req.t('validation.searchQueryRequired')
       });
     }
 

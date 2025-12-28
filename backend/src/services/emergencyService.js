@@ -1,405 +1,506 @@
+/**
+ * Emergency Service - خدمة وضع الطوارئ
+ * يوفر جميع العمليات المتعلقة بوضع الطوارئ
+ */
+
 const { PrismaClient } = require('@prisma/client');
+const logger = require('../utils/logger');
+
 const prisma = new PrismaClient();
 
-class EmergencyService {
-  // ✅ Emergency Order Methods
-
-  async createEmergencyOrder(userId, data) {
-    const {
-      restaurantId,
-      emergencyType,
-      emergencyReason,
-      items,
-      deliveryAddress,
-      deliveryLat,
-      deliveryLng,
-      fastTrackDelivery
-    } = data;
-
-    // Calculate total amount
-    let totalAmount = 0;
-
-    // Optimizing N+1: Fetch all menu items in one query
-    const menuItemIds = items.map(item => item.menuItemId);
-    const menuItems = await prisma.menuItem.findMany({
+/**
+ * تفعيل وضع الطوارئ للمشروع
+ */
+async function activateEmergencyMode({ projectId, emergencyType, reason, estimatedDuration, activatedBy }) {
+  try {
+    // التحقق من عدم وجود جلسة طوارئ نشطة
+    const existingSession = await prisma.emergencySession.findFirst({
       where: {
-        id: { in: menuItemIds }
+        projectId,
+        isActive: true
       }
     });
 
-    const menuItemMap = new Map(menuItems.map(item => [item.id, item]));
-
-    for (const item of items) {
-      const menuItem = menuItemMap.get(item.menuItemId);
-      if (!menuItem) {
-        throw new Error(`Menu item not found: ${item.menuItemId}`);
-      }
-      totalAmount += menuItem.price * item.quantity;
+    if (existingSession) {
+      throw new Error('يوجد بالفعل جلسة طوارئ نشطة لهذا المشروع');
     }
 
-    // Create the emergency order
-    const order = await prisma.emergencyOrder.create({
+    // إنشاء جلسة طوارئ جديدة
+    const emergencySession = await prisma.emergencySession.create({
       data: {
-        userId,
-        restaurantId,
+        projectId,
         emergencyType,
-        emergencyReason,
-        preApprovedItems: items, // Storing items in JSON field
-        totalAmount,
-        fastTrackDelivery,
-        priorityLevel: 'HIGH', // Default per schema/logic
-        estimatedTime: 30, // Default or calculated
-        status: 'PENDING',
-        deliveryAddress,
-        deliveryLat,
-        deliveryLng
-      }
-    });
-
-    return order;
-  }
-
-  async getUserEmergencyOrders(userId, options) {
-    const { status, page = 1, limit = 10 } = options;
-    const skip = (page - 1) * limit;
-
-    const where = { userId };
-    if (status) {
-      where.status = status;
-    }
-
-    const [orders, total] = await Promise.all([
-      prisma.emergencyOrder.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' }
-      }),
-      prisma.emergencyOrder.count({ where })
-    ]);
-
-    return {
-      orders,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit)
-      }
-    };
-  }
-
-  async getEmergencyOrderById(orderId, userId) {
-    const order = await prisma.emergencyOrder.findFirst({
-      where: {
-        id: orderId,
-        userId // Ensure user owns the order
-      }
-    });
-
-    if (!order) {
-      throw new Error('Emergency order not found');
-    }
-
-    return order;
-  }
-
-  async updateEmergencyOrder(orderId, userId, data) {
-    const order = await prisma.emergencyOrder.findFirst({
-      where: {
-        id: orderId,
-        userId
-      }
-    });
-
-    if (!order) {
-      throw new Error('Emergency order not found');
-    }
-
-    const updatedOrder = await prisma.emergencyOrder.update({
-      where: { id: orderId },
-      data
-    });
-
-    return updatedOrder;
-  }
-
-  // ✅ Emergency Restaurant Methods
-
-  async getAvailableEmergencyRestaurants(options) {
-    const { latitude, longitude, radius, emergencyLevel } = options;
-
-    const where = {
-      isActive: true,
-      isEmergencyReady: true
-    };
-
-    if (emergencyLevel) {
-      where.emergencyLevel = emergencyLevel;
-    }
-
-    const emergencyRestaurants = await prisma.emergencyRestaurant.findMany({
-      where
-    });
-
-    if (emergencyRestaurants.length === 0) {
-      return [];
-    }
-
-    const restaurantIds = emergencyRestaurants.map(er => er.restaurantId);
-
-    const restaurants = await prisma.restaurant.findMany({
-      where: {
-        id: { in: restaurantIds }
-      }
-    });
-
-    const restaurantMap = new Map(restaurants.map(r => [r.id, r]));
-
-    const enhancedRestaurants = emergencyRestaurants.map(er => ({
-      ...er,
-      restaurant: restaurantMap.get(er.restaurantId)
-    }));
-
-    if (latitude && longitude && radius) {
-      return enhancedRestaurants.filter(er => {
-        if (!er.restaurant) return false;
-        const dist = this.calculateDistance(latitude, longitude, er.restaurant.latitude, er.restaurant.longitude);
-        return dist <= radius;
-      });
-    }
-
-    return enhancedRestaurants;
-  }
-
-  calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Radius of the earth in km
-    const dLat = this.deg2rad(lat2 - lat1);
-    const dLon = this.deg2rad(lon2 - lon1);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const d = R * c; // Distance in km
-    return d;
-  }
-
-  deg2rad(deg) {
-    return deg * (Math.PI / 180);
-  }
-
-  async registerEmergencyRestaurant(data) {
-    const { restaurantId, ...otherData } = data;
-
-    const existing = await prisma.emergencyRestaurant.findUnique({
-      where: { restaurantId }
-    });
-
-    if (existing) {
-      return prisma.emergencyRestaurant.update({
-        where: { restaurantId },
-        data: otherData
-      });
-    }
-
-    return prisma.emergencyRestaurant.create({
-      data: {
-        restaurantId,
-        ...otherData
-      }
-    });
-  }
-
-  async updateEmergencyRestaurant(id, data) {
-    // Note: Assuming 'id' is the EmergencyRestaurant PK, as per standard REST conventions for PATCH /:id
-    return prisma.emergencyRestaurant.update({
-      where: { id },
-      data
-    });
-  }
-
-  // ✅ Pre-prepared Meals Methods
-
-  async getAvailablePrePreparedMeals(options) {
-    const { restaurantId, dietaryRestrictions, allergens } = options;
-
-    const where = {
-      isAvailable: true,
-      isReserved: false
-    };
-
-    if (restaurantId) {
-      where.restaurantId = restaurantId;
-    }
-
-    let meals = await prisma.prePreparedMeal.findMany({
-      where
-    });
-
-    if (allergens && allergens.length > 0) {
-      meals = meals.filter(meal => {
-        const hasAllergen = meal.allergens.some(a => allergens.includes(a));
-        return !hasAllergen;
-      });
-    }
-
-    if (dietaryRestrictions && dietaryRestrictions.length > 0) {
-        meals = meals.filter(meal => {
-            return dietaryRestrictions.every(dr => meal.dietaryLabels.includes(dr));
-        });
-    }
-
-    return meals;
-  }
-
-  async addPrePreparedMeal(data) {
-    return prisma.prePreparedMeal.create({
-      data
-    });
-  }
-
-  async reservePrePreparedMeal(mealId, userId) {
-    // Atomic update to prevent race conditions
-    // We update directly with a where clause that checks availability
-    const result = await prisma.prePreparedMeal.updateMany({
-      where: {
-        id: mealId,
-        isAvailable: true,
-        isReserved: false
+        reason,
+        estimatedDuration,
+        activatedBy,
+        activatedAt: new Date(),
+        isActive: true
       },
-      data: {
-        isReserved: true,
-        reservedBy: userId,
-        reservedAt: new Date()
+      include: {
+        project: {
+          select: { name: true }
+        },
+        activatedByUser: {
+          select: { firstName: true, lastName: true }
+        }
       }
     });
 
-    if (result.count === 0) {
-      throw new Error('Meal not available');
-    }
-
-    // Return the updated meal
-    return prisma.prePreparedMeal.findUnique({
-      where: { id: mealId }
-    });
-  }
-
-  // ✅ Emergency Protocol Methods
-
-  async getEmergencyProtocols(options) {
-    const { emergencyType, isActive } = options;
-    const where = {};
-    if (emergencyType) where.emergencyType = emergencyType;
-    if (isActive !== undefined) where.isActive = isActive;
-
-    return prisma.emergencyProtocol.findMany({ where });
-  }
-
-  async createEmergencyProtocol(data) {
-    return prisma.emergencyProtocol.create({ data });
-  }
-
-  async activateEmergencyProtocol(id) {
-    const protocol = await prisma.emergencyProtocol.update({
-      where: { id },
+    // تسجيل الحدث
+    await prisma.emergencyLog.create({
       data: {
-        lastExecuted: new Date(),
-        executionCount: { increment: 1 }
+        sessionId: emergencySession.id,
+        action: 'ACTIVATED',
+        performedBy: activatedBy,
+        details: {
+          emergencyType,
+          reason,
+          estimatedDuration
+        }
       }
     });
 
-    return protocol;
-  }
-
-  // ✅ Notification Methods
-
-  async sendEmergencyNotification(data) {
-    const { type, title, message, targetUsers, targetRestaurants, senderId } = data;
-
-    const notificationsData = [];
-    if (targetUsers && targetUsers.length > 0) {
-      for (const userId of targetUsers) {
-        notificationsData.push({
-            userId,
-            type: 'SYSTEM',
-            title,
-            message,
-            data: { isEmergency: true, type },
-            isRead: false,
-            createdAt: new Date()
-        });
-      }
-    }
-
-    if (notificationsData.length > 0) {
-      await prisma.notification.createMany({
-        data: notificationsData
-      });
-    }
-
-    return { sent: notificationsData.length };
-  }
-
-  async getEmergencyNotifications(userId, options) {
-    const { isRead, page = 1, limit = 10 } = options;
-    const skip = (page - 1) * limit;
-
-    const where = {
-      userId,
-      type: 'SYSTEM',
-      data: {
-        path: ['isEmergency'],
-        equals: true
-      }
-    };
-
-    if (isRead !== undefined) {
-      where.isRead = isRead;
-    }
-
-    const [notifications, total] = await Promise.all([
-      prisma.notification.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' }
-      }),
-      prisma.notification.count({ where })
-    ]);
-
-    return {
-      notifications,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit)
-      }
-    };
-  }
-
-  // ✅ Statistics & Schedule Changes
-
-  async getEmergencyStatistics(options) {
-    const { startDate, endDate, emergencyType } = options;
-
-    const where = {};
-    if (startDate) where.createdAt = { gte: startDate };
-    if (endDate) where.createdAt = { ...where.createdAt, lte: endDate };
-    if (emergencyType) where.emergencyType = emergencyType;
-
-    const totalOrders = await prisma.emergencyOrder.count({ where });
-
-    return {
-      totalOrders
-    };
-  }
-
-  async notifyScheduleChange(data) {
-    // Ideally this would be implemented with a real notification system
-    return { success: true, message: 'Schedule change notifications queued' };
+    logger.info(`Emergency mode activated for project ${projectId} by user ${activatedBy}`);
+    return emergencySession;
+  } catch (error) {
+    logger.error('Error activating emergency mode:', error);
+    throw error;
   }
 }
 
-module.exports = new EmergencyService();
+/**
+ * إنشاء طلب طوارئ سريع
+ */
+async function createEmergencyOrder({ projectId, userId, urgencyLevel, specialInstructions, deliveryLocation, sessionId }) {
+  try {
+    // إنشاء طلب طوارئ
+    const emergencyOrder = await prisma.emergencyOrder.create({
+      data: {
+        projectId,
+        userId,
+        sessionId,
+        urgencyLevel,
+        specialInstructions,
+        deliveryLocation,
+        status: 'URGENT_PENDING',
+        createdAt: new Date()
+      },
+      include: {
+        user: {
+          select: { firstName: true, lastName: true, phoneNumber: true }
+        },
+        project: {
+          select: { name: true }
+        }
+      }
+    });
+
+    // تسجيل الحدث
+    await prisma.emergencyLog.create({
+      data: {
+        sessionId,
+        action: 'ORDER_CREATED',
+        performedBy: userId,
+        details: {
+          orderId: emergencyOrder.id,
+          urgencyLevel,
+          deliveryLocation
+        }
+      }
+    });
+
+    return emergencyOrder;
+  } catch (error) {
+    logger.error('Error creating emergency order:', error);
+    throw error;
+  }
+}
+
+/**
+ * الحصول على جلسة الطوارئ النشطة
+ */
+async function getActiveEmergencySession(projectId) {
+  try {
+    return await prisma.emergencySession.findFirst({
+      where: {
+        projectId,
+        isActive: true
+      },
+      include: {
+        project: true,
+        activatedByUser: {
+          select: { firstName: true, lastName: true }
+        }
+      }
+    });
+  } catch (error) {
+    logger.error('Error getting active emergency session:', error);
+    throw error;
+  }
+}
+
+/**
+ * الحصول على المطاعم المتاحة للطوارئ
+ */
+async function getEmergencyRestaurants({ latitude, longitude, radius }) {
+  try {
+    // البحث عن المطاعم المتاحة للطوارئ في النطاق المحدد
+    const restaurants = await prisma.restaurant.findMany({
+      where: {
+        isActive: true,
+        emergencyAvailable: true,
+        // حساب المسافة باستخدام Haversine formula
+        AND: [
+          {
+            latitude: {
+              gte: latitude - (radius / 111000), // تحويل المتر إلى درجات
+              lte: latitude + (radius / 111000)
+            }
+          },
+          {
+            longitude: {
+              gte: longitude - (radius / (111000 * Math.cos(latitude * Math.PI / 180))),
+              lte: longitude + (radius / (111000 * Math.cos(latitude * Math.PI / 180)))
+            }
+          }
+        ]
+      },
+      select: {
+        id: true,
+        name: true,
+        phoneNumber: true,
+        latitude: true,
+        longitude: true,
+        emergencyContactPerson: true,
+        emergencyContactPhone: true,
+        emergencyMenuItems: true,
+        averagePreparationTime: true,
+        rating: true
+      },
+      orderBy: {
+        rating: 'desc'
+      }
+    });
+
+    // حساب المسافة الفعلية لكل مطعم
+    const restaurantsWithDistance = restaurants.map(restaurant => {
+      const distance = calculateDistance(
+        latitude, longitude,
+        restaurant.latitude, restaurant.longitude
+      );
+      
+      return {
+        ...restaurant,
+        distance: Math.round(distance),
+        estimatedDeliveryTime: Math.round(distance / 30 * 60) + restaurant.averagePreparationTime // تقدير الوقت
+      };
+    });
+
+    return restaurantsWithDistance.filter(r => r.distance <= radius);
+  } catch (error) {
+    logger.error('Error getting emergency restaurants:', error);
+    throw error;
+  }
+}
+
+/**
+ * إشعار المطاعم المتاحة للطوارئ
+ */
+async function notifyEmergencyRestaurants(projectId, emergencyOrder) {
+  try {
+    // الحصول على المطاعم القريبة
+    const restaurants = await getEmergencyRestaurants({
+      latitude: emergencyOrder.deliveryLocation?.latitude || 0,
+      longitude: emergencyOrder.deliveryLocation?.longitude || 0,
+      radius: 5000
+    });
+
+    // إرسال إشعارات للمطاعم
+    const notifications = await Promise.all(
+      restaurants.slice(0, 5).map(async (restaurant) => {
+        return await prisma.emergencyRestaurantNotification.create({
+          data: {
+            restaurantId: restaurant.id,
+            orderId: emergencyOrder.id,
+            notificationType: 'EMERGENCY_ORDER',
+            message: `طلب طوارئ جديد - مستوى الأولوية: ${emergencyOrder.urgencyLevel}`,
+            sentAt: new Date()
+          }
+        });
+      })
+    );
+
+    logger.info(`Emergency notifications sent to ${notifications.length} restaurants`);
+    return notifications;
+  } catch (error) {
+    logger.error('Error notifying emergency restaurants:', error);
+    throw error;
+  }
+}
+
+/**
+ * تحديث حالة طلب الطوارئ
+ */
+async function updateEmergencyOrderStatus(orderId, status, metadata = {}) {
+  try {
+    const updatedOrder = await prisma.emergencyOrder.update({
+      where: { id: orderId },
+      data: {
+        status,
+        estimatedDeliveryTime: metadata.estimatedDeliveryTime,
+        notes: metadata.notes,
+        updatedAt: new Date()
+      },
+      include: {
+        user: {
+          select: { id: true, firstName: true, lastName: true }
+        },
+        session: {
+          select: { id: true, projectId: true }
+        }
+      }
+    });
+
+    // تسجيل تحديث الحالة
+    await prisma.emergencyLog.create({
+      data: {
+        sessionId: updatedOrder.session.id,
+        action: 'ORDER_STATUS_UPDATED',
+        performedBy: updatedOrder.userId,
+        details: {
+          orderId,
+          oldStatus: updatedOrder.status,
+          newStatus: status,
+          metadata
+        }
+      }
+    });
+
+    return updatedOrder;
+  } catch (error) {
+    logger.error('Error updating emergency order status:', error);
+    throw error;
+  }
+}
+
+/**
+ * الحصول على المخزون المُعد مسبقاً
+ */
+async function getPrePreparedInventory(projectId) {
+  try {
+    const inventory = await prisma.prePreparedInventory.findMany({
+      where: {
+        projectId,
+        quantity: { gt: 0 },
+        OR: [
+          { expiryDate: null },
+          { expiryDate: { gte: new Date() } }
+        ]
+      },
+      include: {
+        addedByUser: {
+          select: { firstName: true, lastName: true }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    return inventory;
+  } catch (error) {
+    logger.error('Error getting pre-prepared inventory:', error);
+    throw error;
+  }
+}
+
+/**
+ * إضافة عنصر للمخزون المُعد مسبقاً
+ */
+async function addToPrePreparedInventory({ projectId, itemName, quantity, expiryDate, storageLocation, addedBy }) {
+  try {
+    const inventoryItem = await prisma.prePreparedInventory.create({
+      data: {
+        projectId,
+        itemName,
+        quantity,
+        expiryDate,
+        storageLocation,
+        addedBy,
+        createdAt: new Date()
+      },
+      include: {
+        addedByUser: {
+          select: { firstName: true, lastName: true }
+        }
+      }
+    });
+
+    return inventoryItem;
+  } catch (error) {
+    logger.error('Error adding to pre-prepared inventory:', error);
+    throw error;
+  }
+}
+
+/**
+ * إلغاء تفعيل وضع الطوارئ
+ */
+async function deactivateEmergencyMode(projectId, deactivatedBy, reason) {
+  try {
+    // العثور على الجلسة النشطة
+    const activeSession = await prisma.emergencySession.findFirst({
+      where: {
+        projectId,
+        isActive: true
+      }
+    });
+
+    if (!activeSession) {
+      throw new Error('لا توجد جلسة طوارئ نشطة لهذا المشروع');
+    }
+
+    // إلغاء تفعيل الجلسة
+    const deactivatedSession = await prisma.emergencySession.update({
+      where: { id: activeSession.id },
+      data: {
+        isActive: false,
+        deactivatedAt: new Date(),
+        deactivatedBy,
+        deactivationReason: reason
+      }
+    });
+
+    // تسجيل الحدث
+    await prisma.emergencyLog.create({
+      data: {
+        sessionId: activeSession.id,
+        action: 'DEACTIVATED',
+        performedBy: deactivatedBy,
+        details: {
+          reason,
+          duration: new Date() - activeSession.activatedAt
+        }
+      }
+    });
+
+    return deactivatedSession;
+  } catch (error) {
+    logger.error('Error deactivating emergency mode:', error);
+    throw error;
+  }
+}
+
+/**
+ * الحصول على تاريخ حالات الطوارئ
+ */
+async function getEmergencyHistory({ projectId, startDate, endDate, page, limit }) {
+  try {
+    const where = {};
+    if (projectId) where.projectId = projectId;
+    if (startDate || endDate) {
+      where.activatedAt = {};
+      if (startDate) where.activatedAt.gte = startDate;
+      if (endDate) where.activatedAt.lte = endDate;
+    }
+
+    const [sessions, total] = await Promise.all([
+      prisma.emergencySession.findMany({
+        where,
+        include: {
+          project: { select: { name: true } },
+          activatedByUser: { select: { firstName: true, lastName: true } },
+          deactivatedByUser: { select: { firstName: true, lastName: true } },
+          orders: {
+            select: {
+              id: true,
+              urgencyLevel: true,
+              status: true,
+              createdAt: true
+            }
+          },
+          _count: {
+            select: { orders: true }
+          }
+        },
+        orderBy: { activatedAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit
+      }),
+      prisma.emergencySession.count({ where })
+    ]);
+
+    return {
+      sessions,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    };
+  } catch (error) {
+    logger.error('Error getting emergency history:', error);
+    throw error;
+  }
+}
+
+/**
+ * إرسال تنبيه تغيير الجدولة
+ */
+async function notifyScheduleChange({ projectId, changeType, newSchedule, reason, affectedMeals, notifiedBy }) {
+  try {
+    const notification = await prisma.scheduleChangeNotification.create({
+      data: {
+        projectId,
+        changeType,
+        newSchedule,
+        reason,
+        affectedMeals,
+        notifiedBy,
+        createdAt: new Date()
+      },
+      include: {
+        project: { select: { name: true } },
+        notifiedByUser: { select: { firstName: true, lastName: true } }
+      }
+    });
+
+    return notification;
+  } catch (error) {
+    logger.error('Error creating schedule change notification:', error);
+    throw error;
+  }
+}
+
+/**
+ * حساب المسافة بين نقطتين (Haversine formula)
+ */
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371e3; // نصف قطر الأرض بالمتر
+  const φ1 = lat1 * Math.PI / 180;
+  const φ2 = lat2 * Math.PI / 180;
+  const Δφ = (lat2 - lat1) * Math.PI / 180;
+  const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+  const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+    Math.cos(φ1) * Math.cos(φ2) *
+    Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c; // المسافة بالمتر
+}
+
+module.exports = {
+  activateEmergencyMode,
+  createEmergencyOrder,
+  getActiveEmergencySession,
+  getEmergencyRestaurants,
+  notifyEmergencyRestaurants,
+  updateEmergencyOrderStatus,
+  getPrePreparedInventory,
+  addToPrePreparedInventory,
+  deactivateEmergencyMode,
+  getEmergencyHistory,
+  notifyScheduleChange
+};

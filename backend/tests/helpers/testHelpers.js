@@ -1,261 +1,163 @@
-/**
- * Test Helpers - دوال مساعدة للاختبارات
- */
-
-const jwt = require('jsonwebtoken');
+const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 
-// ==========================================
-// Token Generation Helpers
-// ==========================================
+const prisma = new PrismaClient();
 
 /**
- * توليد JWT token للاختبار
+ * Test Helpers & Fixtures
+ * مساعدات واختبارات للتطوير
  */
-const generateTestToken = (payload, expiresIn = '1h') => {
-  return jwt.sign(
-    payload,
-    process.env.JWT_SECRET || 'test-jwt-secret-key-for-testing-only',
-    { expiresIn }
-  );
-};
 
-/**
- * توليد token للمستخدم
- */
-const generateUserToken = (user) => {
-  return generateTestToken({
-    userId: user.id,
-    email: user.email,
-    role: user.role,
-  });
-};
-
-/**
- * توليد token منتهي الصلاحية
- */
-const generateExpiredToken = (payload) => {
-  return jwt.sign(
-    payload,
-    process.env.JWT_SECRET || 'test-jwt-secret-key-for-testing-only',
-    { expiresIn: '-1h' }
-  );
-};
-
-/**
- * توليد token غير صالح
- */
-const generateInvalidToken = () => {
-  return 'invalid.token.here';
-};
-
-// ==========================================
-// Password Helpers
-// ==========================================
-
-/**
- * تشفير كلمة مرور للاختبار
- */
-const hashPassword = async (password) => {
-  return bcrypt.hash(password, 10);
-};
-
-/**
- * مقارنة كلمات المرور
- */
-const comparePasswords = async (password, hash) => {
-  return bcrypt.compare(password, hash);
-};
-
-// ==========================================
-// Mock Helpers
-// ==========================================
-
-/**
- * إنشاء mock لـ Prisma
- */
-const createPrismaMock = () => {
-  return {
-    user: {
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      count: jest.fn(),
-    },
-    order: {
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      count: jest.fn(),
-    },
-    menuItem: {
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      count: jest.fn(),
-    },
-    restaurant: {
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      count: jest.fn(),
-    },
-    payment: {
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-    },
-    $transaction: jest.fn((fn) => fn()),
+// إنشاء مستخدم تجريبي
+const createTestUser = async (overrides = {}) => {
+  const defaultUser = {
+    email: `test_${Date.now()}@test.com`,
+    passwordHash: await bcrypt.hash('password123', 10),
+    firstName: 'Test',
+    lastName: 'User',
+    role: 'REGULAR',
+    isActive: true
   };
-};
 
-/**
- * إنشاء mock request
- */
-const createMockRequest = (overrides = {}) => ({
-  body: {},
-  params: {},
-  query: {},
-  headers: {
-    'content-type': 'application/json',
-  },
-  user: null,
-  ip: '127.0.0.1',
-  ...overrides,
-});
-
-/**
- * إنشاء mock response
- */
-const createMockResponse = () => {
-  const res = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
-  res.send = jest.fn().mockReturnValue(res);
-  res.set = jest.fn().mockReturnValue(res);
-  res.cookie = jest.fn().mockReturnValue(res);
-  res.clearCookie = jest.fn().mockReturnValue(res);
-  return res;
-};
-
-/**
- * إنشاء mock next function
- */
-const createMockNext = () => jest.fn();
-
-// ==========================================
-// Assertion Helpers
-// ==========================================
-
-/**
- * التحقق من شكل الاستجابة الناجحة
- */
-const expectSuccessResponse = (res, statusCode = 200) => {
-  expect(res.status).toHaveBeenCalledWith(statusCode);
-  const jsonCall = res.json.mock.calls[0][0];
-  expect(jsonCall).toHaveProperty('success', true);
-  return jsonCall;
-};
-
-/**
- * التحقق من شكل استجابة الخطأ
- */
-const expectErrorResponse = (res, statusCode, errorCode = null) => {
-  expect(res.status).toHaveBeenCalledWith(statusCode);
-  const jsonCall = res.json.mock.calls[0][0];
-  expect(jsonCall).toHaveProperty('success', false);
-  if (errorCode) {
-    expect(jsonCall.error).toHaveProperty('code', errorCode);
-  }
-  return jsonCall;
-};
-
-/**
- * التحقق من وجود pagination
- */
-const expectPagination = (data) => {
-  expect(data).toHaveProperty('pagination');
-  expect(data.pagination).toHaveProperty('page');
-  expect(data.pagination).toHaveProperty('limit');
-  expect(data.pagination).toHaveProperty('total');
-};
-
-// ==========================================
-// Delay Helper
-// ==========================================
-
-/**
- * تأخير للاختبارات غير المتزامنة
- */
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-// ==========================================
-// Random Data Generators
-// ==========================================
-
-/**
- * توليد UUID عشوائي
- */
-const generateUUID = () => {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
+  return await prisma.user.create({
+    data: { ...defaultUser, ...overrides }
   });
 };
 
-/**
- * توليد بريد إلكتروني عشوائي
- */
-const generateRandomEmail = () => {
-  return `test-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`;
+// إنشاء مطعم تجريبي
+const createTestRestaurant = async (overrides = {}) => {
+  const defaultRestaurant = {
+    name: `Test Restaurant ${Date.now()}`,
+    address: 'Test Address',
+    latitude: 24.7136,
+    longitude: 46.6753,
+    isPartner: true,
+    isActive: true,
+    rating: 4.5
+  };
+
+  return await prisma.restaurant.create({
+    data: { ...defaultRestaurant, ...overrides }
+  });
 };
 
-/**
- * توليد رقم هاتف سعودي عشوائي
- */
-const generateRandomPhone = () => {
-  return `+9665${Math.floor(10000000 + Math.random() * 90000000)}`;
+// إنشاء عنصر قائمة تجريبي
+const createTestMenuItem = async (restaurantId, overrides = {}) => {
+  const defaultItem = {
+    restaurantId,
+    name: `Test Item ${Date.now()}`,
+    price: 50,
+    category: 'Test',
+    isAvailable: true,
+    menuType: 'CORE'
+  };
+
+  return await prisma.menuItem.create({
+    data: { ...defaultItem, ...overrides }
+  });
 };
 
-// ==========================================
-// Exports
-// ==========================================
+// إنشاء طلب تجريبي
+const createTestOrder = async (userId, restaurantId, overrides = {}) => {
+  const defaultOrder = {
+    userId,
+    restaurantId,
+    status: 'PENDING',
+    orderType: 'REGULAR',
+    totalAmount: 100
+  };
+
+  return await prisma.order.create({
+    data: { ...defaultOrder, ...overrides }
+  });
+};
+
+// إنشاء مشروع تجريبي
+const createTestProject = async (overrides = {}) => {
+  const defaultProject = {
+    name: `Test Project ${Date.now()}`,
+    qrCode: `QR_${Date.now()}`,
+    startDate: new Date(),
+    isActive: true
+  };
+
+  return await prisma.project.create({
+    data: { ...defaultProject, ...overrides }
+  });
+};
+
+// تنظيف قاعدة البيانات
+const cleanupDatabase = async () => {
+  const tables = [
+    'OrderItem',
+    'Order',
+    'MenuItem',
+    'Restaurant',
+    'ProjectMember',
+    'Project',
+    'UserPreferences',
+    'User'
+  ];
+
+  for (const table of tables) {
+    await prisma[table.charAt(0).toLowerCase() + table.slice(1)].deleteMany({});
+  }
+};
+
+// إنشاء JWT token تجريبي
+const createTestToken = (userId, role = 'REGULAR') => {
+  const jwt = require('jsonwebtoken');
+  return jwt.sign(
+    { id: userId, role },
+    process.env.JWT_SECRET || 'test_secret',
+    { expiresIn: '1h' }
+  );
+};
+
+// Mock data generators
+const mockData = {
+  user: (overrides = {}) => ({
+    email: `user_${Date.now()}@test.com`,
+    firstName: 'John',
+    lastName: 'Doe',
+    role: 'REGULAR',
+    ...overrides
+  }),
+
+  restaurant: (overrides = {}) => ({
+    name: 'Test Restaurant',
+    address: '123 Test St',
+    latitude: 24.7136,
+    longitude: 46.6753,
+    rating: 4.5,
+    ...overrides
+  }),
+
+  menuItem: (restaurantId, overrides = {}) => ({
+    restaurantId,
+    name: 'Test Dish',
+    price: 50,
+    category: 'Main',
+    isAvailable: true,
+    ...overrides
+  }),
+
+  order: (userId, restaurantId, overrides = {}) => ({
+    userId,
+    restaurantId,
+    totalAmount: 100,
+    status: 'PENDING',
+    ...overrides
+  })
+};
 
 module.exports = {
-  // Token helpers
-  generateTestToken,
-  generateUserToken,
-  generateExpiredToken,
-  generateInvalidToken,
-  
-  // Password helpers
-  hashPassword,
-  comparePasswords,
-  
-  // Mock helpers
-  createPrismaMock,
-  createMockRequest,
-  createMockResponse,
-  createMockNext,
-  
-  // Assertion helpers
-  expectSuccessResponse,
-  expectErrorResponse,
-  expectPagination,
-  
-  // Utility helpers
-  delay,
-  generateUUID,
-  generateRandomEmail,
-  generateRandomPhone,
+  createTestUser,
+  createTestRestaurant,
+  createTestMenuItem,
+  createTestOrder,
+  createTestProject,
+  cleanupDatabase,
+  createTestToken,
+  mockData
 };

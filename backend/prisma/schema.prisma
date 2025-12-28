@@ -44,6 +44,9 @@ model User {
   moodLogs      UserMoodLog[]
   emotionProfile EmotionProfile?
 
+  @@index([email])
+  @@index([role, isActive])
+  @@index([createdAt])
   @@map("users")
 }
 
@@ -62,6 +65,7 @@ model UserPreferences {
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   dietaryProfile DietaryProfile?
 
+  @@index([userId])
   @@map("user_preferences")
 }
 
@@ -282,6 +286,10 @@ model Restaurant {
   quantityForecasts QuantityForecast[]
   demandReports     DemandForecastReport[]
 
+  @@index([cuisineType])
+  @@index([isActive, isPartner])
+  @@index([rating])
+  @@index([createdAt])
   @@map("restaurants")
 }
 
@@ -309,6 +317,9 @@ model MenuItem {
   recommendations   Recommendation[]
   quantityForecasts QuantityForecast[]
 
+  @@index([restaurantId, isAvailable])
+  @@index([menuType, isAvailable])
+  @@index([category])
   @@map("menu_items")
 }
 
@@ -367,6 +378,10 @@ model Order {
   payments        Payment[]
   invoice         Invoice?
 
+  @@index([userId, createdAt])
+  @@index([projectId, status])
+  @@index([restaurantId, status])
+  @@index([status, createdAt])
   @@map("orders")
 }
 
@@ -419,6 +434,8 @@ model OrderItem {
   order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   menuItem MenuItem @relation(fields: [menuItemId], references: [id])
 
+  @@index([orderId])
+  @@index([menuItemId])
   @@map("order_items")
 }
 
@@ -455,6 +472,9 @@ model Review {
   user       User       @relation(fields: [userId], references: [id])
   restaurant Restaurant @relation(fields: [restaurantId], references: [id])
 
+  @@index([restaurantId, rating])
+  @@index([userId, createdAt])
+  @@index([menuItemId])
   @@map("reviews")
 }
 
@@ -477,6 +497,9 @@ model Notification {
   order     Order?           @relation(fields: [orderId], references: [id], onDelete: SetNull)
   project   Project?         @relation(fields: [projectId], references: [id], onDelete: SetNull)
 
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@index([type])
   @@map("notifications")
 }
 
@@ -514,6 +537,9 @@ model CostBudget {
   user   User?       @relation(fields: [targetUserId], references: [id])
   alerts CostAlert[]
 
+  @@index([type, isActive])
+  @@index([targetUserId])
+  @@index([expiresAt])
   @@map("cost_budgets")
 }
 
@@ -538,6 +564,10 @@ model CostAlert {
   budget CostBudget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
   user   User       @relation(fields: [userId], references: [id])
 
+  @@index([userId, isRead])
+  @@index([budgetId])
+  @@index([severity, isResolved])
+  @@index([createdAt])
   @@map("cost_alerts")
 }
 
@@ -580,6 +610,9 @@ model Project {
   members     ProjectMember[]
   notifications Notification[]
 
+  @@index([qrCode])
+  @@index([isActive, startDate])
+  @@index([createdBy])
   @@map("projects")
 }
 
@@ -623,6 +656,9 @@ model Recommendation {
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   menuItem MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
 
+  @@index([userId, isActive])
+  @@index([recommendationType, isActive])
+  @@index([expiresAt])
   @@map("recommendations")
 }
 
@@ -1051,6 +1087,8 @@ model UserMoodLog {
   // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, createdAt])
+  @@index([mood, createdAt])
   @@map("user_mood_logs")
 }
 
@@ -1639,8 +1677,9 @@ model Payment {
 
   @@index([userId])
   @@index([orderId])
-  @@index([status])
-  @@index([createdAt])
+  @@index([status, createdAt])
+  @@index([paymentIntentId])
+  @@index([provider, status])
   @@map("payments")
 }
 

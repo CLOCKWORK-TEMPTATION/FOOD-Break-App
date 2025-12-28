@@ -32,7 +32,7 @@ async function logNutrition(req, res) {
     res.status(200).json({
       success: true,
       data: log,
-      message: 'تم تسجيل البيانات الغذائية بنجاح',
+      message: req.t('nutrition.nutritionLogAdded'),
     });
   } catch (error) {
     logger.error('Error logging nutrition:', error);
@@ -40,7 +40,7 @@ async function logNutrition(req, res) {
       success: false,
       error: {
         code: 'NUTRITION_LOG_ERROR',
-        message: error.message || 'فشل تسجيل البيانات الغذائية',
+        message: error.message || req.t('nutrition.nutritionLogFailed'),
       },
     });
   }
@@ -69,7 +69,7 @@ async function getTodayNutrition(req, res) {
       success: false,
       error: {
         code: 'GET_NUTRITION_ERROR',
-        message: error.message || 'فشل جلب البيانات الغذائية',
+        message: error.message || req.t('nutrition.nutritionFetchFailed'),
       },
     });
   }
@@ -89,7 +89,7 @@ async function getNutritionLogs(req, res) {
         success: false,
         error: {
           code: 'INVALID_PARAMS',
-          message: 'يجب تحديد تاريخ البداية والنهاية',
+          message: req.t('validation.dateRangeRequired'),
         },
       });
     }
@@ -110,7 +110,7 @@ async function getNutritionLogs(req, res) {
       success: false,
       error: {
         code: 'GET_LOGS_ERROR',
-        message: error.message || 'فشل جلب سجلات التغذية',
+        message: error.message || req.t('nutrition.nutritionLogsFetchFailed'),
       },
     });
   }
@@ -139,7 +139,7 @@ async function setGoal(req, res) {
         success: false,
         error: {
           code: 'INVALID_GOAL_TYPE',
-          message: 'يجب تحديد نوع الهدف',
+          message: req.t('nutrition.goalTypeRequired'),
         },
       });
     }
@@ -158,7 +158,7 @@ async function setGoal(req, res) {
     res.status(201).json({
       success: true,
       data: goal,
-      message: 'تم تعيين الهدف بنجاح',
+      message: req.t('nutrition.goalSetSuccess'),
     });
   } catch (error) {
     logger.error('Error setting goal:', error);
@@ -166,7 +166,7 @@ async function setGoal(req, res) {
       success: false,
       error: {
         code: 'SET_GOAL_ERROR',
-        message: error.message || 'فشل تعيين الهدف',
+        message: error.message || req.t('nutrition.goalSetFailed'),
       },
     });
   }
@@ -191,7 +191,7 @@ async function getGoals(req, res) {
       success: false,
       error: {
         code: 'GET_GOALS_ERROR',
-        message: error.message || 'فشل جلب الأهداف',
+        message: error.message || req.t('nutrition.goalsFetchFailed'),
       },
     });
   }
@@ -209,7 +209,7 @@ async function generateReport(req, res) {
     res.status(200).json({
       success: true,
       data: report,
-      message: 'تم إنشاء التقرير بنجاح',
+      message: req.t('nutrition.reportGenerateSuccess'),
     });
   } catch (error) {
     logger.error('Error generating report:', error);
@@ -217,7 +217,7 @@ async function generateReport(req, res) {
       success: false,
       error: {
         code: 'GENERATE_REPORT_ERROR',
-        message: error.message || 'فشل إنشاء التقرير',
+        message: error.message || req.t('nutrition.reportGenerateFailed'),
       },
     });
   }
@@ -244,7 +244,7 @@ async function getReports(req, res) {
       success: false,
       error: {
         code: 'GET_REPORTS_ERROR',
-        message: error.message || 'فشل جلب التقارير',
+        message: error.message || req.t('nutrition.reportsFetchFailed'),
       },
     });
   }
@@ -269,7 +269,7 @@ async function createChallenge(req, res) {
     res.status(201).json({
       success: true,
       data: challenge,
-      message: 'تم إنشاء التحدي بنجاح',
+      message: req.t('nutrition.challengeCreateSuccess'),
     });
   } catch (error) {
     logger.error('Error creating challenge:', error);
@@ -277,7 +277,7 @@ async function createChallenge(req, res) {
       success: false,
       error: {
         code: 'CREATE_CHALLENGE_ERROR',
-        message: error.message || 'فشل إنشاء التحدي',
+        message: error.message || req.t('nutrition.challengeCreateFailed'),
       },
     });
   }
@@ -301,7 +301,7 @@ async function getChallenges(req, res) {
       success: false,
       error: {
         code: 'GET_CHALLENGES_ERROR',
-        message: error.message || 'فشل جلب التحديات',
+        message: error.message || req.t('nutrition.challengesFetchFailed'),
       },
     });
   }
@@ -321,7 +321,7 @@ async function joinChallenge(req, res) {
     res.status(200).json({
       success: true,
       data: participant,
-      message: 'تم الانضمام للتحدي بنجاح',
+      message: req.t('nutrition.challengeJoinSuccess'),
     });
   } catch (error) {
     logger.error('Error joining challenge:', error);
@@ -329,7 +329,7 @@ async function joinChallenge(req, res) {
       success: false,
       error: {
         code: 'JOIN_CHALLENGE_ERROR',
-        message: error.message || 'فشل الانضمام للتحدي',
+        message: error.message || req.t('nutrition.challengeJoinFailed'),
       },
     });
   }
@@ -350,7 +350,7 @@ async function updateProgress(req, res) {
         success: false,
         error: {
           code: 'INVALID_PROGRESS',
-          message: 'يجب تحديد قيمة التقدم',
+          message: req.t('nutrition.progressRequired'),
         },
       });
     }
@@ -364,7 +364,7 @@ async function updateProgress(req, res) {
     res.status(200).json({
       success: true,
       data: participant,
-      message: 'تم تحديث التقدم بنجاح',
+      message: req.t('nutrition.progressUpdateSuccess'),
     });
   } catch (error) {
     logger.error('Error updating progress:', error);
@@ -372,7 +372,7 @@ async function updateProgress(req, res) {
       success: false,
       error: {
         code: 'UPDATE_PROGRESS_ERROR',
-        message: error.message || 'فشل تحديث التقدم',
+        message: error.message || req.t('nutrition.progressUpdateFailed'),
       },
     });
   }
@@ -397,7 +397,7 @@ async function getLeaderboard(req, res) {
       success: false,
       error: {
         code: 'GET_LEADERBOARD_ERROR',
-        message: error.message || 'فشل جلب لوحة الصدارة',
+        message: error.message || req.t('nutrition.leaderboardFetchFailed'),
       },
     });
   }
@@ -422,7 +422,7 @@ async function getUserChallenges(req, res) {
       success: false,
       error: {
         code: 'GET_USER_CHALLENGES_ERROR',
-        message: error.message || 'فشل جلب تحديات المستخدم',
+        message: error.message || req.t('nutrition.userChallengesFetchFailed'),
       },
     });
   }

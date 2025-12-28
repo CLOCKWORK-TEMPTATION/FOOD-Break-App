@@ -39,6 +39,30 @@ const registerLimiter = rateLimit({
  * @route   POST /api/v1/auth/register
  * @desc    تسجيل مستخدم جديد
  * @access  Public
+ *
+ * @swagger
+ * /auth/register:
+ *   post:
+ *     summary: تسجيل مستخدم جديد
+ *     description: إنشاء حساب مستخدم جديد في النظام
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RegisterRequest'
+ *     responses:
+ *       201:
+ *         description: تم إنشاء الحساب بنجاح
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       409:
+ *         description: البريد الإلكتروني مستخدم بالفعل
  */
 router.post('/register', registerLimiter, [
   body('email')

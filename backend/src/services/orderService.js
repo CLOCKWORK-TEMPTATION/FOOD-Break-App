@@ -2,9 +2,17 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 class OrderService {
-  // إنشاء طلب جديد
+  // إنشاء طلب جديد مع التحقق من نافذة الطلب
   async createOrder(orderData) {
     try {
+      // التحقق من نافذة الطلب
+      if (orderData.projectId) {
+        const project = await prisma.project.findUnique({ where: { id: orderData.projectId } });
+        if (project && !this.isWithinOrderWindow(project)) {
+          throw new Error('نافذة الطلب مغلقة. يمكنك الطلب فقط خلال الساعة الأولى من التصوير');
+        }
+      }
+
       const items = Array.isArray(orderData.items) ? orderData.items : [];
 
       const order = await prisma.order.create({
@@ -15,6 +23,9 @@ class OrderService {
           totalAmount: orderData.totalAmount,
           status: 'PENDING',
           deliveryAddress: orderData.deliveryAddress,
+          deliveryLat: orderData.deliveryLat,
+          deliveryLng: orderData.deliveryLng,
+          estimatedTime: orderData.estimatedTime,
           items: {
             create: items.map((i) => ({
               menuItemId: i.menuItemId,
@@ -27,12 +38,111 @@ class OrderService {
         include: {
           user: true,
           restaurant: true,
-          project: true
+          project: true,
+          items: { include: { menuItem: true } }
         }
       });
       return order;
     } catch (error) {
       throw new Error(`خطأ في إنشاء الطلب: ${error.message}`);
+    }
+  }
+
+  // التحقق من نافذة الطلب
+  isWithinOrderWindow(project) {
+    if (!project.startDate) return true;
+    const now = new Date();
+    const startDate = new Date(project.startDate);
+    const orderWindowMinutes = project.orderWindow || 60;
+    const windowEnd = new Date(startDate.getTime() + orderWindowMinutes * 60000);
+    return now >= startDate && now <= windowEnd;
+  }
+
+  // الحصول على الطلبات التي لم تُقدم في المشروع
+  async getNonSubmitters(projectId) {
+    try {
+      const members = await prisma.projectMember.findMany({
+        where: { projectId },
+        include: { user: true }
+      });
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const ordersToday = await prisma.order.findMany({
+        where: {
+          projectId,
+          createdAt: { gte: today }
+        },
+        select: { userId: true }
+      });
+
+      const submittedUserIds = new Set(ordersToday.map(o => o.userId));
+      const nonSubmitters = members.filter(m => !submittedUserIds.has(m.userId));
+
+      return nonSubmitters.map(m => ({
+        userId: m.userId,
+        email: m.user.email,
+        firstName: m.user.firstName,
+        lastName: m.user.lastName
+      }));
+    } catch (error) {
+      throw new Error(`خطأ في جلب غير المقدمين: ${error.message}`);
+    }
+  }
+
+  // تجميع الطلبات حسب المطعم
+  async aggregateOrdersByRestaurant(projectId, date) {
+    try {
+      const startDate = new Date(date);
+      startDate.setHours(0, 0, 0, 0);
+      const endDate = new Date(date);
+      endDate.setHours(23, 59, 59, 999);
+
+      const orders = await prisma.order.findMany({
+        where: {
+          projectId,
+          createdAt: { gte: startDate, lte: endDate },
+          status: { notIn: ['CANCELLED'] }
+        },
+        include: {
+          restaurant: true,
+          items: { include: { menuItem: true } },
+          user: true
+        }
+      });
+
+      const aggregated = {};
+      orders.forEach(order => {
+        const restId = order.restaurantId;
+        if (!aggregated[restId]) {
+          aggregated[restId] = {
+            restaurant: order.restaurant,
+            orders: [],
+            totalAmount: 0,
+            itemsSummary: {}
+          };
+        }
+        aggregated[restId].orders.push(order);
+        aggregated[restId].totalAmount += order.totalAmount;
+
+        order.items.forEach(item => {
+          const key = item.menuItemId;
+          if (!aggregated[restId].itemsSummary[key]) {
+            aggregated[restId].itemsSummary[key] = {
+              menuItem: item.menuItem,
+              quantity: 0,
+              totalPrice: 0
+            };
+          }
+          aggregated[restId].itemsSummary[key].quantity += item.quantity;
+          aggregated[restId].itemsSummary[key].totalPrice += item.price * item.quantity;
+        });
+      });
+
+      return Object.values(aggregated);
+    } catch (error) {
+      throw new Error(`خطأ في تجميع الطلبات: ${error.message}`);
     }
   }
 

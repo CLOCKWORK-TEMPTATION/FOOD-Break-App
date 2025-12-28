@@ -1,123 +1,306 @@
-# BreakApp Project Structure
+# BreakApp - Project Structure
 
 ## Directory Organization
 
-### Root Level
 ```
 breakapp/
-├── backend/          # Node.js/Express API server
-├── mobile/           # React Native mobile application  
-├── docs/             # Project documentation
-├── .amazonq/         # AI assistant rules and memory
-├── .qodo/            # Code quality and workflow tools
-├── package.json      # Workspace configuration
-├── README.md         # Project overview
-└── TODO.md           # Development roadmap
-```
-
-### Backend Structure (`/backend/`)
-```
-backend/
-├── src/
-│   ├── controllers/  # Request handlers and business logic
-│   ├── middleware/   # Authentication, validation, logging
-│   ├── routes/       # API endpoint definitions
-│   │   └── index.js  # Main route aggregator
-│   ├── services/     # Business logic and external integrations
-│   ├── utils/        # Helper functions and utilities
-│   ├── app.js        # Express application setup
-│   └── server.js     # Server entry point
-├── prisma/
-│   └── schema.prisma # Database schema definition
-├── package.json      # Backend dependencies
-├── nodemon.json      # Development server configuration
-└── env.example.txt   # Environment variables template
-```
-
-### Mobile Structure (`/mobile/`)
-```
-mobile/
-├── src/
-│   ├── components/   # Reusable UI components
-│   ├── screens/      # Screen-level components
-│   ├── services/     # API clients and external services
-│   └── store/        # State management (Redux/Zustand)
-├── App.tsx           # Main application component
-├── package.json      # Mobile dependencies
-├── app.json          # Expo/React Native configuration
-└── tsconfig.json     # TypeScript configuration
-```
-
-### Documentation (`/docs/`)
-```
-docs/
-├── architecture.md   # System architecture overview
-└── database.md       # Database design and relationships
+├── backend/                    # Node.js/Express backend API
+│   ├── prisma/                # Database schema and migrations
+│   │   ├── migrations/        # Database migration files
+│   │   ├── schema.prisma      # Prisma schema definition
+│   │   ├── seed.js            # Database seeding script
+│   │   └── seed-emotion.js    # Emotion AI data seeding
+│   ├── src/                   # Backend source code
+│   │   ├── controllers/       # Request handlers
+│   │   ├── services/          # Business logic layer
+│   │   │   ├── ml/           # Machine learning services
+│   │   │   ├── dietary/      # Dietary and nutrition services
+│   │   │   └── ...           # Other service modules
+│   │   ├── routes/            # API route definitions
+│   │   ├── middleware/        # Express middleware
+│   │   ├── models/            # Data models
+│   │   ├── utils/             # Utility functions
+│   │   ├── jobs/              # Background jobs and cron tasks
+│   │   ├── app.js             # Express app configuration
+│   │   └── server.js          # Server entry point
+│   ├── tests/                 # Test suites
+│   │   ├── unit/             # Unit tests
+│   │   ├── integration/      # Integration tests
+│   │   ├── e2e/              # End-to-end tests
+│   │   ├── fixtures/         # Test data fixtures
+│   │   ├── mocks/            # Mock objects
+│   │   └── helpers/          # Test utilities
+│   ├── docs/                  # Backend documentation
+│   ├── .env                   # Environment variables
+│   ├── package.json           # Backend dependencies
+│   └── jest.config.js         # Jest test configuration
+│
+├── mobile/                    # React Native mobile application
+│   ├── src/                   # Mobile source code
+│   │   ├── screens/          # Screen components
+│   │   ├── components/       # Reusable UI components
+│   │   ├── navigation/       # Navigation configuration
+│   │   ├── services/         # API client services
+│   │   ├── theme/            # Theme and styling
+│   │   └── __tests__/        # Mobile tests
+│   ├── App.tsx               # Mobile app entry point
+│   ├── app.json              # Expo configuration
+│   ├── package.json          # Mobile dependencies
+│   └── jest.config.js        # Jest configuration
+│
+├── frontend/                  # React web dashboard (admin/producer)
+│   ├── src/                   # Frontend source code
+│   │   ├── pages/            # Page components
+│   │   ├── components/       # Reusable components
+│   │   ├── services/         # API services
+│   │   ├── test/             # Test utilities
+│   │   ├── __tests__/        # Frontend tests
+│   │   ├── App.tsx           # App entry point
+│   │   └── main.tsx          # Vite entry point
+│   ├── package.json          # Frontend dependencies
+│   ├── vite.config.ts        # Vite configuration
+│   └── vitest.config.ts      # Vitest configuration
+│
+├── mcp-server-mas-sequential-thinking/  # Python MCP server
+│   ├── src/                   # Python source code
+│   │   └── mcp_server_mas_sequential_thinking/
+│   │       └── routing/       # Multi-agent routing logic
+│   ├── pyproject.toml         # Python dependencies
+│   └── README.md              # MCP server documentation
+│
+├── docs/                      # Project documentation
+│   ├── architecture.md        # System architecture
+│   ├── database.md            # Database schema docs
+│   ├── EMOTION_AI_FEATURE.md  # Emotion AI documentation
+│   ├── NUTRITION_FEATURE.md   # Nutrition feature docs
+│   └── ...                    # Other documentation
+│
+├── e2e/                       # End-to-end tests (Playwright)
+│   ├── auth.spec.ts           # Authentication tests
+│   ├── orders.spec.ts         # Order workflow tests
+│   └── playwright.config.ts   # Playwright configuration
+│
+├── .amazonq/                  # Amazon Q configuration
+│   └── rules/                 # Development rules
+│       ├── AGENTS.md          # Agent instructions
+│       └── memory-bank/       # Memory bank documentation
+│
+├── package.json               # Root workspace configuration
+├── README.md                  # Project README
+└── TODO.md                    # Development roadmap
 ```
 
 ## Core Components & Relationships
 
 ### Backend Architecture
-- **Server Entry Point**: `server.js` initializes the HTTP server
-- **Application Setup**: `app.js` configures Express middleware and routes
-- **Route Management**: `routes/index.js` aggregates all API endpoints
-- **Database Layer**: Prisma ORM handles PostgreSQL interactions
-- **Business Logic**: Controllers and services implement core functionality
 
-### Mobile Architecture  
-- **Entry Point**: `App.tsx` bootstraps the React Native application
-- **Screen Navigation**: React Navigation manages screen transitions
-- **State Management**: Centralized store for application state
-- **API Integration**: Services layer handles backend communication
-- **UI Components**: Reusable components for consistent design
+#### Controllers Layer
+- **Purpose**: Handle HTTP requests, validate input, return responses
+- **Pattern**: Thin controllers delegate to services
+- **Location**: `backend/src/controllers/`
+- **Examples**: `authController.js`, `orderController.js`, `menuController.js`
 
-### Data Flow
-1. **Mobile App** → API requests → **Backend Routes**
-2. **Controllers** → Business logic → **Services**
-3. **Services** → Database queries → **Prisma ORM**
-4. **Database** → Response data → **Mobile App**
+#### Services Layer
+- **Purpose**: Business logic, data processing, external integrations
+- **Pattern**: Service-oriented architecture with specialized modules
+- **Location**: `backend/src/services/`
+- **Key Services**:
+  - `ml/`: Machine learning services (recommendations, predictions)
+  - `dietary/`: Nutrition and dietary management
+  - `payment/`: Payment processing (Stripe, PayPal)
+  - `notification/`: Push, email, SMS notifications
+  - `qr/`: QR code generation and validation
+
+#### Routes Layer
+- **Purpose**: Define API endpoints and middleware chains
+- **Pattern**: RESTful API design with versioning
+- **Location**: `backend/src/routes/`
+- **Structure**: `/api/v1/{resource}`
+
+#### Middleware Layer
+- **Purpose**: Request preprocessing, authentication, validation
+- **Location**: `backend/src/middleware/`
+- **Key Middleware**:
+  - `auth.js`: JWT authentication
+  - `validation.js`: Request validation (Zod schemas)
+  - `errorHandler.js`: Centralized error handling
+  - `rateLimiter.js`: Rate limiting protection
+
+#### Database Layer
+- **ORM**: Prisma
+- **Database**: PostgreSQL
+- **Schema**: `backend/prisma/schema.prisma`
+- **Key Models**:
+  - User, UserPreferences, DietaryProfile, AllergyProfile
+  - Restaurant, MenuItem, NutritionalInfo, FoodLabel
+  - Order, OrderItem, OrderTracking
+  - Exception, CostBudget, CostAlert
+  - Project, ProjectMember, ProjectReminderSettings
+  - Recommendation, UserBehavior, OrderPattern
+  - Payment, Invoice
+  - EmotionProfile, UserMoodLog
+  - MedicalProfile, AllergyAlert
+
+### Mobile Application Architecture
+
+#### Screen Components
+- **Purpose**: Full-screen views for user interactions
+- **Location**: `mobile/src/screens/`
+- **Examples**: `HomeScreen`, `MenuScreen`, `OrderScreen`, `ProfileScreen`
+
+#### Navigation
+- **Library**: React Navigation
+- **Pattern**: Stack and tab navigation
+- **Location**: `mobile/src/navigation/`
+
+#### Services
+- **Purpose**: API communication, data fetching
+- **Location**: `mobile/src/services/`
+- **Pattern**: Axios-based HTTP client with interceptors
+
+### Frontend Dashboard Architecture
+
+#### Pages
+- **Purpose**: Admin and producer dashboard views
+- **Location**: `frontend/src/pages/`
+- **Examples**: Analytics, Orders, Users, Restaurants
+
+#### Components
+- **Purpose**: Reusable UI components
+- **Location**: `frontend/src/components/`
+- **Pattern**: Functional components with hooks
 
 ## Architectural Patterns
 
-### Monorepo Structure
-- **Workspace Management**: npm workspaces for unified dependency management
-- **Shared Scripts**: Root-level scripts coordinate backend and mobile development
-- **Independent Deployment**: Each workspace can be deployed separately
+### Layered Architecture
+```
+Presentation Layer (Mobile/Web)
+    ↓
+API Layer (Express Routes)
+    ↓
+Business Logic Layer (Services)
+    ↓
+Data Access Layer (Prisma ORM)
+    ↓
+Database Layer (PostgreSQL)
+```
 
-### API Design
-- **RESTful Architecture**: Standard HTTP methods and status codes
-- **Route Organization**: Logical grouping by feature/resource
-- **Middleware Pipeline**: Authentication, validation, and error handling
-- **Service Layer**: Separation of business logic from HTTP concerns
+### Service-Oriented Design
+- **Separation of Concerns**: Each service handles specific domain logic
+- **Dependency Injection**: Services injected into controllers
+- **Testability**: Services can be mocked for unit testing
 
-### Mobile Architecture
-- **Component-Based**: Modular UI components for reusability
-- **Screen-Based Navigation**: Clear separation of application screens
-- **Centralized State**: Single source of truth for application data
-- **Service Abstraction**: Clean API integration layer
+### Repository Pattern (via Prisma)
+- **Abstraction**: Prisma Client abstracts database operations
+- **Type Safety**: TypeScript types generated from schema
+- **Migrations**: Version-controlled schema changes
 
-### Database Design
-- **Relational Model**: PostgreSQL for ACID compliance and complex queries
-- **ORM Integration**: Prisma for type-safe database operations
-- **Schema Management**: Version-controlled database migrations
-- **Performance Optimization**: Indexed queries and relationship optimization
+### API Design Patterns
+- **RESTful**: Resource-based URLs, HTTP verbs
+- **Pagination**: Cursor-based pagination for large datasets
+- **Filtering**: Query parameters for filtering and sorting
+- **Error Handling**: Consistent error response format
 
-## Development Workflow
+### Authentication & Authorization
+- **JWT Tokens**: Stateless authentication
+- **Role-Based Access Control (RBAC)**: User roles (REGULAR, VIP, ADMIN, PRODUCER)
+- **Project-Based Access**: QR code tokens for project membership
 
-### Environment Setup
-- **Node.js 18+**: Runtime requirement for both backend and mobile
-- **PostgreSQL 14+**: Database server for data persistence
-- **React Native CLI**: Mobile development toolchain
-- **Development Scripts**: Unified commands for workspace management
+### Real-time Features
+- **GPS Tracking**: Periodic location updates stored in OrderTracking
+- **Notifications**: Push notifications via Expo (mobile) and web push
+- **Live Updates**: Polling or WebSocket for order status changes
 
-### Build Process
-- **Backend**: Express server with nodemon for hot reloading
-- **Mobile**: React Native Metro bundler for development builds
-- **Database**: Prisma migrations for schema synchronization
-- **Testing**: Jest framework for unit and integration tests
+## Data Flow Examples
 
-### Deployment Strategy
-- **Backend**: Node.js server deployment to cloud infrastructure
-- **Mobile**: React Native builds for iOS and Android app stores
-- **Database**: Managed PostgreSQL service (AWS RDS/GCP Cloud SQL)
-- **CI/CD**: GitHub Actions for automated testing and deployment
+### Order Submission Flow
+```
+Mobile App → POST /api/orders
+    ↓
+orderController.createOrder()
+    ↓
+orderService.createOrder()
+    ↓
+- Validate user quota
+- Check project access
+- Calculate costs
+- Create order in DB
+- Trigger notifications
+    ↓
+Response to Mobile App
+```
+
+### Recommendation Generation Flow
+```
+Cron Job (daily)
+    ↓
+recommendationService.generateRecommendations()
+    ↓
+- Fetch user order history
+- Get weather data
+- Analyze dietary patterns
+- Run ML model
+- Store recommendations
+    ↓
+Mobile App fetches recommendations
+```
+
+### Exception Approval Flow
+```
+User requests exception
+    ↓
+exceptionService.requestException()
+    ↓
+- Check user quota
+- Calculate cost differential
+- Check budget thresholds
+- Create cost alert if needed
+- Notify producer/admin
+    ↓
+Producer approves/rejects
+    ↓
+Update exception status
+```
+
+## Testing Strategy
+
+### Unit Tests
+- **Location**: `backend/tests/unit/`
+- **Coverage**: Services, utilities, helpers
+- **Framework**: Jest
+- **Pattern**: Isolated tests with mocks
+
+### Integration Tests
+- **Location**: `backend/tests/integration/`
+- **Coverage**: API endpoints, database operations
+- **Framework**: Jest + Supertest
+- **Pattern**: Test database with fixtures
+
+### E2E Tests
+- **Location**: `e2e/`
+- **Coverage**: Critical user journeys
+- **Framework**: Playwright
+- **Pattern**: Full stack testing with test database
+
+### Mobile Tests
+- **Location**: `mobile/src/__tests__/`
+- **Framework**: Jest + React Native Testing Library
+- **Coverage**: Components, screens, services
+
+## Configuration Management
+
+### Environment Variables
+- **Backend**: `.env` (DATABASE_URL, JWT_SECRET, API keys)
+- **Mobile**: Expo configuration in `app.json`
+- **Frontend**: Vite environment variables
+
+### Workspace Configuration
+- **Root**: `package.json` defines workspaces (backend, mobile)
+- **Scripts**: Centralized npm scripts for dev, test, build
+
+## Deployment Architecture (Planned)
+- **Backend**: Node.js server on AWS/GCP/Azure
+- **Database**: Managed PostgreSQL (RDS, Cloud SQL)
+- **Mobile**: Expo build → App Store / Google Play
+- **Frontend**: Static hosting (S3, Vercel, Netlify)
+- **CI/CD**: GitHub Actions (`.github/workflows/ci.yml`)

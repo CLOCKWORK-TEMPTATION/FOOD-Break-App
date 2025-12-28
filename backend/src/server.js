@@ -4,9 +4,12 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const compression = require('compression');
+const swaggerUi = require('swagger-ui-express');
 const logger = require('./utils/logger');
 const { startJobs } = require('./jobs');
 const { initMonitoring } = require('./utils/monitoring');
+const { localizationMiddleware } = require('./config/localization');
+const swaggerSpec = require('./config/swagger');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -30,6 +33,9 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// إضافة middleware التعريب
+app.use(localizationMiddleware);
+
 if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'));
 }
@@ -41,6 +47,28 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
   });
+});
+
+// Swagger API Documentation
+// توثيق API باستخدام Swagger
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  explorer: true,
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'BreakApp API Documentation',
+  swaggerOptions: {
+    persistAuthorization: true,
+    displayRequestDuration: true,
+    docExpansion: 'none',
+    filter: true,
+    showRequestHeaders: true,
+    tryItOutEnabled: true
+  }
+}));
+
+// Swagger JSON endpoint
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
 });
 
 // API Routes
@@ -57,6 +85,7 @@ app.use(errorHandler);
 
 // تهيئة نظام التذكيرات النصف ساعية
 const reminderScheduler = require('./services/reminderSchedulerService');
+const cronJobs = require('./jobs/cronJobs');
 
 // بدء خدمة الجدولة (Scheduler)
 const schedulerService = require('./services/schedulerService');
@@ -74,6 +103,12 @@ if (require.main === module) {
 
     // تشغيل الوظائف المجدولة
     startJobs();
+
+    // تشغيل Cron Jobs
+    if (process.env.ENABLE_CRON_JOBS !== 'false') {
+      cronJobs.startAllJobs();
+      logger.info('Cron Jobs started successfully');
+    }
 
     // تشغيل نظام التذكيرات
     try {
@@ -101,12 +136,14 @@ if (require.main === module) {
   process.on('SIGTERM', () => {
     logger.warn('إيقاف التطبيق...');
     reminderScheduler.stopAll();
+    cronJobs.stopAllJobs();
     process.exit(0);
   });
 
   process.on('SIGINT', () => {
     logger.warn('إيقاف التطبيق...');
     reminderScheduler.stopAll();
+    cronJobs.stopAllJobs();
     process.exit(0);
   });
 }

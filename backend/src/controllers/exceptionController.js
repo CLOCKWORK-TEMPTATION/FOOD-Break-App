@@ -11,7 +11,7 @@ const checkEligibility = async (req, res, next) => {
     if (!exceptionType) {
       return res.status(400).json({
         success: false,
-        error: 'نوع الاستثناء مطلوب'
+        error: req.t('exceptions.exceptionTypeRequired')
       });
     }
 
@@ -49,7 +49,7 @@ const createException = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      message: 'تم إنشاء الاستثناء بنجاح',
+      message: req.t('exceptions.exceptionCreated'),
       data: exception
     });
   } catch (error) {
@@ -102,7 +102,7 @@ const calculateCost = async (req, res, next) => {
     if (!exceptionType || !orderTotal) {
       return res.status(400).json({
         success: false,
-        error: 'نوع الاستثناء وإجمالي الطلب مطلوبان'
+        error: req.t('exceptions.exceptionTypeAndTotalRequired')
       });
     }
 
@@ -132,7 +132,7 @@ const generateFinancialReport = async (req, res, next) => {
     if (!startDate || !endDate) {
       return res.status(400).json({
         success: false,
-        error: 'تاريخ البداية والنهاية مطلوبان'
+        error: req.t('validation.dateRangeRequired')
       });
     }
 

@@ -1,298 +1,155 @@
+/**
+ * Emergency Routes - مسارات وضع الطوارئ
+ * Feature #23: Emergency Mode
+ */
+
 const express = require('express');
-const { PrismaClient } = require('@prisma/client');
-const { authenticateToken } = require('../middleware/auth');
-const { validateRequest } = require('../middleware/validationZod');
-const { z } = require('zod');
-const emergencyService = require('../services/emergencyService');
-const asyncHandler = require('express-async-handler');
+const emergencyController = require('../controllers/emergencyController');
+const { authenticateToken, authorizeRoles } = require('../middleware/auth');
+const { validateRequest } = require('../middleware/validation');
+const { body, query, param } = require('express-validator');
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
-// ✅ Validation Schemas
-const createEmergencyOrderSchema = z.object({
-  restaurantId: z.string().uuid(),
-  emergencyType: z.enum(['NATURAL_DISASTER', 'MEDICAL_EMERGENCY', 'SECURITY_EMERGENCY', 'SYSTEM_FAILURE', 'CUSTOM']),
-  emergencyReason: z.string().optional(),
-  items: z.array(z.object({
-    menuItemId: z.string().uuid(),
-    quantity: z.number().int().positive()
-  })),
-  deliveryAddress: z.string().optional(),
-  deliveryLat: z.number().optional(),
-  deliveryLng: z.number().optional(),
-  fastTrackDelivery: z.boolean().optional().default(true)
-});
+// تطبيق المصادقة على جميع المسارات
+router.use(authenticateToken);
 
-const updateEmergencyOrderSchema = z.object({
-  status: z.enum(['PENDING', 'APPROVED', 'PREPARING', 'DELIVERING', 'COMPLETED', 'CANCELLED']).optional(),
-  priorityLevel: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']).optional(),
-  estimatedTime: z.number().int().positive().optional(),
-  isResolved: z.boolean().optional()
-});
+/**
+ * تفعيل وضع الطوارئ
+ * POST /api/emergency/activate
+ */
+router.post('/activate',
+  authorizeRoles('ADMIN', 'PRODUCER'),
+  [
+    body('projectId').notEmpty().withMessage('معرف المشروع مطلوب'),
+    body('emergencyType').isIn(['SCHEDULE_CHANGE', 'MEDICAL', 'WEATHER', 'TECHNICAL', 'OTHER']).withMessage('نوع الطوارئ غير صحيح'),
+    body('reason').optional().isString(),
+    body('estimatedDuration').optional().isInt({ min: 1 })
+  ],
+  validateRequest,
+  emergencyController.activateEmergencyMode
+);
 
-const emergencyRestaurantSchema = z.object({
-  restaurantId: z.string().uuid(),
-  isEmergencyReady: z.boolean().optional().default(true),
-  emergencyLevel: z.enum(['STANDARD', 'PRIORITY', 'CRITICAL', 'DISASTER']).optional().default('STANDARD'),
-  maxEmergencyOrders: z.number().int().positive().optional().default(10),
-  avgPreparationTime: z.number().int().positive().optional().default(15),
-  emergencyHoursStart: z.string().optional(),
-  emergencyHoursEnd: z.string().optional(),
-  is24HourAvailable: z.boolean().optional().default(false),
-  emergencyPhone: z.string().optional(),
-  emergencyEmail: z.string().email().optional(),
-  servicesAvailable: z.array(z.string()).optional(),
-  paymentMethods: z.array(z.string()).optional()
-});
+/**
+ * إنشاء طلب طوارئ
+ * POST /api/emergency/orders
+ */
+router.post('/orders',
+  [
+    body('projectId').notEmpty().withMessage('معرف المشروع مطلوب'),
+    body('urgencyLevel').isIn(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']).withMessage('مستوى الأولوية غير صحيح'),
+    body('specialInstructions').optional().isString(),
+    body('deliveryLocation').optional().isObject()
+  ],
+  validateRequest,
+  emergencyController.createEmergencyOrder
+);
 
-const prePreparedMealSchema = z.object({
-  restaurantId: z.string().uuid(),
-  name: z.string().min(1),
-  description: z.string().optional(),
-  quantity: z.number().int().positive(),
-  expirationDate: z.string().datetime(),
-  cost: z.number().positive(),
-  emergencyPrice: z.number().positive(),
-  nutritionalInfo: z.object({}).optional(),
-  allergens: z.array(z.string()).optional().default([]),
-  dietaryLabels: z.array(z.string()).optional().default([])
-});
+/**
+ * الحصول على المطاعم المتاحة للطوارئ
+ * GET /api/emergency/restaurants
+ */
+router.get('/restaurants',
+  [
+    query('latitude').isFloat().withMessage('خط العرض مطلوب'),
+    query('longitude').isFloat().withMessage('خط الطول مطلوب'),
+    query('radius').optional().isInt({ min: 100, max: 50000 })
+  ],
+  validateRequest,
+  emergencyController.getEmergencyRestaurants
+);
 
-const emergencyProtocolSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().optional(),
-  emergencyType: z.enum(['NATURAL_DISASTER', 'MEDICAL_EMERGENCY', 'SECURITY_EMERGENCY', 'SYSTEM_FAILURE', 'CUSTOM']),
-  triggerConditions: z.object({}).optional(),
-  requiredActions: z.array(z.string()).optional().default([]),
-  notificationSteps: z.object({}).optional(),
-  escalationRules: z.object({}).optional(),
-  emergencyContacts: z.array(z.string()).optional().default([])
-});
+/**
+ * تحديث حالة طلب الطوارئ
+ * PATCH /api/emergency/orders/:orderId/status
+ */
+router.patch('/orders/:orderId/status',
+  authorizeRoles('ADMIN', 'PRODUCER', 'RESTAURANT_MANAGER'),
+  [
+    param('orderId').isUUID().withMessage('معرف الطلب غير صحيح'),
+    body('status').isIn(['URGENT_PENDING', 'URGENT_CONFIRMED', 'URGENT_PREPARING', 'URGENT_OUT_FOR_DELIVERY', 'URGENT_DELIVERED']).withMessage('حالة الطلب غير صحيحة'),
+    body('estimatedDeliveryTime').optional().isInt({ min: 1 }),
+    body('notes').optional().isString()
+  ],
+  validateRequest,
+  emergencyController.updateEmergencyOrderStatus
+);
 
-// ✅ Emergency Order Routes
+/**
+ * الحصول على المخزون المُعد مسبقاً
+ * GET /api/emergency/inventory
+ */
+router.get('/inventory',
+  [
+    query('projectId').notEmpty().withMessage('معرف المشروع مطلوب')
+  ],
+  validateRequest,
+  emergencyController.getPrePreparedInventory
+);
 
-// إنشاء طلب طوارئ جديد
-router.post('/orders', authenticateToken, validateRequest(createEmergencyOrderSchema), asyncHandler(async (req, res) => {
-  const order = await emergencyService.createEmergencyOrder(req.user.id, req.body);
-  res.status(201).json({
-    success: true,
-    data: order,
-    message: 'تم إنشاء طلب الطوارئ بنجاح'
-  });
-}));
+/**
+ * إضافة عنصر للمخزون المُعد مسبقاً
+ * POST /api/emergency/inventory
+ */
+router.post('/inventory',
+  authorizeRoles('ADMIN', 'PRODUCER'),
+  [
+    body('projectId').notEmpty().withMessage('معرف المشروع مطلوب'),
+    body('itemName').notEmpty().withMessage('اسم العنصر مطلوب'),
+    body('quantity').isInt({ min: 1 }).withMessage('الكمية يجب أن تكون رقم موجب'),
+    body('expiryDate').optional().isISO8601(),
+    body('storageLocation').optional().isString()
+  ],
+  validateRequest,
+  emergencyController.addToPrePreparedInventory
+);
 
-// الحصول على طلبات الطوارئ للمستخدم
-router.get('/orders', authenticateToken, asyncHandler(async (req, res) => {
-  const { status, page = 1, limit = 10 } = req.query;
-  const result = await emergencyService.getUserEmergencyOrders(req.user.id, {
-    status,
-    page: parseInt(page),
-    limit: parseInt(limit)
-  });
-  res.json({
-    success: true,
-    data: result.orders,
-    pagination: result.pagination
-  });
-}));
+/**
+ * إلغاء تفعيل وضع الطوارئ
+ * POST /api/emergency/deactivate
+ */
+router.post('/deactivate',
+  authorizeRoles('ADMIN', 'PRODUCER'),
+  [
+    body('projectId').notEmpty().withMessage('معرف المشروع مطلوب'),
+    body('reason').optional().isString()
+  ],
+  validateRequest,
+  emergencyController.deactivateEmergencyMode
+);
 
-// الحصول على تفاصيل طلب طوارئ محدد
-router.get('/orders/:id', authenticateToken, asyncHandler(async (req, res) => {
-  const order = await emergencyService.getEmergencyOrderById(req.params.id, req.user.id);
-  res.json({
-    success: true,
-    data: order
-  });
-}));
+/**
+ * الحصول على تاريخ حالات الطوارئ
+ * GET /api/emergency/history
+ */
+router.get('/history',
+  authorizeRoles('ADMIN', 'PRODUCER'),
+  [
+    query('projectId').optional().isString(),
+    query('startDate').optional().isISO8601(),
+    query('endDate').optional().isISO8601(),
+    query('page').optional().isInt({ min: 1 }),
+    query('limit').optional().isInt({ min: 1, max: 100 })
+  ],
+  validateRequest,
+  emergencyController.getEmergencyHistory
+);
 
-// تحديث طلب طوارئ
-router.patch('/orders/:id', authenticateToken, validateRequest(updateEmergencyOrderSchema), asyncHandler(async (req, res) => {
-  const order = await emergencyService.updateEmergencyOrder(req.params.id, req.user.id, req.body);
-  res.json({
-    success: true,
-    data: order,
-    message: 'تم تحديث طلب الطوارئ بنجاح'
-  });
-}));
-
-// ✅ Emergency Restaurant Routes
-
-// الحصول على مطاعم الطوارئ المتاحة
-router.get('/restaurants', authenticateToken, asyncHandler(async (req, res) => {
-  const { latitude, longitude, radius = 10, emergencyLevel } = req.query;
-  const restaurants = await emergencyService.getAvailableEmergencyRestaurants({
-    latitude: latitude ? parseFloat(latitude) : null,
-    longitude: longitude ? parseFloat(longitude) : null,
-    radius: parseInt(radius),
-    emergencyLevel
-  });
-  res.json({
-    success: true,
-    data: restaurants
-  });
-}));
-
-// تسجيل مطعم في نظام الطوارئ
-router.post('/restaurants', authenticateToken, validateRequest(emergencyRestaurantSchema), asyncHandler(async (req, res) => {
-  const restaurant = await emergencyService.registerEmergencyRestaurant(req.body);
-  res.status(201).json({
-    success: true,
-    data: restaurant,
-    message: 'تم تسجيل المطعم في نظام الطوارئ بنجاح'
-  });
-}));
-
-// تحديث معلومات مطعم الطوارئ
-router.patch('/restaurants/:id', authenticateToken, asyncHandler(async (req, res) => {
-  const restaurant = await emergencyService.updateEmergencyRestaurant(req.params.id, req.body);
-  res.json({
-    success: true,
-    data: restaurant,
-    message: 'تم تحديث معلومات مطعم الطوارئ بنجاح'
-  });
-}));
-
-// ✅ Pre-prepared Meals Routes
-
-// الحصول على الوجبات المعدة مسبقاً
-router.get('/meals/available', authenticateToken, asyncHandler(async (req, res) => {
-  const { restaurantId, dietaryRestrictions, allergens } = req.query;
-  const meals = await emergencyService.getAvailablePrePreparedMeals({
-    restaurantId,
-    dietaryRestrictions: dietaryRestrictions ? dietaryRestrictions.split(',') : [],
-    allergens: allergens ? allergens.split(',') : []
-  });
-  res.json({
-    success: true,
-    data: meals
-  });
-}));
-
-// إضافة وجبة معدة مسبقاً
-router.post('/meals', authenticateToken, validateRequest(prePreparedMealSchema), asyncHandler(async (req, res) => {
-  const meal = await emergencyService.addPrePreparedMeal(req.body);
-  res.status(201).json({
-    success: true,
-    data: meal,
-    message: 'تم إضافة الوجبة المعدة مسبقاً بنجاح'
-  });
-}));
-
-// حجز وجبة معدة مسبقاً
-router.post('/meals/:id/reserve', authenticateToken, asyncHandler(async (req, res) => {
-  const meal = await emergencyService.reservePrePreparedMeal(req.params.id, req.user.id);
-  res.json({
-    success: true,
-    data: meal,
-    message: 'تم حجز الوجبة بنجاح'
-  });
-}));
-
-// ✅ Emergency Protocol Routes
-
-// الحصول على بروتوكولات الطوارئ
-router.get('/protocols', authenticateToken, asyncHandler(async (req, res) => {
-  const { emergencyType, isActive } = req.query;
-  const protocols = await emergencyService.getEmergencyProtocols({
-    emergencyType,
-    isActive: isActive !== undefined ? isActive === 'true' : undefined
-  });
-  res.json({
-    success: true,
-    data: protocols
-  });
-}));
-
-// إنشاء بروتوكول طوارئ جديد
-router.post('/protocols', authenticateToken, validateRequest(emergencyProtocolSchema), asyncHandler(async (req, res) => {
-  const protocol = await emergencyService.createEmergencyProtocol(req.body);
-  res.status(201).json({
-    success: true,
-    data: protocol,
-    message: 'تم إنشاء بروتوكول الطوارئ بنجاح'
-  });
-}));
-
-// تفعيل بروتوكول طوارئ
-router.post('/protocols/:id/activate', authenticateToken, asyncHandler(async (req, res) => {
-  const result = await emergencyService.activateEmergencyProtocol(req.params.id);
-  res.json({
-    success: true,
-    data: result,
-    message: 'تم تفعيل بروتوكول الطوارئ بنجاح'
-  });
-}));
-
-// ✅ Emergency Notifications
-
-// إرسال إشعار طوارئ
-router.post('/notifications', authenticateToken, asyncHandler(async (req, res) => {
-  const { type, title, message, targetUsers, targetRestaurants } = req.body;
-  const result = await emergencyService.sendEmergencyNotification({
-    type,
-    title,
-    message,
-    targetUsers,
-    targetRestaurants,
-    senderId: req.user.id
-  });
-  res.json({
-    success: true,
-    data: result,
-    message: 'تم إرسال إشعار الطوارئ بنجاح'
-  });
-}));
-
-// الحصول على إشعارات الطوارئ
-router.get('/notifications', authenticateToken, asyncHandler(async (req, res) => {
-  const { isRead, page = 1, limit = 10 } = req.query;
-  const result = await emergencyService.getEmergencyNotifications(req.user.id, {
-    isRead: isRead !== undefined ? isRead === 'true' : undefined,
-    page: parseInt(page),
-    limit: parseInt(limit)
-  });
-  res.json({
-    success: true,
-    data: result.notifications,
-    pagination: result.pagination
-  });
-}));
-
-// ✅ Emergency Statistics
-
-// الحصول على إحصائيات الطوارئ
-router.get('/statistics', authenticateToken, asyncHandler(async (req, res) => {
-  const { startDate, endDate, emergencyType } = req.query;
-  const stats = await emergencyService.getEmergencyStatistics({
-    startDate: startDate ? new Date(startDate) : null,
-    endDate: endDate ? new Date(endDate) : null,
-    emergencyType
-  });
-  res.json({
-    success: true,
-    data: stats
-  });
-}));
-
-// ✅ Emergency Schedule Changes
-
-// إشعار بتغيير الجدول
-router.post('/schedule-changes', authenticateToken, asyncHandler(async (req, res) => {
-  const { restaurantId, changeType, effectiveDate, reason, affectedOrders } = req.body;
-  const result = await emergencyService.notifyScheduleChange({
-    restaurantId,
-    changeType,
-    effectiveDate: new Date(effectiveDate),
-    reason,
-    affectedOrders,
-    notifiedBy: req.user.id
-  });
-  res.json({
-    success: true,
-    data: result,
-    message: 'تم إرسال إشعار تغيير الجدول بنجاح'
-  });
-}));
+/**
+ * إرسال تنبيه تغيير الجدولة
+ * POST /api/emergency/schedule-change
+ */
+router.post('/schedule-change',
+  authorizeRoles('ADMIN', 'PRODUCER'),
+  [
+    body('projectId').notEmpty().withMessage('معرف المشروع مطلوب'),
+    body('changeType').isIn(['DELAY', 'CANCELLATION', 'TIME_CHANGE', 'LOCATION_CHANGE']).withMessage('نوع التغيير غير صحيح'),
+    body('newSchedule').optional().isObject(),
+    body('reason').optional().isString(),
+    body('affectedMeals').optional().isArray()
+  ],
+  validateRequest,
+  emergencyController.notifyScheduleChange
+);
 
 module.exports = router;

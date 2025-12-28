@@ -67,5 +67,48 @@ router.patch(
   }
 );
 
+/**
+ * @route   PATCH /api/v1/notifications/read-all
+ * @desc    تحديد جميع الإشعارات كمقروءة
+ * @access  Private
+ */
+router.patch(
+  '/read-all',
+  authenticateToken,
+  async (req, res, next) => {
+    try {
+      const result = await notificationService.markAllAsRead(req.user.id);
+      res.json({
+        success: true,
+        data: { count: result.count }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * @route   DELETE /api/v1/notifications/:id
+ * @desc    حذف إشعار
+ * @access  Private
+ */
+router.delete(
+  '/:id',
+  authenticateToken,
+  [param('id').notEmpty().withMessage('معرف الإشعار مفقود')],
+  async (req, res, next) => {
+    try {
+      await notificationService.deleteNotification(req.params.id, req.user.id);
+      res.json({
+        success: true,
+        message: 'تم حذف الإشعار بنجاح'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 module.exports = router;
 
