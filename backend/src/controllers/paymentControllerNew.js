@@ -4,6 +4,15 @@
  */
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder');
+const paypal = require('@paypal/checkout-server-sdk');
+
+// PayPal Environment Setup
+const paypalEnvironment = process.env.NODE_ENV === 'production'
+  ? new paypal.core.LiveEnvironment(process.env.PAYPAL_CLIENT_ID, process.env.PAYPAL_CLIENT_SECRET)
+  : new paypal.core.SandboxEnvironment(process.env.PAYPAL_CLIENT_ID || 'sandbox_client_id', process.env.PAYPAL_CLIENT_SECRET || 'sandbox_client_secret');
+
+const paypalClient = new paypal.core.PayPalHttpClient(paypalEnvironment);
+
 const paymentService = require('../services/paymentService');
 const invoiceService = require('../services/invoiceService');
 const logger = require('../utils/logger');
@@ -13,7 +22,7 @@ const logger = require('../utils/logger');
  */
 const createPaymentIntent = async (req, res, next) => {
   try {
-    const { amount, currency = 'egp', orderId } = req.body;
+    const { amount, currency = 'egp', orderId, provider = 'STRIPE' } = req.body;
     const userId = req.user.id;
 
     if (!amount || amount <= 0) {
@@ -23,21 +32,62 @@ const createPaymentIntent = async (req, res, next) => {
       });
     }
 
-    // تحويل المبلغ إلى cents (Stripe يعمل بالـ cents)
-    const amountInCents = Math.round(amount * 100);
+    let paymentIntentData = {};
+    let paymentProvider = provider.toUpperCase();
 
-    // إنشاء نية الدفع في Stripe
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: amountInCents,
-      currency: currency.toLowerCase(),
-      metadata: {
-        userId,
-        ...(orderId && { orderId })
-      },
-      automatic_payment_methods: {
-        enabled: true,
-      },
-    });
+    if (paymentProvider === 'PAYPAL') {
+      const request = new paypal.orders.OrdersCreateRequest();
+      request.prefer("return=representation");
+      request.requestBody({
+        intent: 'CAPTURE',
+        purchase_units: [{
+          amount: {
+            currency_code: currency.toUpperCase(),
+            value: amount.toString()
+          },
+          reference_id: orderId || undefined
+        }]
+      });
+
+      try {
+        const order = await paypalClient.execute(request);
+        paymentIntentData = {
+          id: order.result.id,
+          client_secret: order.result.links.find(link => link.rel === 'approve')?.href, // For PayPal, we return approval URL or ID
+          status: order.result.status
+        };
+      } catch (err) {
+        logger.error('PayPal create order error:', err);
+        throw new Error('فشل إنشاء طلب PayPal');
+      }
+
+    } else {
+      // Default to Stripe
+      paymentProvider = 'STRIPE';
+      // تحويل المبلغ إلى cents (Stripe يعمل بالـ cents)
+      const amountInCents = Math.round(amount * 100);
+
+      // إنشاء نية الدفع في Stripe
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amountInCents,
+        currency: currency.toLowerCase(),
+        metadata: {
+          userId,
+          ...(orderId && { orderId })
+        },
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      });
+
+      paymentIntentData = {
+        id: paymentIntent.id,
+        client_secret: paymentIntent.client_secret,
+        status: paymentIntent.status,
+        customer: paymentIntent.customer,
+        payment_method: paymentIntent.payment_method
+      };
+    }
 
     // حفظ معلومات الدفع في قاعدة البيانات
     const payment = await paymentService.createPayment({
@@ -45,25 +95,26 @@ const createPaymentIntent = async (req, res, next) => {
       orderId,
       amount,
       currency: currency.toUpperCase(),
-      provider: 'STRIPE',
-      paymentIntentId: paymentIntent.id,
+      provider: paymentProvider,
+      paymentIntentId: paymentIntentData.id,
       metadata: {
-        stripeCustomerId: paymentIntent.customer,
-        paymentMethod: paymentIntent.payment_method
+        stripeCustomerId: paymentIntentData.customer,
+        paymentMethod: paymentIntentData.payment_method
       }
     });
 
-    logger.info(`Payment intent created: ${paymentIntent.id} for user: ${userId}`);
+    logger.info(`Payment intent created: ${paymentIntentData.id} (${paymentProvider}) for user: ${userId}`);
 
     res.status(201).json({
       success: true,
       message: 'تم إنشاء نية الدفع بنجاح',
       data: {
         paymentId: payment.id,
-        clientSecret: paymentIntent.client_secret,
-        amount: paymentIntent.amount / 100,
-        currency: paymentIntent.currency,
-        status: paymentIntent.status
+        clientSecret: paymentIntentData.client_secret,
+        amount: amount,
+        currency: currency,
+        status: paymentIntentData.status,
+        provider: paymentProvider
       }
     });
   } catch (error) {
@@ -109,16 +160,42 @@ const confirmPayment = async (req, res, next) => {
       });
     }
 
-    // جلب حالة الدفع من Stripe
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    // جلب حالة الدفع
+    let paymentIntentStatus;
+    let clientSecret;
+
+    if (payment.provider === 'PAYPAL') {
+      const request = new paypal.orders.OrdersCaptureRequest(paymentIntentId);
+      request.requestBody({});
+      
+      try {
+        const capture = await paypalClient.execute(request);
+        const status = capture.result.status;
+        
+        if (status === 'COMPLETED') {
+          paymentIntentStatus = 'succeeded';
+        } else {
+          paymentIntentStatus = status.toLowerCase();
+        }
+      } catch (err) {
+        logger.error('PayPal capture error:', err);
+        throw new Error('فشل تأكيد دفع PayPal');
+      }
+
+    } else {
+      // Stripe
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      paymentIntentStatus = paymentIntent.status;
+      clientSecret = paymentIntent.client_secret;
+    }
 
     // تحديث حالة الدفع في قاعدة البيانات
     let status = 'PENDING';
-    if (paymentIntent.status === 'succeeded') {
+    if (paymentIntentStatus === 'succeeded') {
       status = 'COMPLETED';
-    } else if (paymentIntent.status === 'canceled') {
+    } else if (paymentIntentStatus === 'canceled' || paymentIntentStatus === 'voided') {
       status = 'CANCELLED';
-    } else if (paymentIntent.status === 'requires_action') {
+    } else if (paymentIntentStatus === 'requires_action' || paymentIntentStatus === 'payer_action_required') {
       status = 'PROCESSING';
     }
 
@@ -126,7 +203,7 @@ const confirmPayment = async (req, res, next) => {
       payment.id,
       status,
       {
-        ...(paymentIntent.payment_method && { paymentMethodId: paymentIntent.payment_method })
+        // Add specific metadata if needed
       }
     );
 
@@ -140,8 +217,8 @@ const confirmPayment = async (req, res, next) => {
         status: updatedPayment.status,
         amount: updatedPayment.amount,
         currency: updatedPayment.currency,
-        requiresAction: paymentIntent.status === 'requires_action',
-        clientSecret: paymentIntent.client_secret
+        requiresAction: status === 'PROCESSING',
+        clientSecret: clientSecret
       }
     });
   } catch (error) {
@@ -348,6 +425,16 @@ const processRefund = async (req, res, next) => {
     // حساب مبلغ الاسترداد
     const refundAmount = amount || payment.amount;
     const refundAmountInCents = Math.round(refundAmount * 100);
+
+    if (payment.provider === 'PAYPAL') {
+      // Implement PayPal refund logic if needed
+      // const request = new paypal.payments.CapturesRefundRequest(captureId); ...
+      // For now, simple error or placeholder
+      return res.status(501).json({
+        success: false,
+        message: 'استرداد PayPal غير مدعوم تلقائياً بعد'
+      });
+    }
 
     // إنشاء استرداد في Stripe
     const refund = await stripe.refunds.create({

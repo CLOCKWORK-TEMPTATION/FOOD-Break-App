@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const recommendationController = require('../controllers/recommendationController');
-const auth = require('../middleware/auth');
-const { body } = require('express-validator');
+const { authenticateToken } = require('../middleware/auth');
 
 // جميع المسارات تحتاج إلى مصادقة
-router.use(auth);
+router.use(authenticateToken);
 
 // الحصول على التوصيات للمستخدم
 router.get('/', recommendationController.getRecommendations);

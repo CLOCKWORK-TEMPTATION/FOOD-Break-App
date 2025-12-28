@@ -1,10 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const qrCodeService = require('../services/qrCodeService');
-const auth = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/auth');
+const { qrLimiter } = require('../middleware/rateLimit');
+
+router.use(qrLimiter);
 
 // توليد QR Code للمشروع
-router.post('/project/:projectId', auth, async (req, res) => {
+router.post('/project/:projectId', authenticateToken, async (req, res) => {
   try {
     const { projectId } = req.params;
     
@@ -106,7 +109,7 @@ router.post('/decode', async (req, res) => {
 });
 
 // الوصول للمشروع عبر QR Code
-router.post('/access', auth, async (req, res) => {
+router.post('/access', authenticateToken, async (req, res) => {
   try {
     const { qrToken } = req.body;
     
@@ -147,7 +150,7 @@ router.post('/access', auth, async (req, res) => {
 });
 
 // إنشاء QR Code مخصص
-router.post('/custom', auth, async (req, res) => {
+router.post('/custom', authenticateToken, async (req, res) => {
   try {
     const { data, options } = req.body;
     

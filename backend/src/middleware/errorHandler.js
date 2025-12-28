@@ -15,14 +15,14 @@ const errorHandler = (err, req, res, next) => {
     stack: err.stack,
     path: req.path,
     method: req.method,
-    body: req.body
+    body: req.body ? { ...req.body, password: '***', token: '***' } : undefined
   });
 
   // Monitoring (Sentry)
   captureException(err, {
     path: req.path,
     method: req.method,
-    body: req.body
+    body: req.body ? { ...req.body, password: '***', token: '***' } : undefined
   });
 
   // Prisma errors

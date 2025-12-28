@@ -6,10 +6,10 @@
 const express = require('express');
 const router = express.Router();
 const mlController = require('../controllers/mlController');
-const { authenticate } = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/auth');
 
 // Note: في بيئة الإنتاج، يجب حماية مسارات التدريب بصلاحيات ADMIN فقط
-// const { authorize } = require('../middleware/auth');
+// const { authorizeRoles } = require('../middleware/auth');
 
 // ============================================
 // Training Data Routes
@@ -22,8 +22,8 @@ const { authenticate } = require('../middleware/auth');
  */
 router.post(
   '/training-data/collect',
-  authenticate,
-  // authorize(['ADMIN']), // Uncomment in production
+  authenticateToken,
+  // authorizeRoles(['ADMIN']), // Uncomment in production
   mlController.collectTrainingData
 );
 
@@ -38,8 +38,8 @@ router.post(
  */
 router.post(
   '/models/train/recommendation',
-  authenticate,
-  // authorize(['ADMIN']),
+  authenticateToken,
+  // authorizeRoles(['ADMIN']),
   mlController.trainRecommendationModel
 );
 
@@ -50,8 +50,8 @@ router.post(
  */
 router.post(
   '/models/train/predictive',
-  authenticate,
-  // authorize(['ADMIN']),
+  authenticateToken,
+  // authorizeRoles(['ADMIN']),
   mlController.trainPredictiveModel
 );
 
@@ -62,8 +62,8 @@ router.post(
  */
 router.post(
   '/models/train/quality',
-  authenticate,
-  // authorize(['ADMIN']),
+  authenticateToken,
+  // authorizeRoles(['ADMIN']),
   mlController.trainQualityModel
 );
 
@@ -74,8 +74,8 @@ router.post(
  */
 router.post(
   '/models/train/all',
-  authenticate,
-  // authorize(['ADMIN']),
+  authenticateToken,
+  // authorizeRoles(['ADMIN']),
   mlController.trainAllModels
 );
 
@@ -90,8 +90,8 @@ router.post(
  */
 router.get(
   '/restaurants/search',
-  authenticate,
-  // authorize(['ADMIN', 'MANAGER']),
+  authenticateToken,
+  // authorizeRoles(['ADMIN', 'MANAGER']),
   mlController.searchNewRestaurants
 );
 
@@ -102,8 +102,8 @@ router.get(
  */
 router.get(
   '/restaurants/:restaurantId/quality',
-  authenticate,
-  // authorize(['ADMIN', 'MANAGER']),
+  authenticateToken,
+  // authorizeRoles(['ADMIN', 'MANAGER']),
   mlController.analyzeRestaurantQuality
 );
 
@@ -114,8 +114,8 @@ router.get(
  */
 router.get(
   '/restaurants/suggest',
-  authenticate,
-  // authorize(['ADMIN', 'MANAGER']),
+  authenticateToken,
+  // authorizeRoles(['ADMIN', 'MANAGER']),
   mlController.suggestNewRestaurants
 );
 
@@ -126,8 +126,8 @@ router.get(
  */
 router.post(
   '/restaurants/trial',
-  authenticate,
-  // authorize(['ADMIN', 'MANAGER']),
+  authenticateToken,
+  // authorizeRoles(['ADMIN', 'MANAGER']),
   mlController.createRestaurantTrial
 );
 
@@ -138,8 +138,8 @@ router.post(
  */
 router.get(
   '/restaurants/:restaurantId/trial/evaluate',
-  authenticate,
-  // authorize(['ADMIN', 'MANAGER']),
+  authenticateToken,
+  // authorizeRoles(['ADMIN', 'MANAGER']),
   mlController.evaluateTrialResults
 );
 
@@ -150,8 +150,8 @@ router.get(
  */
 router.get(
   '/restaurants/ratings/aggregate',
-  authenticate,
-  // authorize(['ADMIN', 'MANAGER']),
+  authenticateToken,
+  // authorizeRoles(['ADMIN', 'MANAGER']),
   mlController.aggregateRatings
 );
 

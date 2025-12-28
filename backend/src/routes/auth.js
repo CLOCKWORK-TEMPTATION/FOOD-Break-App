@@ -4,6 +4,10 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 const { authenticateToken } = require('../middleware/auth');
 const { validate } = require('../middleware/validation');
+const { authLimiter } = require('../middleware/rateLimit');
+
+router.use(authLimiter);
+
 
 /**
  * @route   POST /api/v1/auth/register

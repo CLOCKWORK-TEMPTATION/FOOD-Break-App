@@ -1596,7 +1596,6 @@ model UserReminderPreferences {
   updatedAt DateTime @updatedAt
 
   @@map("user_reminder_preferences")
->>>>>>> origin/claude/complete-todo-20-N2wFs
 }
 
 // ============================================

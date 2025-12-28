@@ -152,14 +152,14 @@ const getCoreMenu = async () => {
     const menuItems = await prisma.menuItem.findMany({
       where: {
         menuType: 'CORE',
-        isAvailable: true
+        isAvailable: true,
+        restaurant: {
+          isPartner: true,
+          isActive: true
+        }
       },
       include: {
         restaurant: {
-          where: {
-            isPartner: true,
-            isActive: true
-          },
           select: {
             id: true,
             name: true,

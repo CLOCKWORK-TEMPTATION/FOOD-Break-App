@@ -4,6 +4,33 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // ملاحظة: في Expo استخدم EXPO_PUBLIC_API_URL
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
 
+export interface MenuItem {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  category?: string;
+  imageUrl?: string;
+  isAvailable: boolean;
+  restaurantId: string;
+}
+
+export interface OrderData {
+  id?: string;
+  userId?: string;
+  restaurantId?: string;
+  items: Array<{
+    menuItemId: string;
+    quantity: number;
+    price: number;
+    notes?: string;
+  }>;
+  totalAmount: number;
+  status?: string;
+  deliveryAddress?: string;
+  createdAt?: string;
+}
+
 type ApiResponse<T = any> = {
   success: boolean;
   data?: T;
@@ -89,7 +116,7 @@ const menuService = {
 };
 
 const orderService = {
-  submitOrder: async (orderData: any): Promise<ApiResponse> => {
+  submitOrder: async (orderData: OrderData): Promise<ApiResponse> => {
     const response = await apiClient.post('/workflow/orders', orderData);
     return response.data;
   },
