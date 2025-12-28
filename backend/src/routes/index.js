@@ -17,6 +17,7 @@ const productionRoutes = require('./productionRoutes');
 const notificationRoutes = require('./notifications');
 const qrRoutes = require('./qr');
 const projectRoutes = require('./projects');
+const mlRoutes = require('./mlRoutes');
 // const orderRoutes = require('./orders'); // سيتم إضافته لاحقاً
 
 // ربط Routes
@@ -35,6 +36,7 @@ router.use('/production', productionRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/qr', qrRoutes);
 router.use('/projects', projectRoutes);
+router.use('/ml', mlRoutes);
 // router.use('/orders', orderRoutes); // سيتم إضافته لاحقاً
 
 // Route رئيسي
@@ -55,7 +57,8 @@ router.get('/', (req, res) => {
       emotion: '/emotion',
       notifications: '/notifications',
       qr: '/qr',
-      projects: '/projects'
+      projects: '/projects',
+      ml: '/ml'
       // orders: '/orders' // سيتم إضافته لاحقاً
     }
   });
