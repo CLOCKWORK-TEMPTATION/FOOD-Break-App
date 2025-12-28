@@ -24,10 +24,23 @@
 - ✅ **qrScannerService.ts** - خدمة مسح QR مع 50+ اختبار
 
 ### Backend Tests
-- ✅ **server.test.js** - اختبارات الخادم الأساسية
+
+#### Unit Tests (Servicesالخدمات)
+- ✅ **authService.test.js** - خدمة المصادقة (45+ اختبار)
+- ✅ **orderService.test.js** - خدمة الطلبات (35+ اختبار)
+- ✅ **restaurantService.test.js** - خدمة المطاعم (40+ اختبار)
+- ✅ **server.test.js** - اختبارات الخادم الأساسية (15 اختبار)
+
+#### Integration Tests (API Endpoints)
+- ✅ **auth.api.test.js** - اختبارات API المصادقة (35+ اختبار)
+- ✅ **orders.api.test.js** - اختبارات API الطلبات (30+ اختبار)
+
+### E2E Tests (End-to-End)
+- ✅ **auth.spec.js** - رحلة المستخدم للمصادقة (8+ سيناريوهات)
+- ✅ **order-journey.spec.js** - رحلة الطلب الكاملة (7+ سيناريوهات)
 
 ### إجمالي الاختبارات
-- **310+ اختبار شامل**
+- **500+ اختبار شامل**
 - **تغطية 70%+** من الكود
 
 ---
@@ -614,6 +627,236 @@ jobs:
 
 ---
 
+## الاختبارات الإضافية المضافة - New Tests Added
+
+### 1. Backend Unit Tests
+
+تم إضافة اختبارات وحدة شاملة للخدمات الحرجة:
+
+#### authService.test.js
+**الموقع:** `backend/src/__tests__/services/authService.test.js`
+
+**التغطية:**
+- تسجيل مستخدم جديد (Register)
+- تسجيل الدخول (Login)
+- الحصول على المستخدم الحالي (Get Current User)
+- تحديث الملف الشخصي (Update Profile)
+- تغيير كلمة المرور (Change Password)
+- معالجة الأخطاء والحالات الحدودية
+
+**عدد الاختبارات:** 45+ اختبار
+
+#### orderService.test.js
+**الموقع:** `backend/src/__tests__/services/orderService.test.js`
+
+**التغطية:**
+- إنشاء طلب جديد
+- الحصول على الطلبات مع الفلاتر
+- الحصول على طلب محدد
+- تحديث حالة الطلب
+- إلغاء الطلب
+- حساب إحصائيات الطلبات
+- دعم Pagination
+
+**عدد الاختبارات:** 35+ اختبار
+
+#### restaurantService.test.js
+**الموقع:** `backend/src/__tests__/services/restaurantService.test.js`
+
+**التغطية:**
+- الحصول على جميع المطاعم
+- الفلترة حسب المعايير
+- البحث عن المطاعم القريبة جغرافياً
+- حساب المسافة (Haversine Formula)
+- تحديث تقييم المطعم
+- إدارة المطاعم (CRUD)
+
+**عدد الاختبارات:** 40+ اختبار
+
+### 2. Integration Tests (API Endpoints)
+
+#### auth.api.test.js
+**الموقع:** `backend/src/__tests__/integration/auth.api.test.js`
+
+**التغطية:**
+- POST /api/v1/auth/register
+- POST /api/v1/auth/login
+- GET /api/v1/auth/me
+- PUT /api/v1/auth/profile
+- POST /api/v1/auth/change-password
+- POST /api/v1/auth/logout
+- التحقق من Validation
+- Rate Limiting
+
+**عدد الاختبارات:** 35+ اختبار
+
+#### orders.api.test.js
+**الموقع:** `backend/src/__tests__/integration/orders.api.test.js`
+
+**التغطية:**
+- POST /api/v1/orders
+- GET /api/v1/orders
+- GET /api/v1/orders/:id
+- PUT /api/v1/orders/:id/status
+- DELETE /api/v1/orders/:id
+- الفلترة والـ Pagination
+- Authorization
+
+**عدد الاختبارات:** 30+ اختبار
+
+### 3. E2E Tests (End-to-End)
+
+#### auth.spec.js
+**الموقع:** `e2e/auth.spec.js`
+
+**السيناريوهات:**
+- رحلة مستخدم كاملة: Register → Login → Update → Logout
+- تغيير كلمة المرور
+- التحقق من التصريحات
+- معالجة الأخطاء
+
+**عدد السيناريوهات:** 8 سيناريوهات
+
+#### order-journey.spec.js
+**الموقع:** `e2e/order-journey.spec.js`
+
+**السيناريوهات:**
+- رحلة طلب كاملة: Login → Browse → Order → Track
+- البحث عن المطاعم القريبة
+- فلترة الطلبات
+- Pagination
+- التحقق من البيانات
+- Authorization
+
+**عدد السيناريوهات:** 7 سيناريوهات
+
+---
+
+## تشغيل الاختبارات الجديدة - Running New Tests
+
+### Unit Tests
+
+```bash
+# تشغيل جميع اختبارات Backend
+cd backend
+npm test
+
+# تشغيل اختبار محدد
+npm test -- authService.test.js
+
+# تشغيل مع التغطية
+npm test -- --coverage
+
+# وضع المراقبة
+npm run test:watch
+```
+
+### Integration Tests
+
+```bash
+# تشغيل اختبارات Integration
+cd backend
+npm test -- integration
+
+# تشغيل اختبار API محدد
+npm test -- auth.api.test.js
+```
+
+### E2E Tests
+
+```bash
+# من الجذر الرئيسي
+npm run test:e2e
+
+# تشغيل بواجهة UI
+npm run test:e2e:ui
+
+# تشغيل بوضع التصحيح
+npm run test:e2e:debug
+
+# عرض التقرير
+npm run test:report
+```
+
+### تشغيل جميع الاختبارات
+
+```bash
+# من الجذر الرئيسي
+npm run test:all
+```
+
+---
+
+## ملفات الإعداد - Configuration Files
+
+### Jest Configuration (Backend)
+**الموقع:** `backend/jest.config.js`
+
+```javascript
+module.exports = {
+  testEnvironment: 'node',
+  coveragePathIgnorePatterns: ['/node_modules/'],
+  testMatch: ['**/__tests__/**/*.test.js'],
+  collectCoverageFrom: ['src/**/*.js'],
+  coverageThreshold: {
+    global: {
+      branches: 70,
+      functions: 70,
+      lines: 70,
+      statements: 70,
+    },
+  },
+};
+```
+
+### Playwright Configuration (E2E)
+**الموقع:** `playwright.config.js`
+
+```javascript
+module.exports = {
+  testDir: './e2e',
+  timeout: 60 * 1000,
+  retries: process.env.CI ? 2 : 0,
+  reporter: [['html'], ['list'], ['json']],
+  use: {
+    baseURL: 'http://localhost:3001',
+    trace: 'on-first-retry',
+  },
+  webServer: {
+    command: 'npm run dev:backend',
+    url: 'http://localhost:3001/api/v1/health',
+  },
+};
+```
+
+---
+
+## أفضل الممارسات الإضافية - Additional Best Practices
+
+### 1. اختبار الأمان (Security Testing)
+- التحقق من SQL Injection
+- التحقق من XSS
+- اختبار Rate Limiting
+- التحقق من Authorization
+
+### 2. اختبار الأداء (Performance Testing)
+- قياس وقت الاستجابة
+- اختبار التحميل (Load Testing)
+- اختبار الإجهاد (Stress Testing)
+
+### 3. اختبار الحالات الحدودية (Edge Cases)
+- البيانات الفارغة
+- القيم الكبيرة جداً
+- الأحرف الخاصة
+- أخطاء قاعدة البيانات
+
+### 4. التوثيق في الاختبارات
+- استخدام أسماء وصفية
+- إضافة تعليقات للاختبارات المعقدة
+- توثيق السيناريوهات
+
+---
+
 **آخر تحديث:** ديسمبر 2025
-**الإصدار:** 1.0.0
+**الإصدار:** 2.0.0
 **المؤلف:** BreakApp Development Team
