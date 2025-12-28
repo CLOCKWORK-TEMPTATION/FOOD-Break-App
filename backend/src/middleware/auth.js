@@ -1,19 +1,18 @@
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
+const logger = require('../utils/logger');
 
 const prisma = new PrismaClient();
 
 /**
  * Middleware للتحقق من صحة JWT Token
- * @param {Object} req - طلب Express
- * @param {Object} res - استجابة Express
- * @param {Function} next - الوظيفة التالية
+ * - يقرأ التوكن من Authorization: Bearer <token>
+ * - يجلب المستخدم من قاعدة البيانات (مصدر الحقيقة)
  */
 const authenticateToken = async (req, res, next) => {
   try {
-    // استخراج التوكن من الـ Header
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    const authHeader = req.headers.authorization || req.headers.Authorization;
+    const token = typeof authHeader === 'string' ? authHeader.split(' ')[1] : null;
 
     if (!token) {
       return res.status(401).json({
@@ -22,10 +21,8 @@ const authenticateToken = async (req, res, next) => {
       });
     }
 
-    // التحقق من صحة التوكن
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // التحقق من وجود المستخدم في قاعدة البيانات
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
       select: {
@@ -39,168 +36,59 @@ const authenticateToken = async (req, res, next) => {
     });
 
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        error: 'المستخدم غير موجود'
-      });
+      return res.status(401).json({ success: false, error: 'المستخدم غير موجود' });
     }
 
     if (!user.isActive) {
-      return res.status(403).json({
-        success: false,
-        error: 'حساب المستخدم معطل'
-      });
+      return res.status(403).json({ success: false, error: 'حساب المستخدم معطل' });
     }
 
-    // إضافة بيانات المستخدم إلى الطلب
     req.user = user;
-    next();
+    return next();
   } catch (error) {
+    logger.warn(`فشل التحقق من التوكن: ${error.message}`);
+
     if (error.name === 'JsonWebTokenError') {
-      return res.status(401).json({
-        success: false,
-        error: 'التوكن غير صحيح'
-      });
-    }
-
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({
-        success: false,
-        error: 'انتهت صلاحية التوكن'
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      error: 'خطأ في المصادقة'
-    });
-  }
-};
-
-/**
- * Middleware للتحقق من أن المستخدم قد سجل الدخول
- */
-const auth = authenticateToken;
-
-/**
- * Middleware للتحقق من أن المستخدم منتج أو مدير
- */
-const producer = async (req, res, next) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        error: 'رجاءً قم بتسجيل الدخول أولاً'
-      });
-    }
-
-    if (req.user.role !== 'PRODUCER' && req.user.role !== 'ADMIN') {
-      return res.status(403).json({
-        success: false,
-        error: 'غير مصرح لك بالوصول إلى هذا المورد'
-      });
-    }
-
-    next();
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'خطأ في التحقق من الأذونات'
-    });
-  }
-};
-
-/**
- * Middleware للتحقق من أن المستخدم مدير
- */
-const admin = async (req, res, next) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        error: 'رجاءً قم بتسجيل الدخول أولاً'
-      });
-    }
-
-    if (req.user.role !== 'ADMIN') {
-      return res.status(403).json({
-        success: false,
-        error: 'غير مصرح لك بالوصول إلى هذا المورد'
-      });
-    }
-
-    next();
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'خطأ في التحقق من الأذونات'
-    });
-  }
-};
-
-/**
- * Middleware للتحقق من أن المستخدم VIP
- */
-const vipOnly = async (req, res, next) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        error: 'رجاءً قم بتسجيل الدخول أولاً'
-      });
-    }
-
-    if (req.user.role !== 'VIP' && req.user.role !== 'ADMIN') {
-      return res.status(403).json({
-        success: false,
-        error: 'هذه الميزة مخصصة للمستخدمين المميزين'
-      });
-    }
-
-    next();
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'خطأ في التحقق من الأذونات'
-    });
-  }
-};
-        error: 'الحساب غير مفعل'
-      });
-    }
-
-    // إضافة بيانات المستخدم للطلب
-    req.user = user;
-    next();
-  } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
-      return res.status(401).json({
-        success: false,
-        error: 'توكن غير صالح'
-      });
+      return res.status(401).json({ success: false, error: 'التوكن غير صحيح' });
     }
     if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({
-        success: false,
-        error: 'انتهت صلاحية التوكن، رجاءً سجل دخول مرة أخرى'
-      });
+      return res.status(401).json({ success: false, error: 'انتهت صلاحية التوكن' });
     }
-    return res.status(500).json({
-      success: false,
-      error: 'خطأ في التحقق من الهوية'
-    });
+    return res.status(500).json({ success: false, error: 'خطأ في المصادقة' });
   }
 };
 
 /**
- * Middleware للتحقق من الصلاحيات
- * @param  {...string} roles - الأدوار المسموح لها
+ * Middleware للتحقق من الصلاحيات حسب الدور
+ * Why: توحيد منطق التفويض وتقليل التكرار عبر الـ Routes
  */
 const authorizeRoles = (...roles) => {
+  const allowed = roles.map(String);
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'رجاءً قم بتسجيل الدخول أولاً' });
+    }
+    if (!allowed.includes(req.user.role)) {
+      return res.status(403).json({ success: false, error: 'غير مصرح لك بالوصول إلى هذا المورد' });
+    }
+    return next();
+  };
+};
+
+const requireAdmin = authorizeRoles('ADMIN');
+const requireProducer = authorizeRoles('PRODUCER', 'ADMIN');
+const requireAdminOrProducer = authorizeRoles('ADMIN', 'PRODUCER');
+const vipOnly = authorizeRoles('VIP', 'ADMIN');
+
 module.exports = {
   authenticateToken,
-  auth,
-  producer,
-  admin,
+  authorizeRoles,
+  // aliases لتوافق imports الحالية
+  auth: authenticateToken,
+  producer: requireProducer,
+  admin: requireAdmin,
+  requireAdmin,
+  requireProducer,
+  requireAdminOrProducer,
   vipOnly
 };

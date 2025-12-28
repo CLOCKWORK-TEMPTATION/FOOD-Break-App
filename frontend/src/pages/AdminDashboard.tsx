@@ -3,7 +3,7 @@
  * Dashboard للإدارة والمتابعة
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import styles from './AdminDashboard.module.css';
 import MenuManagement from '../components/MenuManagement';
 import PredictiveInsights from '../components/PredictiveInsights';
@@ -15,7 +15,6 @@ import {
   notificationsService,
   DashboardStats,
   Order,
-  Restaurant,
 } from '../services/dashboardService';
 
 // نوع بيانات الطلب المحلي للعرض
@@ -51,7 +50,6 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState<LocalOrder[]>([]);
   const [restaurants, setRestaurants] = useState<LocalRestaurant[]>([]);
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -69,8 +67,6 @@ export default function AdminDashboard() {
   // تحميل البيانات
   const loadDashboardData = useCallback(async () => {
     try {
-      setLoading(true);
-
       // محاولة جلب البيانات من API
       try {
         const [statsData, ordersData, restaurantsData] = await Promise.all([
@@ -137,8 +133,6 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error('فشل تحميل البيانات:', error);
-    } finally {
-      setLoading(false);
     }
   }, []);
 
@@ -229,18 +223,6 @@ export default function AdminDashboard() {
       CANCELLED: '#F44336',
     };
     return colors[status] || '#333';
-  };
-
-  const getStatusLabel = (status: Order['status']) => {
-    const labels: Record<Order['status'], string> = {
-      PENDING: 'قيد الانتظار',
-      CONFIRMED: 'مؤكد',
-      PREPARING: 'قيد الإعداد',
-      OUT_FOR_DELIVERY: 'في الطريق',
-      DELIVERED: 'تم التوصيل',
-      CANCELLED: 'ملغى',
-    };
-    return labels[status] || status;
   };
 
   return (

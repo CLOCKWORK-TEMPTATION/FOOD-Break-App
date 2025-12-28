@@ -14,6 +14,9 @@ const nutritionRoutes = require('./nutrition');
 const dietaryRoutes = require('./dietary');
 const emotionRoutes = require('./emotion');
 const productionRoutes = require('./productionRoutes');
+const notificationRoutes = require('./notifications');
+const qrRoutes = require('./qr');
+const projectRoutes = require('./projects');
 // const orderRoutes = require('./orders'); // سيتم إضافته لاحقاً
 
 // ربط Routes
@@ -29,6 +32,9 @@ router.use('/nutrition', nutritionRoutes);
 router.use('/dietary', dietaryRoutes);
 router.use('/emotion', emotionRoutes);
 router.use('/production', productionRoutes);
+router.use('/notifications', notificationRoutes);
+router.use('/qr', qrRoutes);
+router.use('/projects', projectRoutes);
 // router.use('/orders', orderRoutes); // سيتم إضافته لاحقاً
 
 // Route رئيسي
@@ -46,7 +52,10 @@ router.get('/', (req, res) => {
       predictive: '/predictive',
       nutrition: '/nutrition',
       dietary: '/dietary',
-      emotion: '/emotion'
+      emotion: '/emotion',
+      notifications: '/notifications',
+      qr: '/qr',
+      projects: '/projects'
       // orders: '/orders' // سيتم إضافته لاحقاً
     }
   });

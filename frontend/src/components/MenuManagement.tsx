@@ -3,7 +3,7 @@
  * Restaurant Menu Management Component
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { menuService, MenuItem } from '../services/dashboardService';
 import styles from './MenuManagement.module.css';
 

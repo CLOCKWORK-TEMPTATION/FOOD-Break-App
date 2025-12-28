@@ -5,16 +5,24 @@ class OrderService {
   // إنشاء طلب جديد
   async createOrder(orderData) {
     try {
+      const items = Array.isArray(orderData.items) ? orderData.items : [];
+
       const order = await prisma.order.create({
         data: {
           userId: orderData.userId,
           projectId: orderData.projectId,
           restaurantId: orderData.restaurantId,
-          items: orderData.items,
           totalAmount: orderData.totalAmount,
           status: 'PENDING',
           deliveryAddress: orderData.deliveryAddress,
-          notes: orderData.notes
+          items: {
+            create: items.map((i) => ({
+              menuItemId: i.menuItemId,
+              quantity: i.quantity,
+              price: i.price,
+              specialInstructions: i.specialInstructions || null
+            }))
+          }
         },
         include: {
           user: true,
@@ -139,7 +147,6 @@ class OrderService {
         where: { id: orderId },
         data: {
           status: 'CANCELLED',
-          notes: `${order.notes || ''}\nسبب الإلغاء: ${reason}`,
           updatedAt: new Date()
         }
       });

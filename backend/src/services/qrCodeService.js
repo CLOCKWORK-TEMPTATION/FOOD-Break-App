@@ -7,6 +7,27 @@ class QRCodeService {
     this.secretKey = process.env.QR_SECRET_KEY || 'breakapp-qr-secret';
   }
 
+  /**
+   * استخراج token من محتوى QR
+   * - يدعم token مباشر
+   * - أو JSON string يحتوي على { token, url, metadata }
+   */
+  extractTokenFromInput(qrInput) {
+    if (!qrInput || typeof qrInput !== 'string') return null;
+    const trimmed = qrInput.trim();
+    if (!trimmed) return null;
+
+    if (trimmed.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (parsed && typeof parsed.token === 'string') return parsed.token;
+      } catch (_) {
+        // تجاهل
+      }
+    }
+    return trimmed;
+  }
+
   // توليد QR Code للمشروع
   async generateProjectQR(projectData) {
     try {
@@ -54,7 +75,7 @@ class QRCodeService {
   }
 
   // التحقق من صحة QR Code
-  async validateQRCode(qrToken) {
+  async validateQRCode(qrToken, expectedType = null) {
     try {
       const decoded = jwt.verify(qrToken, this.secretKey);
       
@@ -63,22 +84,27 @@ class QRCodeService {
         throw new Error('QR Code منتهي الصلاحية');
       }
 
-      // التحقق من نوع QR Code
-      if (decoded.type !== 'PROJECT_ACCESS') {
+      if (expectedType && decoded.type !== expectedType) {
         throw new Error('نوع QR Code غير صحيح');
       }
 
       // التحقق من صحة الهاش
-      const expectedHash = this.generateHash(decoded.projectId);
-      if (decoded.hash !== expectedHash) {
-        throw new Error('QR Code غير صحيح');
+      if (decoded.type === 'PROJECT_ACCESS') {
+        const expectedHash = this.generateHash(decoded.projectId);
+        if (decoded.hash !== expectedHash) throw new Error('QR Code غير صحيح');
+      } else if (decoded.type === 'ORDER_TRACKING') {
+        const expectedHash = this.generateHash(`${decoded.orderId}-${decoded.userId}`);
+        if (decoded.hash !== expectedHash) throw new Error('QR Code غير صحيح');
       }
 
       return {
         valid: true,
+        type: decoded.type,
         projectId: decoded.projectId,
         projectName: decoded.projectName,
-        expiresAt: decoded.validUntil
+        expiresAt: decoded.validUntil,
+        orderId: decoded.orderId,
+        userId: decoded.userId
       };
     } catch (error) {
       if (error.name === 'JsonWebTokenError') {
@@ -89,6 +115,12 @@ class QRCodeService {
       }
       throw new Error(`خطأ في التحقق من QR Code: ${error.message}`);
     }
+  }
+
+  async validateQRCodeFromInput(qrInput, expectedType = null) {
+    const token = this.extractTokenFromInput(qrInput);
+    if (!token) throw new Error('QR Code غير صحيح - لا يحتوي على token');
+    return this.validateQRCode(token, expectedType);
   }
 
   // إعادة توليد QR Code
@@ -150,16 +182,20 @@ class QRCodeService {
   // فك تشفير QR Code من النص
   async decodeQRData(qrText) {
     try {
-      const qrData = JSON.parse(qrText);
+      const qrData = qrText && typeof qrText === 'string' && qrText.trim().startsWith('{')
+        ? JSON.parse(qrText)
+        : { token: qrText };
       
       if (!qrData.token) {
         throw new Error('QR Code غير صحيح - لا يحتوي على token');
       }
 
-      const validation = await this.validateQRCode(qrData.token);
+      const decoded = jwt.verify(qrData.token, this.secretKey);
+      const validation = await this.validateQRCode(qrData.token, decoded.type);
       
       return {
         ...validation,
+        token: qrData.token,
         url: qrData.url,
         metadata: qrData.metadata
       };

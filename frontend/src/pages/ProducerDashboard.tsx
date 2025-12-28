@@ -7,9 +7,8 @@
  * - Comprehensive Reports
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import styles from './ProducerDashboard.module.css';
-import { productionService } from '../services/productionService';
 import MoodTracker from '../components/MoodTracker';
 
 // --- Types ---
@@ -68,23 +67,13 @@ const MOCK_BUDGET: BudgetCategory[] = [
 
 export default function ProducerDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'schedule' | 'budget' | 'attendance'>('overview');
-  const [schedule, setSchedule] = useState<ShootingDay[]>(MOCK_SCHEDULE);
-  const [crew, setCrew] = useState<CrewMember[]>(MOCK_CREW);
+  const [schedule] = useState<ShootingDay[]>(MOCK_SCHEDULE);
+  const [crew] = useState<CrewMember[]>(MOCK_CREW);
 
   // State for simulated actions
   const [showExportOptions, setShowExportOptions] = useState(false);
 
   // --- Helpers ---
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'SHOOTING': return styles.shooting;
-      case 'COMPLETED': return styles.completed;
-      case 'SCHEDULED': return styles.scheduled;
-      case 'OFF_DAY': return '#999';
-      default: return '#333';
-    }
-  };
 
   const getAttendanceColor = (status: string) => {
     switch (status) {
@@ -231,6 +220,7 @@ export default function ProducerDashboard() {
                 </div>
               </div>
             </div>
+          </div>
         )}
 
             {activeTab === 'schedule' && (
