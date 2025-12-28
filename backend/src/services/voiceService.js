@@ -53,7 +53,6 @@ async function speechToText(audioData, language = 'ar') {
     const randomTranscription = transcriptions[Math.floor(Math.random() * transcriptions.length)];
 
     return {
-      success: true,
       text: randomTranscription,
       confidence: 0.95,
       language: language
@@ -70,57 +69,79 @@ async function speechToText(audioData, language = 'ar') {
 /**
  * معالجة الأمر الصوتي
  */
-async function processVoiceCommand(userId, text, language, sessionId) {
+async function processVoiceCommand(userId, voiceData) {
   try {
+    const { audioData, language = 'ar', sessionId } = voiceData;
+    
+    // تحويل الصوت إلى نص
+    const transcriptionResult = await speechToText(audioData, language);
+    const text = transcriptionResult.text;
+    const confidence = transcriptionResult.confidence;
+    
     // إنشاء جلسة جديدة إذا لم تكن موجودة
-    if (!sessionId) {
-      sessionId = crypto.randomUUID();
+    let currentSessionId = sessionId;
+    if (!currentSessionId) {
+      currentSessionId = crypto.randomUUID();
     }
 
     // تحليل النص باستخدام معالجة اللغة الطبيعية
     const intent = await analyzeIntent(text, language);
     
+    // استخراج العناصر من النص
+    const entities = extractEntities(text, language);
+    
     // معالجة الأمر بناءً على النية المكتشفة
-    let commandResult;
+    let result = {
+      sessionId: currentSessionId,
+      transcription: text,
+      intent: intent.action,
+      confidence: confidence,
+      language: language
+    };
     
     switch (intent.action) {
-      case 'ORDER_USUAL':
-        commandResult = await handleUsualOrder(userId, sessionId);
-        break;
       case 'ORDER_ITEM':
-        commandResult = await handleItemOrder(userId, intent.entities, sessionId);
+        const foodEntities = entities.filter(e => e.type === 'FOOD_ITEM');
+        result.extractedItems = foodEntities.map(entity => ({
+          name: entity.value,
+          quantity: entity.quantity || 1
+        }));
+        result.requiresConfirmation = true;
         break;
+        
+      case 'ORDER_USUAL':
+        const usualOrder = await getUserUsualOrder(userId);
+        result.usualOrder = usualOrder;
+        result.requiresConfirmation = true;
+        break;
+        
       case 'SEARCH_MENU':
-        commandResult = await handleMenuSearch(userId, intent.entities, sessionId);
+        result.searchResults = await voiceSearchMenu(text, null, language, userId);
         break;
+        
       case 'CANCEL_ORDER':
-        commandResult = await handleCancelOrder(userId, sessionId);
+        result.cancelled = true;
         break;
-      case 'ADD_TO_ORDER':
-        commandResult = await handleAddToOrder(userId, intent.entities, sessionId);
+        
+      case 'UNCLEAR':
+        result.requiresClarification = true;
+        result.suggestions = language === 'ar' ? 
+          ['اطلب لي الطلب المعتاد', 'أريد برجر', 'ما هي الخيارات المتاحة'] :
+          ['Order my usual', 'I want a burger', 'What are the available options'];
         break;
-      case 'GET_RECOMMENDATIONS':
-        commandResult = await handleGetRecommendations(userId, intent.entities, sessionId);
-        break;
+        
       default:
-        commandResult = {
-          action: 'UNKNOWN',
-          message: language === 'ar' ? 'لم أفهم طلبك، يرجى المحاولة مرة أخرى' : 'I didn\'t understand your request, please try again',
-          suggestions: language === 'ar' ? 
-            ['اطلب لي الطلب المعتاد', 'أريد برجر', 'ما هي الخيارات المتاحة'] :
-            ['Order my usual', 'I want a burger', 'What are the available options']
-        };
+        result.intent = 'UNKNOWN';
+        result.message = language === 'ar' ? 'لم أفهم طلبك، يرجى المحاولة مرة أخرى' : 'I didn\'t understand your request, please try again';
+        result.suggestions = language === 'ar' ? 
+          ['اطلب لي الطلب المعتاد', 'أريد برجر', 'ما هي الخيارات المتاحة'] :
+          ['Order my usual', 'I want a burger', 'What are the available options'];
     }
 
     // حفظ الجلسة الصوتية
-    await saveVoiceSession(userId, sessionId, text, intent, commandResult);
+    await saveVoiceSession(userId, currentSessionId, voiceData, intent, result);
 
-    return {
-      ...commandResult,
-      sessionId,
-      originalText: text,
-      detectedIntent: intent
-    };
+    return result;
   } catch (error) {
     logger.error('Error processing voice command:', error);
     throw error;
@@ -512,8 +533,9 @@ async function getUserUsualOrder(userId) {
 /**
  * البحث الصوتي في القائمة
  */
-async function voiceSearchMenu(query, restaurantId, language, userId) {
+async function voiceSearchMenu(userId, searchData) {
   try {
+    const { query, restaurantId, language } = searchData;
     const searchTerms = query.toLowerCase().split(' ');
     
     const where = {
@@ -542,34 +564,64 @@ async function voiceSearchMenu(query, restaurantId, language, userId) {
       take: 10
     });
 
-    return results;
+    // Add match score to results
+    return results.map(item => ({
+      ...item,
+      matchScore: calculateMatchScore(item, query)
+    }));
   } catch (error) {
     logger.error('Error in voice search menu:', error);
-    throw error;
+    return [];
   }
+}
+
+// Helper function to calculate match score
+function calculateMatchScore(item, query) {
+  const queryLower = query.toLowerCase();
+  const itemName = (item.name || '').toLowerCase();
+  const itemNameArabic = (item.nameArabic || '').toLowerCase();
+  
+  if (itemName.includes(queryLower) || itemNameArabic.includes(queryLower)) {
+    return 0.9;
+  }
+  
+  // Simple fuzzy matching
+  const words = queryLower.split(' ');
+  let matches = 0;
+  words.forEach(word => {
+    if (itemName.includes(word) || itemNameArabic.includes(word)) {
+      matches++;
+    }
+  });
+  
+  return matches / words.length;
 }
 
 /**
  * تحويل النص إلى صوت
  */
-async function textToSpeech(text, language, voice) {
+async function textToSpeech(userId, textData) {
   try {
+    const { text, language = 'ar', voice = 'female' } = textData;
+    
     // محاكاة تحويل النص إلى صوت
     // في التطبيق الحقيقي، ستستدعي Google Text-to-Speech API أو Azure
     
     await new Promise(resolve => setTimeout(resolve, 500));
     
+    const audioId = crypto.randomUUID();
+    const duration = Math.ceil(text.length / 10); // تقدير مدة الصوت
+    
     return {
-      success: true,
-      audioUrl: `/api/voice/audio/${crypto.randomUUID()}.mp3`,
-      duration: Math.ceil(text.length / 10) // تقدير مدة الصوت
+      audioData: `base64-audio-data-${audioId}`,
+      format: 'mp3',
+      duration: duration,
+      language: language,
+      voice: voice
     };
   } catch (error) {
     logger.error('Error in text-to-speech:', error);
-    return {
-      success: false,
-      error: error.message
-    };
+    throw error;
   }
 }
 
@@ -603,9 +655,21 @@ async function setVoicePreferences(userId, preferences) {
  */
 async function getVoicePreferences(userId) {
   try {
-    return await prisma.voicePreferences.findUnique({
+    const preferences = await prisma.voicePreferences.findUnique({
       where: { userId }
     });
+
+    if (!preferences) {
+      return {
+        preferredLanguage: 'ar',
+        voiceSpeed: 'normal',
+        voiceType: 'female',
+        enableVoiceConfirmation: true,
+        enableVoiceShortcuts: true
+      };
+    }
+
+    return preferences;
   } catch (error) {
     logger.error('Error getting voice preferences:', error);
     throw error;
@@ -851,11 +915,19 @@ async function getPersonalizedRecommendations(userId, entities) {
   }
 }
 
+/**
+ * الحصول على الطلب المعتاد للمستخدم (alias for getUserUsualOrder)
+ */
+async function getUsualOrder(userId) {
+  return await getUserUsualOrder(userId);
+}
+
 module.exports = {
   speechToText,
   processVoiceCommand,
   confirmVoiceOrder,
   getUserUsualOrder,
+  getUsualOrder, // alias for tests
   voiceSearchMenu,
   textToSpeech,
   setVoicePreferences,

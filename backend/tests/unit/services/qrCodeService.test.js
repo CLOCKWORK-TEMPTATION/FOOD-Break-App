@@ -20,8 +20,7 @@ describe('QR Code Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     
-    const { PrismaClient } = require('@prisma/client');
-    mockPrisma = new PrismaClient();
+    mockPrisma = global.mockPrisma;
     qrcode = require('qrcode');
   });
 

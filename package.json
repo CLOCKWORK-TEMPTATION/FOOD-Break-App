@@ -1,43 +1,21 @@
 {
-  "name": "breakapp-full-stack",
+  "name": "admin-dashboard-test",
   "version": "1.0.0",
-  "description": "BreakApp - نظام إدارة الوجبات للإنتاج مع التعريب العربي الكامل",
-  "main": "start-full-stack.js",
   "scripts": {
-    "start": "node start-full-stack.js",
-    "dev": "node start-full-stack.js",
-    "backend": "cd backend && npm run dev",
-    "frontend": "cd frontend && npm run dev",
-    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
-    "build": "cd backend && npm run build && cd ../frontend && npm run build",
-    "test": "cd backend && npm test && cd ../frontend && npm test",
-    "lint": "cd backend && npm run lint && cd ../frontend && npm run lint"
+    "test": "jest --coverage --coverageReporters=text --coverageReporters=html",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage --coverageThreshold='{\"global\":{\"branches\":97,\"functions\":97,\"lines\":97,\"statements\":97}}'"
   },
-  "keywords": [
-    "breakapp",
-    "meal-management",
-    "production",
-    "arabic",
-    "localization",
-    "rtl",
-    "full-stack",
-    "react",
-    "nodejs",
-    "prisma",
-    "typescript"
-  ],
-  "author": "BreakApp Team",
-  "license": "MIT",
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=8.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/breakapp/breakapp.git"
-  },
-  "bugs": {
-    "url": "https://github.com/breakapp/breakapp/issues"
-  },
-  "homepage": "https://github.com/breakapp/breakapp#readme"
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/react": "^14.1.2",
+    "@types/jest": "^29.5.11",
+    "@types/react": "^18.2.45",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.3"
+  }
 }

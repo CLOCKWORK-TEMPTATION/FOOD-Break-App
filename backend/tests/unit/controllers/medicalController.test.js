@@ -17,6 +17,10 @@ describe('Medical Controller', () => {
     mockReq = createMockRequest();
     mockRes = createMockResponse();
     mockNext = createMockNext();
+    
+    // Mock localization function
+    mockReq.__ = jest.fn((key) => key);
+    
     jest.clearAllMocks();
   });
 
@@ -55,17 +59,13 @@ describe('Medical Controller', () => {
         consentGiven: false
       };
 
-      medicalService.createOrUpdateMedicalProfile.mockRejectedValue(
-        new Error('Consent required for medical data processing')
-      );
-
       await medicalController.createOrUpdateMedicalProfile(mockReq, mockRes, mockNext);
 
-      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         error: expect.objectContaining({
-          code: 'MEDICAL_PROFILE_FAILED',
+          code: 'CONSENT_REQUIRED',
           message: expect.any(String)
         })
       });
@@ -253,8 +253,7 @@ describe('Medical Controller', () => {
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({
         success: true,
-        data: mockIncidents.incidents,
-        meta: { pagination: mockIncidents.pagination }
+        data: mockIncidents
       });
     });
   });
@@ -300,11 +299,337 @@ describe('Medical Controller', () => {
         }
       };
 
-      medicalService.exportMedicalData.mockResolvedValue(mockExport);
+      medicalService.exportUserMedicalData = jest.fn().mockResolvedValue(mockExport);
 
       await medicalController.exportMedicalData(mockReq, mockRes, mockNext);
 
-      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        data: mockExport,
+        message: expect.any(String)
+      });
+    });
+
+    it('should handle export error', async () => {
+      medicalService.exportUserMedicalData = jest.fn().mockRejectedValue(new Error('Export failed'));
+
+      await medicalController.exportMedicalData(mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+    });
+  });
+
+  describe('deleteMedicalData', () => {
+    it('should delete medical data for GDPR right to be forgotten', async () => {
+      mockReq.body = {
+        confirmDeletion: true
+      };
+
+      medicalService.deleteMedicalData = jest.fn().mockResolvedValue();
+
+      await medicalController.deleteMedicalData(mockReq, mockRes, mockNext);
+
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        message: expect.any(String)
+      });
+    });
+
+    it('should require confirmation for deletion', async () => {
+      mockReq.body = {
+        confirmDeletion: false
+      };
+
+      await medicalController.deleteMedicalData(mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
+        error: expect.objectContaining({
+          code: 'DELETION_NOT_CONFIRMED'
+        })
+      });
+    });
+
+    it('should handle deletion error', async () => {
+      mockReq.body = { confirmDeletion: true };
+      medicalService.deleteMedicalData = jest.fn().mockRejectedValue(new Error('Delete failed'));
+
+      await medicalController.deleteMedicalData(mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+    });
+  });
+
+  describe('addIngredient', () => {
+    it('should add new ingredient (Admin only)', async () => {
+      const mockIngredient = {
+        id: 'ingredient-1',
+        name: 'Peanuts',
+        category: 'NUTS',
+        commonAllergens: ['NUTS']
+      };
+
+      mockReq.body = {
+        name: 'Peanuts',
+        category: 'NUTS',
+        commonAllergens: ['NUTS']
+      };
+
+      medicalService.addIngredient = jest.fn().mockResolvedValue(mockIngredient);
+
+      await medicalController.addIngredient(mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(201);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        data: mockIngredient,
+        message: expect.any(String)
+      });
+    });
+
+    it('should require name and category', async () => {
+      mockReq.body = {};
+
+      await medicalController.addIngredient(mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+    });
+
+    it('should handle add ingredient error', async () => {
+      mockReq.body = { name: 'Test', category: 'TEST' };
+      medicalService.addIngredient = jest.fn().mockRejectedValue(new Error('Add failed'));
+
+      await medicalController.addIngredient(mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+    });
+  });
+
+  describe('searchIngredients', () => {
+    it('should search ingredients successfully', async () => {
+      const mockResults = [
+        { id: '1', name: 'Peanuts', category: 'NUTS' },
+        { id: '2', name: 'Peanut Butter', category: 'NUTS' }
+      ];
+
+      mockReq.query = {
+        query: 'peanut',
+        category: 'NUTS'
+      };
+
+      medicalService.searchIngredients = jest.fn().mockResolvedValue(mockResults);
+
+      await medicalController.searchIngredients(mockReq, mockRes, mockNext);
+
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        data: mockResults
+      });
+    });
+
+    it('should require search query', async () => {
+      mockReq.query = {};
+
+      await medicalController.searchIngredients(mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+    });
+
+    it('should handle search error', async () => {
+      mockReq.query = { query: 'test' };
+      medicalService.searchIngredients = jest.fn().mockRejectedValue(new Error('Search failed'));
+
+      await medicalController.searchIngredients(mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+    });
+  });
+
+  describe('getMedicalConsent', () => {
+    it('should get medical consent status', async () => {
+      const mockConsents = [
+        { consentType: 'DATA_PROCESSING', granted: true },
+        { consentType: 'EMERGENCY_CONTACT', granted: true }
+      ];
+
+      medicalService.getMedicalConsent = jest.fn().mockResolvedValue(mockConsents);
+
+      await medicalController.getMedicalConsent(mockReq, mockRes, mockNext);
+
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        data: mockConsents
+      });
+    });
+
+    it('should handle get consent error', async () => {
+      medicalService.getMedicalConsent = jest.fn().mockRejectedValue(new Error('Fetch failed'));
+
+      await medicalController.getMedicalConsent(mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('should handle createOrUpdateMedicalProfile error', async () => {
+      mockReq.body = { consentGiven: true };
+      medicalService.createOrUpdateMedicalProfile.mockRejectedValue(new Error('DB Error'));
+
+      await medicalController.createOrUpdateMedicalProfile(mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+    });
+
+    it('should handle getMedicalProfile error', async () => {
+      medicalService.getMedicalProfile.mockRejectedValue(new Error('DB Error'));
+
+      await medicalController.getMedicalProfile(mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+    });
+
+    it('should handle checkItemForMedicalAlerts missing data', async () => {
+      mockReq.body = {};
+
+      await medicalController.checkItemForMedicalAlerts(mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+    });
+
+    it('should handle checkItemForMedicalAlerts error', async () => {
+      mockReq.body = { menuItemId: 'item-1' };
+      medicalService.checkItemForMedicalAlerts.mockRejectedValue(new Error('Check failed'));
+
+      await medicalController.checkItemForMedicalAlerts(mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+    });
+
+    it('should handle reportMedicalIncident missing fields', async () => {
+      mockReq.body = {};
+
+      await medicalController.reportMedicalIncident(mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+    });
+
+    it('should handle reportMedicalIncident error', async () => {
+      mockReq.body = { incidentType: 'TEST', severity: 'MILD' };
+      medicalService.reportMedicalIncident.mockRejectedValue(new Error('Report failed'));
+
+      await medicalController.reportMedicalIncident(mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+    });
+
+    it('should handle getMedicalIncidents error', async () => {
+      medicalService.getMedicalIncidents.mockRejectedValue(new Error('Fetch failed'));
+
+      await medicalController.getMedicalIncidents(mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+    });
+
+    it('should handle updateMedicalConsent invalid data', async () => {
+      mockReq.body = {};
+
+      await medicalController.updateMedicalConsent(mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+    });
+
+    it('should handle updateMedicalConsent error', async () => {
+      mockReq.body = { consentType: 'TEST', granted: true };
+      medicalService.updateMedicalConsent.mockRejectedValue(new Error('Update failed'));
+
+      await medicalController.updateMedicalConsent(mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+    });
+  });
+
+  describe('RED Alert Scenarios', () => {
+    it('should trigger emergency notifications for RED alerts', async () => {
+      const mockAlerts = {
+        hasAlerts: true,
+        alertLevel: 'RED',
+        detectedAllergens: ['NUTS'],
+        itemName: 'Peanut Butter Sandwich',
+        emergencyContact: { name: 'John', phone: '123' }
+      };
+
+      mockReq.body = { menuItemId: 'item-1' };
+      medicalService.checkItemForMedicalAlerts.mockResolvedValue(mockAlerts);
+      notificationService.sendMedicalAlert = jest.fn().mockResolvedValue();
+      medicalService.notifyEmergencyContact = jest.fn().mockResolvedValue();
+
+      await medicalController.checkItemForMedicalAlerts(mockReq, mockRes, mockNext);
+
+      expect(notificationService.sendMedicalAlert).toHaveBeenCalled();
+      expect(medicalService.notifyEmergencyContact).toHaveBeenCalled();
+    });
+
+    it('should trigger emergency protocol for SEVERE incidents', async () => {
+      const mockIncident = { id: 'incident-1', severity: 'SEVERE' };
+
+      mockReq.body = {
+        incidentType: 'ALLERGIC_REACTION',
+        severity: 'SEVERE',
+        description: 'Severe reaction'
+      };
+
+      medicalService.reportMedicalIncident.mockResolvedValue(mockIncident);
+      medicalService.triggerEmergencyProtocol = jest.fn().mockResolvedValue();
+
+      await medicalController.reportMedicalIncident(mockReq, mockRes, mockNext);
+
+      expect(medicalService.triggerEmergencyProtocol).toHaveBeenCalled();
+    });
+
+    it('should trigger emergency protocol for CRITICAL incidents', async () => {
+      const mockIncident = { id: 'incident-1', severity: 'CRITICAL' };
+
+      mockReq.body = {
+        incidentType: 'ALLERGIC_REACTION',
+        severity: 'CRITICAL',
+        description: 'Critical reaction'
+      };
+
+      medicalService.reportMedicalIncident.mockResolvedValue(mockIncident);
+      medicalService.triggerEmergencyProtocol = jest.fn().mockResolvedValue();
+
+      await medicalController.reportMedicalIncident(mockReq, mockRes, mockNext);
+
+      expect(medicalService.triggerEmergencyProtocol).toHaveBeenCalled();
+    });
+  });
+
+  describe('Query Parameters', () => {
+    it('should handle getMedicalIncidents with all query params', async () => {
+      mockReq.query = {
+        startDate: '2024-01-01',
+        endDate: '2024-12-31',
+        severity: 'MODERATE',
+        page: '2',
+        limit: '50'
+      };
+
+      medicalService.getMedicalIncidents.mockResolvedValue({ incidents: [], pagination: {} });
+
+      await medicalController.getMedicalIncidents(mockReq, mockRes, mockNext);
+
+      expect(medicalService.getMedicalIncidents).toHaveBeenCalledWith(
+        'user-1',
+        expect.objectContaining({
+          page: 2,
+          limit: 50
+        })
+      );
+    });
+  });
+});veBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({
         success: true,
         data: mockExport,

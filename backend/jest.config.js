@@ -31,14 +31,14 @@ module.exports = {
   
   coverageDirectory: 'coverage',
   
-  // Note: Coverage thresholds are set to 95% for maximum quality
-  // تشجيع مستوى تغطية عالي الجودة للغاية
+  // Note: Coverage thresholds are set to 97% for exceptional quality
+  // تشجيع مستوى تغطية استثنائي عالي الجودة
   coverageThreshold: {
     global: {
-      branches: 95,
-      functions: 95,
-      lines: 95,
-      statements: 95,
+      branches: 97,
+      functions: 97,
+      lines: 97,
+      statements: 97,
     },
   },
   

@@ -291,9 +291,11 @@ const getAllExceptions = async (filters = {}) => {
 const calculateExceptionCost = (exceptionType, orderTotal, standardMealCost = 50) => {
   let costDetails = {
     exceptionType,
+    total: orderTotal,
     orderTotal,
     standardMealCost,
     userPays: 0,
+    companyPays: 0,
     productionPays: 0,
     difference: 0
   };
@@ -302,6 +304,7 @@ const calculateExceptionCost = (exceptionType, orderTotal, standardMealCost = 50
     case 'FULL':
       // الاستثناء التام: الإنتاج يدفع كل شيء
       costDetails.userPays = 0;
+      costDetails.companyPays = orderTotal;
       costDetails.productionPays = orderTotal;
       break;
 
@@ -309,12 +312,14 @@ const calculateExceptionCost = (exceptionType, orderTotal, standardMealCost = 50
       // الاستثناء في الحدود: المستخدم يدفع الفرق
       costDetails.difference = Math.max(0, orderTotal - standardMealCost);
       costDetails.userPays = costDetails.difference;
-      costDetails.productionPays = Math.min(orderTotal, orderTotal, standardMealCost);
+      costDetails.companyPays = Math.min(orderTotal, standardMealCost);
+      costDetails.productionPays = Math.min(orderTotal, standardMealCost);
       break;
 
     case 'SELF_PAID':
       // الاستثناء المدفوع بالكامل: المستخدم يدفع كل شيء
       costDetails.userPays = orderTotal;
+      costDetails.companyPays = 0;
       costDetails.productionPays = 0;
       break;
 

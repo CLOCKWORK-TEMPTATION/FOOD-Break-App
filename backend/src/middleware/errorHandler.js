@@ -69,7 +69,7 @@ const errorHandler = (err, req, res, next) => {
     path: req.path,
     method: req.method,
     ip: req.ip,
-    userAgent: req.get('user-agent'),
+    userAgent: req.get ? req.get('user-agent') : req.headers['user-agent'],
     body: process.env.NODE_ENV === 'development' ? safeBody : undefined
   };
 

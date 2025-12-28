@@ -10,9 +10,7 @@ describe('Menu Service', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
-    const { PrismaClient } = require('@prisma/client');
-    mockPrisma = new PrismaClient();
+    mockPrisma = global.mockPrisma;
   });
 
   // ==========================================

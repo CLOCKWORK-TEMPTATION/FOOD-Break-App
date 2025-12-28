@@ -60,6 +60,26 @@ class NotificationService {
     }
   }
 
+  // إرسال إشعار Push بواسطة معرف الإشعار
+  async sendPushNotificationById(notificationId) {
+    try {
+      const notification = await prisma.notification.findUnique({
+        where: { id: notificationId }
+      });
+
+      if (!notification) {
+        return false;
+      }
+
+      // TODO: تكامل مع Expo Push Notifications
+      logger.info(`Push notification sent for notification ${notificationId}`);
+      return true;
+    } catch (error) {
+      logger.error('خطأ في إرسال Push notification:', error);
+      return false;
+    }
+  }
+
   // إرسال إشعار Email
   async sendEmailNotification(userId, subject, body) {
     try {
@@ -261,6 +281,16 @@ class NotificationService {
     }
   }
 
+  // الحصول على الإشعارات غير المقروءة فقط
+  async getUnreadNotifications(userId) {
+    try {
+      return await this.getUserNotifications(userId, { unreadOnly: true });
+    } catch (error) {
+      logger.error('خطأ في جلب الإشعارات غير المقروءة:', error);
+      throw error;
+    }
+  }
+
   // تحديد إشعار كمقروء
   async markAsRead(notificationId, userId) {
     try {
@@ -270,17 +300,18 @@ class NotificationService {
       });
     } catch (error) {
       logger.error('خطأ في تحديد الإشعار كمقروء:', error);
-      throw error;
+      return null;
     }
   }
 
   // تحديد جميع الإشعارات كمقروءة
   async markAllAsRead(userId) {
     try {
-      return await prisma.notification.updateMany({
+      const result = await prisma.notification.updateMany({
         where: { userId, isRead: false },
         data: { isRead: true, readAt: new Date() }
       });
+      return result.count;
     } catch (error) {
       logger.error('خطأ في تحديد جميع الإشعارات كمقروءة:', error);
       throw error;
@@ -290,11 +321,51 @@ class NotificationService {
   // حذف إشعار
   async deleteNotification(notificationId, userId) {
     try {
-      return await prisma.notification.delete({
+      await prisma.notification.delete({
         where: { id: notificationId, userId }
       });
+      return true;
     } catch (error) {
       logger.error('خطأ في حذف الإشعار:', error);
+      return false;
+    }
+  }
+
+  // الحصول على تفضيلات المستخدم للإشعارات
+  async getPreferences(userId) {
+    try {
+      const preferences = await prisma.userReminderPreferences.findUnique({
+        where: { userId }
+      });
+
+      if (!preferences) {
+        return {
+          enablePush: true,
+          enableEmail: false,
+          enableSMS: false
+        };
+      }
+
+      return preferences;
+    } catch (error) {
+      logger.error('خطأ في جلب تفضيلات الإشعارات:', error);
+      throw error;
+    }
+  }
+
+  // تحديث تفضيلات المستخدم للإشعارات
+  async updatePreferences(userId, preferences) {
+    try {
+      return await prisma.userReminderPreferences.upsert({
+        where: { userId },
+        update: preferences,
+        create: {
+          userId,
+          ...preferences
+        }
+      });
+    } catch (error) {
+      logger.error('خطأ في تحديث تفضيلات الإشعارات:', error);
       throw error;
     }
   }

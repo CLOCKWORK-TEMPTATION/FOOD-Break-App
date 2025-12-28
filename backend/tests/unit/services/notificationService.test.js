@@ -4,12 +4,12 @@
  */
 
 const notificationService = require('../../../src/services/notificationService');
-const { prisma } = require('@prisma/client');
-
-jest.mock('@prisma/client');
 
 describe('Notification Service', () => {
+  let prisma;
+
   beforeEach(() => {
+    prisma = global.mockPrisma;
     jest.clearAllMocks();
   });
 
@@ -25,10 +25,17 @@ describe('Notification Service', () => {
       ];
 
       prisma.notification.findMany.mockResolvedValue(mockNotifications);
+      prisma.notification.count.mockResolvedValue(1);
 
-      const result = await notificationService.getUserNotifications('user-1', 1, 10);
+      const result = await notificationService.getUserNotifications('user-1', { page: 1, limit: 10 });
 
-      expect(result).toEqual(mockNotifications);
+      expect(result.notifications).toEqual(mockNotifications);
+      expect(result.pagination).toEqual({
+        page: 1,
+        limit: 10,
+        total: 1,
+        pages: 1
+      });
       expect(prisma.notification.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { userId: 'user-1' },
@@ -41,9 +48,11 @@ describe('Notification Service', () => {
 
     it('should filter by unread status', async () => {
       prisma.notification.findMany.mockResolvedValue([]);
+      prisma.notification.count.mockResolvedValue(0);
 
-      await notificationService.getUnreadNotifications('user-1');
+      const result = await notificationService.getUnreadNotifications('user-1');
 
+      expect(result.notifications).toEqual([]);
       expect(prisma.notification.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: {
@@ -119,7 +128,7 @@ describe('Notification Service', () => {
       expect(result).toEqual(mockNotification);
       expect(prisma.notification.update).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { id: 'notif-1' },
+          where: { id: 'notif-1', userId: 'user-1' },
           data: {
             isRead: true,
             readAt: expect.any(Date)
@@ -189,7 +198,7 @@ describe('Notification Service', () => {
 
       prisma.notification.findUnique.mockResolvedValue(mockNotification);
 
-      const result = await notificationService.sendPushNotification('notif-1');
+      const result = await notificationService.sendPushNotificationById('notif-1');
 
       expect(result).toBe(true);
     });
@@ -197,7 +206,7 @@ describe('Notification Service', () => {
     it('should return false if notification not found', async () => {
       prisma.notification.findUnique.mockResolvedValue(null);
 
-      const result = await notificationService.sendPushNotification('non-existent');
+      const result = await notificationService.sendPushNotificationById('non-existent');
 
       expect(result).toBe(false);
     });

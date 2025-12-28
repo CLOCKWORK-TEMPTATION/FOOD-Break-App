@@ -37,8 +37,7 @@ describe('Auth API Integration Tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    const { PrismaClient } = require('@prisma/client');
-    mockPrisma = new PrismaClient();
+    mockPrisma = global.mockPrisma;
   });
 
   // ==========================================

@@ -141,11 +141,82 @@ jest.mock('fs', () => ({
 jest.mock('crypto', () => ({
   ...jest.requireActual('crypto'),
   randomUUID: jest.fn(() => 'test-uuid-12345'),
-  randomBytes: jest.fn(() => Buffer.from('test-random-bytes-32-chars-long')),
+  randomBytes: jest.fn((size) => Buffer.alloc(size, 'test-random-bytes')),
+}));
+
+// Mock speech-to-text for voice service tests - use virtual mock
+jest.mock('speech-to-text', () => ({
+  SpeechToTextV1: jest.fn(() => ({
+    recognize: jest.fn().mockResolvedValue({
+      result: {
+        results: [{
+          alternatives: [{
+            transcript: 'Test speech recognition result'
+          }]
+        }]
+      }
+    }),
+  })),
+}), { virtual: true });
+
+// Mock text-to-speech for voice service tests - use virtual mock
+jest.mock('text-to-speech', () => ({
+  TextToSpeechClient: jest.fn(() => ({
+    synthesizeSpeech: jest.fn().mockResolvedValue([{
+      audioContent: Buffer.from('test-audio-content')
+    }]),
+  })),
+}), { virtual: true });
+
+// Mock swagger-jsdoc to prevent parsing issues during tests
+jest.mock('swagger-jsdoc', () => {
+  return jest.fn(() => ({
+    openapi: '3.0.0',
+    info: {
+      title: 'BreakApp API',
+      version: '1.0.0',
+      description: 'Test API Documentation'
+    },
+    paths: {},
+    components: {}
+  }));
+});
+
+// Mock localization system
+const mockTranslations = {
+  'orders.orderCreated': 'تم إنشاء الطلب بنجاح',
+  'orders.itemsRequired': 'يجب إضافة عنصر واحد على الأقل للطلب',
+  'orders.orderStatusUpdated': 'تم تحديث حالة الطلب إلى {status}',
+  'orders.orderCancelled': 'تم إلغاء الطلب بنجاح',
+  'emotion.moodLogSuccess': 'تم تسجيل المزاج بنجاح',
+  'emotion.moodRequired': 'المزاج مطلوب',
+  'emotion.consentUpdated': 'تم تحديث الموافقة بنجاح'
+};
+
+global.__ = jest.fn((key, params = {}) => {
+  let translation = mockTranslations[key] || key;
+  // Replace parameters in translation
+  Object.keys(params).forEach(param => {
+    translation = translation.replace(`{${param}}`, params[param]);
+  });
+  return translation;
+});
+
+// Mock localization middleware
+jest.mock('../src/config/localization', () => ({
+  localizationMiddleware: (req, res, next) => {
+    req.__ = global.__;
+    next();
+  }
+}));
+
+// Mock Prisma Client
+jest.mock('@prisma/client', () => ({
+  PrismaClient: jest.fn(() => global.mockPrisma)
 }));
 
 // Setup global mockPrisma for all tests
-global.mockPrisma = {
+const mockPrisma = {
   user: {
     create: jest.fn(),
     findUnique: jest.fn(),
@@ -308,16 +379,6 @@ global.mockPrisma = {
     findFirst: jest.fn(),
     findMany: jest.fn()
   },
-  voiceSession: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    upsert: jest.fn(),
-    count: jest.fn(),
-    aggregate: jest.fn(),
-    deleteMany: jest.fn()
-  },
   voicePreferences: {
     create: jest.fn(),
     findUnique: jest.fn(),
@@ -340,7 +401,103 @@ global.mockPrisma = {
     update: jest.fn(),
     upsert: jest.fn()
   },
+  // Emotion AI Models
+  emotionLog: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  userMoodLog: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  consentRecord: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    upsert: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  userConsent: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    upsert: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  // Exception Models
+  exception: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    count: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  // Notification Models
+  notification: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    updateMany: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn(),
+    count: jest.fn()
+  },
+  userReminderPreferences: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    upsert: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  // Medical Models
+  medicalConsent: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    upsert: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  ingredient: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn()
+  },
+  // Voice Models
+  voiceSession: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    upsert: jest.fn(),
+    count: jest.fn(),
+    aggregate: jest.fn().mockResolvedValue({
+      _avg: { duration: 120 },
+      _count: { id: 10 }
+    }),
+    deleteMany: jest.fn()
+  },
+  voicePreferences: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    upsert: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  voiceShortcut: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  personalVoiceModel: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    deleteMany: jest.fn()
+  },
   // Transaction support
-  $transaction: jest.fn((callback) => callback(global.mockPrisma)),
+  $transaction: jest.fn((callback) => callback(mockPrisma)),
   $disconnect: jest.fn()
 };
+
+// Make mockPrisma available globally
+global.mockPrisma = mockPrisma;

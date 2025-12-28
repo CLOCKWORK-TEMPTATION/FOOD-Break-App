@@ -15,7 +15,7 @@ const createBudget = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: req.t('budget.budgetCreated'),
+      message: req.__('budget.budgetCreated'),
       data: budget
     });
   } catch (error) {
@@ -45,7 +45,7 @@ const getBudgets = async (req, res) => {
 
     res.json({
       success: true,
-      message: req.t('budget.budgetsFetchSuccess'),
+      message: req.__('budget.budgetsFetchSuccess'),
       data: result.budgets,
       stats: result.stats,
       pagination: result.pagination
@@ -54,7 +54,7 @@ const getBudgets = async (req, res) => {
     logger.error(`خطأ في جلب الميزانيات: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: req.t('budget.budgetsFetchFailed'),
+      message: req.__('budget.budgetsFetchFailed'),
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
@@ -71,7 +71,7 @@ const getBudgetById = async (req, res) => {
 
     res.json({
       success: true,
-      message: req.t('budget.budgetFetchSuccess'),
+      message: req.__('budget.budgetFetchSuccess'),
       data: budget
     });
   } catch (error) {
@@ -124,7 +124,7 @@ const checkBudget = async (req, res) => {
     if (!amount || amount <= 0) {
       return res.status(400).json({
         success: false,
-        message: req.t('budget.amountMustBePositive')
+        message: req.__('budget.amountMustBePositive')
       });
     }
 

@@ -20,8 +20,7 @@ describe('E2E: Admin Management Journey', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    const { PrismaClient } = require('@prisma/client');
-    mockPrisma = new PrismaClient();
+    mockPrisma = global.mockPrisma;
   });
 
   // ==========================================

@@ -28,7 +28,7 @@ const activateEmergencyMode = async (req, res) => {
         success: false,
         error: {
           code: 'MISSING_REQUIRED_FIELDS',
-          message: req.t('validation.required')
+          message: req.__('validation.required')
         }
       });
     }
@@ -44,7 +44,7 @@ const activateEmergencyMode = async (req, res) => {
     // إشعار فوري لجميع أعضاء الفريق
     await notificationService.sendEmergencyAlert(projectId, {
       type: 'EMERGENCY_ACTIVATED',
-      message: req.t('emergency.emergencyProtocolActivated'),
+      message: req.__('emergency.emergencyProtocolActivated'),
       emergencyType,
       sessionId: emergencySession.id
     });
@@ -52,7 +52,7 @@ const activateEmergencyMode = async (req, res) => {
     res.status(201).json({
       success: true,
       data: emergencySession,
-      message: req.t('emergency.emergencyProtocolActivated')
+      message: req.__('emergency.emergencyProtocolActivated')
     });
   } catch (error) {
     logger.error('Error activating emergency mode:', error);
@@ -60,7 +60,7 @@ const activateEmergencyMode = async (req, res) => {
       success: false,
       error: {
         code: 'EMERGENCY_ACTIVATION_FAILED',
-        message: req.t('general.serverError')
+        message: req.__('general.serverError')
       }
     });
   }
@@ -80,7 +80,7 @@ const createEmergencyOrder = async (req, res) => {
         success: false,
         error: {
           code: 'MISSING_REQUIRED_FIELDS',
-          message: req.t('validation.required')
+          message: req.__('validation.required')
         }
       });
     }
@@ -112,7 +112,7 @@ const createEmergencyOrder = async (req, res) => {
     res.status(201).json({
       success: true,
       data: emergencyOrder,
-      message: req.t('emergency.emergencyOrderCreated')
+      message: req.__('emergency.emergencyOrderCreated')
     });
   } catch (error) {
     logger.error('Error creating emergency order:', error);
@@ -120,7 +120,7 @@ const createEmergencyOrder = async (req, res) => {
       success: false,
       error: {
         code: 'EMERGENCY_ORDER_FAILED',
-        message: req.t('general.serverError')
+        message: req.__('general.serverError')
       }
     });
   }
@@ -139,7 +139,7 @@ const getEmergencyRestaurants = async (req, res) => {
         success: false,
         error: {
           code: 'COORDINATES_REQUIRED',
-          message: req.t('validation.coordinatesRequired')
+          message: req.__('validation.coordinatesRequired')
         }
       });
     }
@@ -164,7 +164,7 @@ const getEmergencyRestaurants = async (req, res) => {
       success: false,
       error: {
         code: 'EMERGENCY_RESTAURANTS_FETCH_FAILED',
-        message: req.t('general.serverError')
+        message: req.__('general.serverError')
       }
     });
   }
@@ -184,7 +184,7 @@ const updateEmergencyOrderStatus = async (req, res) => {
         success: false,
         error: {
           code: 'STATUS_REQUIRED',
-          message: req.t('orders.orderStatusRequired')
+          message: req.__('orders.orderStatusRequired')
         }
       });
     }
@@ -206,7 +206,7 @@ const updateEmergencyOrderStatus = async (req, res) => {
     res.json({
       success: true,
       data: updatedOrder,
-      message: req.t('orders.orderStatusUpdated', { status })
+      message: req.__('orders.orderStatusUpdated', { status })
     });
   } catch (error) {
     logger.error('Error updating emergency order status:', error);
@@ -214,7 +214,7 @@ const updateEmergencyOrderStatus = async (req, res) => {
       success: false,
       error: {
         code: 'STATUS_UPDATE_FAILED',
-        message: req.t('orders.orderStatusUpdateFailed')
+        message: req.__('orders.orderStatusUpdateFailed')
       }
     });
   }
@@ -250,7 +250,7 @@ const getPrePreparedInventory = async (req, res) => {
       success: false,
       error: {
         code: 'INVENTORY_FETCH_FAILED',
-        message: req.t('general.serverError')
+        message: req.__('general.serverError')
       }
     });
   }
@@ -270,7 +270,7 @@ const addToPrePreparedInventory = async (req, res) => {
         success: false,
         error: {
           code: 'MISSING_REQUIRED_FIELDS',
-          message: req.t('validation.required')
+          message: req.__('validation.required')
         }
       });
     }
@@ -295,7 +295,7 @@ const addToPrePreparedInventory = async (req, res) => {
       success: false,
       error: {
         code: 'INVENTORY_ADD_FAILED',
-        message: req.t('general.serverError')
+        message: req.__('general.serverError')
       }
     });
   }
@@ -344,7 +344,7 @@ const deactivateEmergencyMode = async (req, res) => {
       success: false,
       error: {
         code: 'EMERGENCY_DEACTIVATION_FAILED',
-        message: req.t('general.serverError')
+        message: req.__('general.serverError')
       }
     });
   }
@@ -376,7 +376,7 @@ const getEmergencyHistory = async (req, res) => {
       success: false,
       error: {
         code: 'HISTORY_FETCH_FAILED',
-        message: req.t('general.serverError')
+        message: req.__('general.serverError')
       }
     });
   }
@@ -396,7 +396,7 @@ const notifyScheduleChange = async (req, res) => {
         success: false,
         error: {
           code: 'MISSING_REQUIRED_FIELDS',
-          message: req.t('validation.required')
+          message: req.__('validation.required')
         }
       });
     }
@@ -421,7 +421,7 @@ const notifyScheduleChange = async (req, res) => {
       success: false,
       error: {
         code: 'SCHEDULE_NOTIFICATION_FAILED',
-        message: req.t('general.serverError')
+        message: req.__('general.serverError')
       }
     });
   }

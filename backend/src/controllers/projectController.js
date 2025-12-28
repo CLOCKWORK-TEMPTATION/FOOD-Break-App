@@ -70,7 +70,7 @@ const createProject = async (req, res, next) => {
           qrCode: updatedProject.qrCode,
           expiresAt: qrData.expiresAt
         },
-        message: req.t('projects.projectCreated')
+        message: req.__('projects.projectCreated')
       }
     });
   } catch (error) {

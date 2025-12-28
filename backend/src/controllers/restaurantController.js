@@ -44,7 +44,7 @@ const createRestaurant = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      message: req.t('menu.restaurantAdded'),
+      message: req.__('menu.restaurantAdded'),
       data: restaurant
     });
   } catch (error) {
@@ -62,7 +62,7 @@ const updateRestaurant = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: req.t('menu.restaurantUpdated'),
+      message: req.__('menu.restaurantUpdated'),
       data: restaurant
     });
   } catch (error) {
@@ -80,7 +80,7 @@ const deleteRestaurant = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: req.t('menu.restaurantDeleted')
+      message: req.__('menu.restaurantDeleted')
     });
   } catch (error) {
     next(error);
@@ -98,7 +98,7 @@ const getNearbyRestaurants = async (req, res, next) => {
     if (!latitude || !longitude) {
       return res.status(400).json({
         success: false,
-        error: req.t('validation.coordinatesRequired')
+        error: req.__('validation.coordinatesRequired')
       });
     }
 

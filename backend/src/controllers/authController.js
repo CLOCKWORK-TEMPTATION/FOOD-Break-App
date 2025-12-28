@@ -11,7 +11,7 @@ const register = async (req, res, next) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        message: req.t('validation.required'),
+        message: req.__('validation.required'),
         errors: errors.array()
       });
     }
@@ -20,7 +20,7 @@ const register = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      message: req.t('auth.registerSuccess'),
+      message: req.__('auth.registerSuccess'),
       data: result
     });
   } catch (error) {
@@ -38,7 +38,7 @@ const login = async (req, res, next) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        message: req.t('validation.required'),
+        message: req.__('validation.required'),
         errors: errors.array()
       });
     }
@@ -48,7 +48,7 @@ const login = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: req.t('auth.loginSuccess'),
+      message: req.__('auth.loginSuccess'),
       data: result
     });
   } catch (error) {

@@ -29,7 +29,7 @@ const getDietaryProfile = async (req, res) => {
         success: false,
         error: {
           code: 'PROFILE_NOT_FOUND',
-          message: req.t('dietary.profileNotFound'),
+          message: req.__('dietary.profileNotFound'),
         },
       });
     }
@@ -44,7 +44,7 @@ const getDietaryProfile = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -67,7 +67,7 @@ const updateDietaryProfile = async (req, res) => {
     res.json({
       success: true,
       data: profile,
-      message: req.t('dietary.profileUpdated'),
+      message: req.__('dietary.profileUpdated'),
     });
   } catch (error) {
     console.error('Error updating dietary profile:', error);
@@ -75,7 +75,7 @@ const updateDietaryProfile = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -100,7 +100,7 @@ const getActiveDiets = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -124,7 +124,7 @@ const getAvailableDietTypes = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -141,7 +141,7 @@ const deleteDietaryProfile = async (req, res) => {
 
     res.json({
       success: true,
-      message: req.t('dietary.profileDeleted'),
+      message: req.__('dietary.profileDeleted'),
     });
   } catch (error) {
     console.error('Error deleting dietary profile:', error);
@@ -149,7 +149,7 @@ const deleteDietaryProfile = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -175,7 +175,7 @@ const getAllergyProfile = async (req, res) => {
         success: false,
         error: {
           code: 'ALLERGY_PROFILE_NOT_FOUND',
-          message: req.t('dietary.allergyProfileNotFound'),
+          message: req.__('dietary.allergyProfileNotFound'),
         },
       });
     }
@@ -190,7 +190,7 @@ const getAllergyProfile = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -213,7 +213,7 @@ const updateAllergyProfile = async (req, res) => {
     res.json({
       success: true,
       data: profile,
-      message: req.t('dietary.allergyProfileUpdated'),
+      message: req.__('dietary.allergyProfileUpdated'),
     });
   } catch (error) {
     console.error('Error updating allergy profile:', error);
@@ -221,7 +221,7 @@ const updateAllergyProfile = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -246,7 +246,7 @@ const getActiveAllergies = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -270,7 +270,7 @@ const getAvailableAllergens = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -297,7 +297,7 @@ const checkItemForAllergies = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -323,7 +323,7 @@ const filterMenuItems = async (req, res) => {
         success: false,
         error: {
           code: 'INVALID_INPUT',
-          message: req.t('dietary.invalidInput'),
+          message: req.__('dietary.invalidInput'),
         },
       });
     }
@@ -340,7 +340,7 @@ const filterMenuItems = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -374,7 +374,7 @@ const findCompatibleItems = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -400,7 +400,7 @@ const getFoodLabel = async (req, res) => {
         success: false,
         error: {
           code: 'LABEL_NOT_FOUND',
-          message: req.t('dietary.labelNotFound'),
+          message: req.__('dietary.labelNotFound'),
         },
       });
     }
@@ -415,7 +415,7 @@ const getFoodLabel = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -440,7 +440,7 @@ const getActiveLabels = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -463,7 +463,7 @@ const updateFoodLabel = async (req, res) => {
     res.json({
       success: true,
       data: label,
-      message: req.t('dietary.labelUpdated'),
+      message: req.__('dietary.labelUpdated'),
     });
   } catch (error) {
     console.error('Error updating food label:', error);
@@ -471,7 +471,7 @@ const updateFoodLabel = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -491,7 +491,7 @@ const verifyFoodLabel = async (req, res) => {
     res.json({
       success: true,
       data: label,
-      message: req.t('dietary.labelVerified'),
+      message: req.__('dietary.labelVerified'),
     });
   } catch (error) {
     console.error('Error verifying food label:', error);
@@ -499,7 +499,7 @@ const verifyFoodLabel = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -518,7 +518,7 @@ const unverifyFoodLabel = async (req, res) => {
     res.json({
       success: true,
       data: label,
-      message: req.t('dietary.labelUnverified'),
+      message: req.__('dietary.labelUnverified'),
     });
   } catch (error) {
     console.error('Error unverifying food label:', error);
@@ -526,7 +526,7 @@ const unverifyFoodLabel = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -551,7 +551,7 @@ const getRestaurantLabelStats = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -575,7 +575,7 @@ const getAvailableLabelTypes = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -595,7 +595,7 @@ const getAllergenInfo = async (req, res) => {
         success: false,
         error: {
           code: 'INFO_NOT_FOUND',
-          message: req.t('dietary.infoNotFound'),
+          message: req.__('dietary.infoNotFound'),
         },
       });
     }
@@ -610,7 +610,7 @@ const getAllergenInfo = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -636,7 +636,7 @@ const createOrderMessage = async (req, res) => {
     res.status(201).json({
       success: true,
       data: message,
-      message: req.t('dietary.messageCreated'),
+      message: req.__('dietary.messageCreated'),
     });
   } catch (error) {
     console.error('Error creating order message:', error);
@@ -644,7 +644,7 @@ const createOrderMessage = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -669,7 +669,7 @@ const createAutoMessages = async (req, res) => {
     res.status(201).json({
       success: true,
       data: messages,
-      message: req.t('dietary.autoMessagesCreated', { count: messages.length }),
+      message: req.__('dietary.autoMessagesCreated', { count: messages.length }),
     });
   } catch (error) {
     console.error('Error creating auto messages:', error);
@@ -677,7 +677,7 @@ const createAutoMessages = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -702,7 +702,7 @@ const getOrderMessages = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -736,7 +736,7 @@ const getRestaurantMessages = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -763,7 +763,7 @@ const getUrgentMessages = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -781,7 +781,7 @@ const acknowledgeMessage = async (req, res) => {
     res.json({
       success: true,
       data: message,
-      message: req.t('dietary.messageAcknowledged'),
+      message: req.__('dietary.messageAcknowledged'),
     });
   } catch (error) {
     console.error('Error acknowledging message:', error);
@@ -789,7 +789,7 @@ const acknowledgeMessage = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -813,7 +813,7 @@ const replyToMessage = async (req, res) => {
     res.json({
       success: true,
       data: message,
-      message: req.t('dietary.messageReplied'),
+      message: req.__('dietary.messageReplied'),
     });
   } catch (error) {
     console.error('Error replying to message:', error);
@@ -821,7 +821,7 @@ const replyToMessage = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }
@@ -846,7 +846,7 @@ const getMessageStats = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.t('general.serverError'),
+        message: req.__('general.serverError'),
       },
     });
   }

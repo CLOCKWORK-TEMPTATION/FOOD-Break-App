@@ -1,78 +1,73 @@
-import axios from 'axios';
+/**
+ * Dashboard Service - Fixed Types
+ */
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1';
-
-const apiClient = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
-
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-export interface ShootingDay {
-  id: string;
-  date: string;
-  dayNumber: number;
-  startTime: string;
-  endTime: string;
-  location: string;
-  status: 'SCHEDULED' | 'SHOOTING' | 'COMPLETED' | 'CANCELLED' | 'OFF_DAY' | 'MOVED';
-  scenes: string[];
-}
-
-export interface CrewMember {
-  id: string;
-  name: string;
-  role: string;
-  avatar: string;
-  status: 'PRESENT' | 'LATE' | 'ABSENT' | 'EXCUSED';
-  checkInTime?: string;
-}
-
-export interface BudgetCategory {
-  name: string;
-  allocated: number;
-  spent: number;
-  projected: number;
-}
+import apiClient from './apiClient';
 
 export interface DashboardStats {
-  totalSpent: number;
-  scheduleAdherence: number;
+  totalOrders: number;
   pendingOrders: number;
-  absences: number;
+  completedOrders: number;
+  cancelledOrders: number;
+  totalRevenue: number;
+  todayRevenue: number;
+  avgOrderValue: number;
+  avgDeliveryTime: number;
 }
 
-export const dashboardService = {
-  async getStats(projectId?: string): Promise<DashboardStats> {
-    const response = await apiClient.get('/admin/dashboard/stats', {
-      params: { projectId }
-    });
-    return response.data.data;
-  },
+export interface Order {
+  id: string;
+  orderNumber: string;
+  user?: { name: string; phone: string };
+  restaurant?: { name: string };
+  status: 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'CANCELLED';
+  totalAmount: number;
+  estimatedDeliveryTime: number;
+  items: Array<{ name: string; quantity: number; price: number }>;
+}
 
-  async getSchedule(projectId: string): Promise<ShootingDay[]> {
-    const response = await apiClient.get(`/projects/${projectId}/schedule`);
-    return response.data.data;
-  },
+export interface MenuItem {
+  id: string;
+  name: string;
+  price: number;
+  category?: string;
+  isAvailable: boolean;
+}
 
-  async getCrew(projectId: string): Promise<CrewMember[]> {
-    const response = await apiClient.get(`/projects/${projectId}/members`);
+export const statsService = {
+  async getDashboardStats(): Promise<DashboardStats> {
+    const response = await apiClient.get('/admin/stats');
     return response.data.data;
-  },
+  }
+};
 
-  async getBudget(projectId: string): Promise<BudgetCategory[]> {
-    const response = await apiClient.get(`/budgets`, {
-      params: { projectId }
-    });
+export const ordersService = {
+  async getOrders(params?: any): Promise<{ orders: Order[]; pagination: any }> {
+    const response = await apiClient.get('/orders', { params });
+    return response.data;
+  },
+  async updateOrderStatus(orderId: string, status: string): Promise<Order> {
+    const response = await apiClient.put(`/orders/${orderId}/status`, { status });
+    return response.data.data;
+  }
+};
+
+export const restaurantsService = {
+  async getRestaurants(params?: any): Promise<{ restaurants: any[] }> {
+    const response = await apiClient.get('/restaurants', { params });
+    return response.data;
+  }
+};
+
+export const notificationsService = {
+  async sendNotification(data: any): Promise<void> {
+    await apiClient.post('/notifications', data);
+  }
+};
+
+export const menuService = {
+  async getMenuItems(restaurantId: string): Promise<MenuItem[]> {
+    const response = await apiClient.get(`/restaurants/${restaurantId}/menu`);
     return response.data.data;
   }
 };

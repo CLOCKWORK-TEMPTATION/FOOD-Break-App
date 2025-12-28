@@ -18,7 +18,7 @@ const orderController = {
       if (!items || items.length === 0) {
         return res.status(400).json({
           success: false,
-          error: req.t('orders.itemsRequired')
+          error: req.__('orders.itemsRequired')
         });
       }
 
@@ -38,13 +38,13 @@ const orderController = {
       res.status(201).json({
         success: true,
         data: order,
-        message: req.t('orders.orderCreated')
+        message: req.__('orders.orderCreated')
       });
     } catch (error) {
       console.error('❌ خطأ في إنشاء الطلب:', error);
       res.status(500).json({
         success: false,
-        error: req.t('orders.orderCreationFailed'),
+        error: req.__('orders.orderCreationFailed'),
         message: error.message
       });
     }
@@ -78,7 +78,7 @@ const orderController = {
       console.error('❌ خطأ في جلب الطلبات:', error);
       res.status(500).json({
         success: false,
-        error: req.t('orders.ordersFetchFailed'),
+        error: req.__('orders.ordersFetchFailed'),
         message: error.message
       });
     }
@@ -98,7 +98,7 @@ const orderController = {
       if (req.user.role === 'REGULAR' && order.userId !== req.user.id) {
         return res.status(403).json({
           success: false,
-          error: req.t('orders.orderAccessDenied')
+          error: req.__('orders.orderAccessDenied')
         });
       }
 
@@ -110,7 +110,7 @@ const orderController = {
       console.error('❌ خطأ في جلب الطلب:', error);
       res.status(404).json({
         success: false,
-        error: req.t('orders.orderNotFound'),
+        error: req.__('orders.orderNotFound'),
         message: error.message
       });
     }
@@ -130,14 +130,14 @@ const orderController = {
       if (!['ADMIN', 'PRODUCER'].includes(req.user.role)) {
         return res.status(403).json({
           success: false,
-          error: req.t('orders.orderStatusUpdateDenied')
+          error: req.__('orders.orderStatusUpdateDenied')
         });
       }
 
       if (!status) {
         return res.status(400).json({
           success: false,
-          error: req.t('orders.orderStatusRequired')
+          error: req.__('orders.orderStatusRequired')
         });
       }
 
@@ -151,13 +151,13 @@ const orderController = {
       res.json({
         success: true,
         data: order,
-        message: req.t('orders.orderStatusUpdated', { status })
+        message: req.__('orders.orderStatusUpdated', { status })
       });
     } catch (error) {
       console.error('❌ خطأ في تحديث حالة الطلب:', error);
       res.status(500).json({
         success: false,
-        error: req.t('orders.orderStatusUpdateFailed'),
+        error: req.__('orders.orderStatusUpdateFailed'),
         message: error.message
       });
     }
@@ -178,13 +178,13 @@ const orderController = {
       res.json({
         success: true,
         data: order,
-        message: req.t('orders.orderCancelled')
+        message: req.__('orders.orderCancelled')
       });
     } catch (error) {
       console.error('❌ خطأ في إلغاء الطلب:', error);
       res.status(500).json({
         success: false,
-        error: req.t('orders.orderCancellationFailed'),
+        error: req.__('orders.orderCancellationFailed'),
         message: error.message
       });
     }
@@ -203,7 +203,7 @@ const orderController = {
       if (!['ADMIN', 'PRODUCER'].includes(req.user.role)) {
         return res.status(403).json({
           success: false,
-          error: req.t('orders.aggregationAccessDenied')
+          error: req.__('orders.aggregationAccessDenied')
         });
       }
 
@@ -215,13 +215,13 @@ const orderController = {
       res.json({
         success: true,
         data: aggregation,
-        message: req.t('orders.aggregationSuccess')
+        message: req.__('orders.aggregationSuccess')
       });
     } catch (error) {
       console.error('❌ خطأ في تجميع الطلبات:', error);
       res.status(500).json({
         success: false,
-        error: req.t('orders.aggregationFailed'),
+        error: req.__('orders.aggregationFailed'),
         message: error.message
       });
     }
@@ -239,7 +239,7 @@ const orderController = {
       if (!['ADMIN', 'PRODUCER'].includes(req.user.role)) {
         return res.status(403).json({
           success: false,
-          error: req.t('orders.summaryAccessDenied')
+          error: req.__('orders.summaryAccessDenied')
         });
       }
 
@@ -253,7 +253,7 @@ const orderController = {
       console.error('❌ خطأ في جلب ملخص اليوم:', error);
       res.status(500).json({
         success: false,
-        error: req.t('orders.summaryFetchFailed'),
+        error: req.__('orders.summaryFetchFailed'),
         message: error.message
       });
     }
@@ -272,7 +272,7 @@ const orderController = {
       if (!['ADMIN', 'PRODUCER'].includes(req.user.role)) {
         return res.status(403).json({
           success: false,
-          error: req.t('orders.exportAccessDenied')
+          error: req.__('orders.exportAccessDenied')
         });
       }
 
@@ -284,13 +284,13 @@ const orderController = {
       res.json({
         success: true,
         data: report,
-        message: req.t('orders.exportSuccess')
+        message: req.__('orders.exportSuccess')
       });
     } catch (error) {
       console.error('❌ خطأ في تصدير التقرير:', error);
       res.status(500).json({
         success: false,
-        error: req.t('orders.exportFailed'),
+        error: req.__('orders.exportFailed'),
         message: error.message
       });
     }
@@ -308,7 +308,7 @@ const orderController = {
       if (!['ADMIN', 'PRODUCER'].includes(req.user.role)) {
         return res.status(403).json({
           success: false,
-          error: req.t('orders.statsAccessDenied')
+          error: req.__('orders.statsAccessDenied')
         });
       }
 
@@ -327,7 +327,7 @@ const orderController = {
       console.error('❌ خطأ في جلب الإحصائيات:', error);
       res.status(500).json({
         success: false,
-        error: req.t('orders.statsFetchFailed'),
+        error: req.__('orders.statsFetchFailed'),
         message: error.message
       });
     }
@@ -345,7 +345,7 @@ const orderController = {
       if (!['ADMIN', 'PRODUCER'].includes(req.user.role)) {
         return res.status(403).json({
           success: false,
-          error: req.t('orders.usersInfoAccessDenied')
+          error: req.__('orders.usersInfoAccessDenied')
         });
       }
 
@@ -360,7 +360,7 @@ const orderController = {
       console.error('❌ خطأ في جلب المستخدمين:', error);
       res.status(500).json({
         success: false,
-        error: req.t('orders.usersFetchFailed'),
+        error: req.__('orders.usersFetchFailed'),
         message: error.message
       });
     }

@@ -29,7 +29,7 @@ const processVoiceCommand = async (req, res) => {
         success: false,
         error: {
           code: 'AUDIO_DATA_REQUIRED',
-          message: req.t('voice.audioDataRequired')
+          message: req.__('voice.audioDataRequired')
         }
       });
     }
@@ -42,7 +42,7 @@ const processVoiceCommand = async (req, res) => {
         success: false,
         error: {
           code: 'TRANSCRIPTION_FAILED',
-          message: req.t('voice.transcriptionFailed')
+          message: req.__('voice.transcriptionFailed')
         }
       });
     }
@@ -69,7 +69,7 @@ const processVoiceCommand = async (req, res) => {
       success: false,
       error: {
         code: 'VOICE_PROCESSING_ERROR',
-        message: req.t('voice.processingFailed')
+        message: req.__('voice.processingFailed')
       }
     });
   }
@@ -89,7 +89,7 @@ const confirmVoiceOrder = async (req, res) => {
         success: false,
         error: {
           code: 'SESSION_ID_REQUIRED',
-          message: req.t('voice.sessionIdRequired')
+          message: req.__('voice.sessionIdRequired')
         }
       });
     }
@@ -109,14 +109,14 @@ const confirmVoiceOrder = async (req, res) => {
         success: true,
         data: {
           order,
-          message: req.t('voice.orderConfirmed')
+          message: req.__('voice.orderConfirmed')
         }
       });
     } else {
       res.json({
         success: true,
         data: {
-          message: req.t('voice.orderCancelled')
+          message: req.__('voice.orderCancelled')
         }
       });
     }
@@ -126,7 +126,7 @@ const confirmVoiceOrder = async (req, res) => {
       success: false,
       error: {
         code: 'VOICE_CONFIRMATION_ERROR',
-        message: req.t('voice.confirmationFailed')
+        message: req.__('voice.confirmationFailed')
       }
     });
   }
@@ -145,7 +145,7 @@ const getUsualOrder = async (req, res) => {
       return res.json({
         success: true,
         data: null,
-        message: req.t('voice.noUsualOrder')
+        message: req.__('voice.noUsualOrder')
       });
     }
 
@@ -159,7 +159,7 @@ const getUsualOrder = async (req, res) => {
       success: false,
       error: {
         code: 'USUAL_ORDER_ERROR',
-        message: req.t('general.serverError')
+        message: req.__('general.serverError')
       }
     });
   }
@@ -179,7 +179,7 @@ const voiceSearchMenu = async (req, res) => {
         success: false,
         error: {
           code: 'SEARCH_QUERY_REQUIRED',
-          message: req.t('validation.searchQueryRequired')
+          message: req.__('validation.searchQueryRequired')
         }
       });
     }
@@ -201,7 +201,7 @@ const voiceSearchMenu = async (req, res) => {
       success: false,
       error: {
         code: 'VOICE_SEARCH_ERROR',
-        message: req.t('voice.searchFailed')
+        message: req.__('voice.searchFailed')
       }
     });
   }
@@ -220,7 +220,7 @@ const textToSpeech = async (req, res) => {
         success: false,
         error: {
           code: 'TEXT_REQUIRED',
-          message: req.t('voice.textRequired')
+          message: req.__('voice.textRequired')
         }
       });
     }
@@ -232,7 +232,7 @@ const textToSpeech = async (req, res) => {
         success: false,
         error: {
           code: 'TTS_FAILED',
-          message: req.t('voice.ttsGenerationFailed')
+          message: req.__('voice.ttsGenerationFailed')
         }
       });
     }
@@ -250,7 +250,7 @@ const textToSpeech = async (req, res) => {
       success: false,
       error: {
         code: 'TTS_ERROR',
-        message: req.t('voice.ttsGenerationFailed')
+        message: req.__('voice.ttsGenerationFailed')
       }
     });
   }
@@ -282,7 +282,7 @@ const setVoicePreferences = async (req, res) => {
     res.json({
       success: true,
       data: preferences,
-      message: req.t('voice.preferencesUpdated')
+      message: req.__('voice.preferencesUpdated')
     });
   } catch (error) {
     logger.error('Error setting voice preferences:', error);
@@ -290,7 +290,7 @@ const setVoicePreferences = async (req, res) => {
       success: false,
       error: {
         code: 'PREFERENCES_ERROR',
-        message: req.t('voice.preferencesUpdateFailed')
+        message: req.__('voice.preferencesUpdateFailed')
       }
     });
   }
@@ -321,7 +321,7 @@ const getVoicePreferences = async (req, res) => {
       success: false,
       error: {
         code: 'PREFERENCES_FETCH_ERROR',
-        message: req.t('general.serverError')
+        message: req.__('general.serverError')
       }
     });
   }
@@ -341,7 +341,7 @@ const createVoiceShortcut = async (req, res) => {
         success: false,
         error: {
           code: 'MISSING_REQUIRED_FIELDS',
-          message: req.t('validation.required')
+          message: req.__('validation.required')
         }
       });
     }
@@ -355,7 +355,7 @@ const createVoiceShortcut = async (req, res) => {
     res.status(201).json({
       success: true,
       data: shortcut,
-      message: req.t('voice.shortcutCreated')
+      message: req.__('voice.shortcutCreated')
     });
   } catch (error) {
     logger.error('Error creating voice shortcut:', error);
@@ -363,7 +363,7 @@ const createVoiceShortcut = async (req, res) => {
       success: false,
       error: {
         code: 'SHORTCUT_CREATION_ERROR',
-        message: req.t('voice.shortcutCreationFailed')
+        message: req.__('voice.shortcutCreationFailed')
       }
     });
   }
@@ -388,7 +388,7 @@ const getVoiceShortcuts = async (req, res) => {
       success: false,
       error: {
         code: 'SHORTCUTS_FETCH_ERROR',
-        message: req.t('general.serverError')
+        message: req.__('general.serverError')
       }
     });
   }
@@ -408,7 +408,7 @@ const trainPersonalVoiceModel = async (req, res) => {
         success: false,
         error: {
           code: 'INSUFFICIENT_VOICE_SAMPLES',
-          message: req.t('voice.insufficientVoiceSamples')
+          message: req.__('voice.insufficientVoiceSamples')
         }
       });
     }
@@ -421,7 +421,7 @@ const trainPersonalVoiceModel = async (req, res) => {
     res.json({
       success: true,
       data: trainingResult,
-      message: req.t('voice.personalModelTrained')
+      message: req.__('voice.personalModelTrained')
     });
   } catch (error) {
     logger.error('Error training personal voice model:', error);
@@ -429,7 +429,7 @@ const trainPersonalVoiceModel = async (req, res) => {
       success: false,
       error: {
         code: 'VOICE_TRAINING_ERROR',
-        message: req.t('voice.trainingFailed')
+        message: req.__('voice.trainingFailed')
       }
     });
   }
@@ -459,7 +459,7 @@ const getVoiceAnalytics = async (req, res) => {
       success: false,
       error: {
         code: 'ANALYTICS_ERROR',
-        message: req.t('general.serverError')
+        message: req.__('general.serverError')
       }
     });
   }

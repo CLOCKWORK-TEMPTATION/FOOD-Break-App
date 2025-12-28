@@ -20,7 +20,7 @@ const createPaymentIntent = async (req, res, next) => {
     if (!amount || amount <= 0) {
       return res.status(400).json({
         success: false,
-        error: req.t('payments.invalidAmount')
+        error: req.__('payments.invalidAmount')
       });
     }
 
@@ -61,7 +61,7 @@ const createPaymentIntent = async (req, res, next) => {
     logger.error('Error creating payment intent:', error);
     res.status(500).json({
       success: false,
-      error: req.t('payments.paymentIntentCreateFailed')
+      error: req.__('payments.paymentIntentCreateFailed')
     });
   }
 };
@@ -77,7 +77,7 @@ const confirmPayment = async (req, res, next) => {
     if (!paymentMethodId || !paymentIntentId) {
       return res.status(400).json({
         success: false,
-        error: req.t('payments.paymentInfoIncomplete')
+        error: req.__('payments.paymentInfoIncomplete')
       });
     }
 
@@ -98,7 +98,7 @@ const confirmPayment = async (req, res, next) => {
     if (payment.count === 0) {
       return res.status(404).json({
         success: false,
-        error: req.t('payments.paymentInfoNotFound')
+        error: req.__('payments.paymentInfoNotFound')
       });
     }
 
@@ -129,7 +129,7 @@ const confirmPayment = async (req, res, next) => {
 
     res.status(500).json({
       success: false,
-      error: req.t('payments.paymentConfirmFailed')
+      error: req.__('payments.paymentConfirmFailed')
     });
   }
 };
@@ -184,7 +184,7 @@ const getUserInvoices = async (req, res, next) => {
     logger.error('Error getting user invoices:', error);
     res.status(500).json({
       success: false,
-      error: req.t('payments.invoicesFetchFailed')
+      error: req.__('payments.invoicesFetchFailed')
     });
   }
 };
@@ -200,7 +200,7 @@ const processRefund = async (req, res, next) => {
     if (!paymentIntentId) {
       return res.status(400).json({
         success: false,
-        error: req.t('payments.paymentIntentIdRequired')
+        error: req.__('payments.paymentIntentIdRequired')
       });
     }
 
@@ -215,14 +215,14 @@ const processRefund = async (req, res, next) => {
     if (!payment) {
       return res.status(404).json({
         success: false,
-        error: req.t('payments.paymentNotFound')
+        error: req.__('payments.paymentNotFound')
       });
     }
 
     if (payment.status !== 'COMPLETED') {
       return res.status(400).json({
         success: false,
-        error: req.t('payments.cannotRefundIncompletePayment')
+        error: req.__('payments.cannotRefundIncompletePayment')
       });
     }
 
@@ -262,7 +262,7 @@ const processRefund = async (req, res, next) => {
     logger.error('Error processing refund:', error);
     res.status(500).json({
       success: false,
-      error: req.t('payments.refundProcessFailed')
+      error: req.__('payments.refundProcessFailed')
     });
   }
 };

@@ -56,7 +56,7 @@ const createOrUpdateMedicalProfile = async (req, res) => {
     res.json({
       success: true,
       data: medicalProfile,
-      message: req.t('medical.profileUpdated')
+      message: req.__('medical.profileUpdated')
     });
   } catch (error) {
     logger.error('Error creating/updating medical profile:', error);
@@ -64,7 +64,7 @@ const createOrUpdateMedicalProfile = async (req, res) => {
       success: false,
       error: {
         code: 'MEDICAL_PROFILE_ERROR',
-        message: req.t('medical.profileUpdateFailed')
+        message: req.__('medical.profileUpdateFailed')
       }
     });
   }
@@ -84,7 +84,7 @@ const getMedicalProfile = async (req, res) => {
         success: false,
         error: {
           code: 'MEDICAL_PROFILE_NOT_FOUND',
-          message: req.t('medical.profileNotFound')
+          message: req.__('medical.profileNotFound')
         }
       });
     }
@@ -99,7 +99,7 @@ const getMedicalProfile = async (req, res) => {
       success: false,
       error: {
         code: 'MEDICAL_PROFILE_FETCH_ERROR',
-        message: req.t('general.serverError')
+        message: req.__('general.serverError')
       }
     });
   }
@@ -135,7 +135,7 @@ const checkItemForMedicalAlerts = async (req, res) => {
         type: 'SEVERE_ALLERGY_WARNING',
         itemName: alertResult.itemName,
         allergens: alertResult.detectedAllergens,
-        message: req.t('emergency.allergyAlertTriggered')
+        message: req.__('emergency.allergyAlertTriggered')
       });
 
       // إشعار جهة الاتصال الطارئة إذا كانت متوفرة
@@ -158,7 +158,7 @@ const checkItemForMedicalAlerts = async (req, res) => {
       success: false,
       error: {
         code: 'MEDICAL_CHECK_ERROR',
-        message: req.t('general.serverError')
+        message: req.__('general.serverError')
       }
     });
   }
@@ -186,7 +186,7 @@ const reportMedicalIncident = async (req, res) => {
         success: false,
         error: {
           code: 'MISSING_REQUIRED_FIELDS',
-          message: req.t('validation.required')
+          message: req.__('validation.required')
         }
       });
     }
@@ -210,7 +210,7 @@ const reportMedicalIncident = async (req, res) => {
     res.status(201).json({
       success: true,
       data: incident,
-      message: req.t('medical.incidentReported')
+      message: req.__('medical.incidentReported')
     });
   } catch (error) {
     logger.error('Error reporting medical incident:', error);
@@ -218,7 +218,7 @@ const reportMedicalIncident = async (req, res) => {
       success: false,
       error: {
         code: 'INCIDENT_REPORT_ERROR',
-        message: req.t('medical.incidentReportFailed')
+        message: req.__('medical.incidentReportFailed')
       }
     });
   }
@@ -251,7 +251,7 @@ const getMedicalIncidents = async (req, res) => {
       success: false,
       error: {
         code: 'INCIDENTS_FETCH_ERROR',
-        message: req.t('general.serverError')
+        message: req.__('general.serverError')
       }
     });
   }
@@ -288,7 +288,7 @@ const updateMedicalConsent = async (req, res) => {
     res.json({
       success: true,
       data: consent,
-      message: req.t('medical.consentUpdated')
+      message: req.__('medical.consentUpdated')
     });
   } catch (error) {
     logger.error('Error updating medical consent:', error);
@@ -296,7 +296,7 @@ const updateMedicalConsent = async (req, res) => {
       success: false,
       error: {
         code: 'CONSENT_UPDATE_ERROR',
-        message: req.t('medical.consentUpdateFailed')
+        message: req.__('medical.consentUpdateFailed')
       }
     });
   }
@@ -321,7 +321,7 @@ const getMedicalConsent = async (req, res) => {
       success: false,
       error: {
         code: 'CONSENT_FETCH_ERROR',
-        message: req.t('general.serverError')
+        message: req.__('general.serverError')
       }
     });
   }
@@ -347,7 +347,7 @@ const addIngredient = async (req, res) => {
         success: false,
         error: {
           code: 'MISSING_REQUIRED_FIELDS',
-          message: req.t('validation.required')
+          message: req.__('validation.required')
         }
       });
     }
@@ -365,7 +365,7 @@ const addIngredient = async (req, res) => {
     res.status(201).json({
       success: true,
       data: ingredient,
-      message: req.t('medical.ingredientAdded')
+      message: req.__('medical.ingredientAdded')
     });
   } catch (error) {
     logger.error('Error adding ingredient:', error);
@@ -373,7 +373,7 @@ const addIngredient = async (req, res) => {
       success: false,
       error: {
         code: 'INGREDIENT_ADD_ERROR',
-        message: req.t('medical.ingredientAddFailed')
+        message: req.__('medical.ingredientAddFailed')
       }
     });
   }
@@ -392,7 +392,7 @@ const searchIngredients = async (req, res) => {
         success: false,
         error: {
           code: 'SEARCH_QUERY_REQUIRED',
-          message: req.t('validation.searchQueryRequired')
+          message: req.__('validation.searchQueryRequired')
         }
       });
     }
@@ -413,7 +413,7 @@ const searchIngredients = async (req, res) => {
       success: false,
       error: {
         code: 'INGREDIENT_SEARCH_ERROR',
-        message: req.t('general.serverError')
+        message: req.__('general.serverError')
       }
     });
   }
@@ -431,7 +431,7 @@ const exportMedicalData = async (req, res) => {
     res.json({
       success: true,
       data: exportData,
-      message: req.t('medical.dataExported')
+      message: req.__('medical.dataExported')
     });
   } catch (error) {
     logger.error('Error exporting medical data:', error);
@@ -439,7 +439,7 @@ const exportMedicalData = async (req, res) => {
       success: false,
       error: {
         code: 'DATA_EXPORT_ERROR',
-        message: req.t('medical.dataExportFailed')
+        message: req.__('medical.dataExportFailed')
       }
     });
   }
@@ -468,7 +468,7 @@ const deleteMedicalData = async (req, res) => {
 
     res.json({
       success: true,
-      message: req.t('medical.dataDeleted')
+      message: req.__('medical.dataDeleted')
     });
   } catch (error) {
     logger.error('Error deleting medical data:', error);
@@ -476,7 +476,7 @@ const deleteMedicalData = async (req, res) => {
       success: false,
       error: {
         code: 'DATA_DELETION_ERROR',
-        message: req.t('medical.dataDeletionFailed')
+        message: req.__('medical.dataDeletionFailed')
       }
     });
   }
