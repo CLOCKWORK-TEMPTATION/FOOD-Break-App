@@ -82,7 +82,7 @@ jest.mock('@paypal/checkout-server-sdk', () => ({
 
 // Mock OpenAI and other AI services
 jest.mock('openai', () => {
-  return jest.fn().mockImplementation(() => ({
+  const mockOpenAI = jest.fn().mockImplementation(() => ({
     chat: {
       completions: {
         create: jest.fn().mockResolvedValue({
@@ -91,25 +91,26 @@ jest.mock('openai', () => {
       },
     },
   }));
+
+  // Return mockOpenAI directly as the default export (for require('openai'))
+  return mockOpenAI;
 });
 
-jest.mock('@anthropic-ai/sdk', () => ({
-  __esModule: true,
-  Anthropic: jest.fn().mockImplementation(() => ({
+jest.mock('@anthropic-ai/sdk', () => {
+  const mockAnthropic = jest.fn().mockImplementation(() => ({
     messages: {
       create: jest.fn().mockResolvedValue({
         content: [{ text: 'Test Anthropic response' }]
       }),
     },
-  })),
-  default: jest.fn().mockImplementation(() => ({
-    messages: {
-      create: jest.fn().mockResolvedValue({
-        content: [{ text: 'Test Anthropic response' }]
-      }),
-    },
-  })),
-}));
+  }));
+
+  return {
+    __esModule: true,
+    Anthropic: mockAnthropic,
+    default: mockAnthropic
+  };
+});
 
 jest.mock('@google/generative-ai', () => ({
   GoogleGenerativeAI: jest.fn(() => ({
@@ -125,7 +126,7 @@ jest.mock('@google/generative-ai', () => ({
 
 // Mock Groq SDK
 jest.mock('groq-sdk', () => {
-  return jest.fn().mockImplementation(() => ({
+  const mockGroq = jest.fn().mockImplementation(() => ({
     chat: {
       completions: {
         create: jest.fn().mockResolvedValue({
@@ -134,19 +135,23 @@ jest.mock('groq-sdk', () => {
       },
     },
   }));
+
+  return mockGroq;
 });
 
 // Mock Together AI
 jest.mock('together-ai', () => {
-  return jest.fn().mockImplementation(() => ({
+  const mockTogether = jest.fn().mockImplementation(() => ({
     chat: {
       completions: {
         create: jest.fn().mockResolvedValue({
-          choices: [{ message: { content: 'Test Together AI response' } }]
+          choices: [{ message: { content: 'Test Together response' } }]
         }),
       },
     },
   }));
+
+  return mockTogether;
 });
 
 // Mock nodemailer
@@ -160,6 +165,20 @@ jest.mock('nodemailer', () => ({
 jest.mock('qrcode', () => ({
   toDataURL: jest.fn().mockResolvedValue('data:image/png;base64,test-qr-code'),
 }));
+
+// Mock swagger-jsdoc to avoid file reading issues during tests
+jest.mock('swagger-jsdoc', () => {
+  return jest.fn(() => ({
+    openapi: '3.0.0',
+    info: {
+      title: 'BreakApp API',
+      version: '1.0.0',
+      description: 'Test API Documentation'
+    },
+    paths: {},
+    components: {}
+  }));
+});
 
 // Mock file system operations for testing
 jest.mock('fs', () => ({
@@ -242,376 +261,348 @@ jest.mock('../src/config/localization', () => ({
   }
 }));
 
-// Mock Prisma Client
-jest.mock('@prisma/client', () => ({
-  PrismaClient: jest.fn(() => global.mockPrisma)
-}));
+// Mock @prisma/client
+jest.mock('@prisma/client', () => {
+  const mockPrismaInstance = {
+    user: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn(),
+      upsert: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    restaurant: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    menuItem: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    order: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    orderItem: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    payment: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    project: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    projectMember: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    emergencySession: {
+      create: jest.fn(),
+      findFirst: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    emergencyOrder: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    emergencyLog: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    prePreparedInventory: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    scheduleChangeNotification: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    emergencyRestaurantNotification: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    medicalProfile: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      upsert: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    medicalIncident: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    medicalCheck: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    medicalConsent: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      upsert: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    emergencyAlert: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    emergencyContactNotification: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    medicalDataAccessLog: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    medicalDataDeletion: {
+      create: jest.fn(),
+      findMany: jest.fn()
+    },
+    ingredient: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn()
+    },
+    drugFoodInteraction: {
+      findFirst: jest.fn(),
+      findMany: jest.fn()
+    },
+    voiceSession: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      upsert: jest.fn(),
+      count: jest.fn(),
+      aggregate: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    voicePreferences: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      upsert: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    voiceShortcut: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    personalVoiceModel: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    dietaryProfile: {
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      upsert: jest.fn()
+    },
+    exception: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    review: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    notification: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    userPreferences: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
+      upsert: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    recommendation: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    costBudget: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    costAlert: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    userBehavior: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    orderPattern: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    autoOrderSuggestion: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    userNutritionLog: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    nutritionGoal: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
+      upsert: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    invoice: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    consentRecord: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    userMoodLog: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    emotionProfile: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
+      upsert: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    qrCode: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn()
+    },
+    // Transaction support
+    $transaction: jest.fn((callback) => callback(mockPrismaInstance)),
+    $disconnect: jest.fn(),
+    $connect: jest.fn()
+  };
 
-// Setup global mockPrisma for all tests
-const mockPrisma = {
-  user: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    count: jest.fn(),
-    upsert: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  restaurant: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    count: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  menuItem: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    count: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  order: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    count: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  orderItem: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  payment: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    count: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  project: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    count: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  // Phase 4 Models
-  emergencySession: {
-    create: jest.fn(),
-    findFirst: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    count: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  emergencyOrder: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  emergencyLog: {
-    create: jest.fn(),
-    findMany: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  prePreparedInventory: {
-    create: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  scheduleChangeNotification: {
-    create: jest.fn(),
-    findMany: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  emergencyRestaurantNotification: {
-    create: jest.fn(),
-    findMany: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  medicalProfile: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    upsert: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  medicalIncident: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    count: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  medicalCheck: {
-    create: jest.fn(),
-    findMany: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  medicalConsent: {
-    create: jest.fn(),
-    findMany: jest.fn(),
-    upsert: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  emergencyAlert: {
-    create: jest.fn(),
-    findMany: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  emergencyContactNotification: {
-    create: jest.fn(),
-    findMany: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  medicalDataAccessLog: {
-    create: jest.fn(),
-    findMany: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  medicalDataDeletion: {
-    create: jest.fn(),
-    findMany: jest.fn()
-  },
-  ingredient: {
-    create: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn()
-  },
-  drugFoodInteraction: {
-    findFirst: jest.fn(),
-    findMany: jest.fn()
-  },
-  voicePreferences: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    upsert: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  voiceShortcut: {
-    create: jest.fn(),
-    findMany: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  personalVoiceModel: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  dietaryProfile: {
-    findUnique: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    upsert: jest.fn()
-  },
-  // Emotion AI Models
-  emotionLog: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  userMoodLog: {
-    create: jest.fn(),
-    findMany: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  consentRecord: {
-    create: jest.fn(),
-    findMany: jest.fn(),
-    upsert: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  userConsent: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    upsert: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  // Notification Models
-  notification: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    updateMany: jest.fn(),
-    delete: jest.fn(),
-    deleteMany: jest.fn(),
-    count: jest.fn()
-  },
-  // Exception Models
-  exception: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    count: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  costAlert: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  budget: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  userReminderPreferences: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    upsert: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  nutritionGoal: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  mealPlan: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  production: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  invoice: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  qRCode: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  reminder: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  mlModel: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  prediction: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  workflow: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  admin: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  analytics: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  // Voice Models
-  voiceSession: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn(),
-    update: jest.fn(),
-    upsert: jest.fn(),
-    count: jest.fn(),
-    aggregate: jest.fn().mockResolvedValue({
-      _avg: { duration: 120 },
-      _count: { id: 10 }
-    }),
-    deleteMany: jest.fn()
-  },
-  // Transaction support
-  $transaction: jest.fn((callback) => callback(mockPrisma)),
-  $disconnect: jest.fn(),
-  $connect: jest.fn()
-};
+  // Make mockPrisma available globally
+  global.mockPrisma = mockPrismaInstance;
 
-// Make mockPrisma available globally
-global.mockPrisma = mockPrisma;
+  return {
+    PrismaClient: jest.fn(() => mockPrismaInstance),
+    Prisma: {
+      PrismaClientKnownRequestError: class PrismaClientKnownRequestError extends Error {
+        constructor(message, { code, clientVersion }) {
+          super(message);
+          this.code = code;
+          this.clientVersion = clientVersion;
+        }
+      },
+      PrismaClientValidationError: class PrismaClientValidationError extends Error {},
+    }
+  };
+});
+

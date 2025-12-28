@@ -30,9 +30,10 @@ module.exports = {
   ],
   
   coverageDirectory: 'coverage',
-  
-  // Note: Coverage thresholds are set to 97% for exceptional quality
-  // تشجيع مستوى تغطية استثنائي عالي الجودة
+
+  // Note: Coverage thresholds raised to 97% for maximum quality
+  // تم رفع مستوى التغطية المطلوبة إلى 97%
+  // Current: ~26% | Target: 97% | Status: Work in progress
   coverageThreshold: {
     global: {
       branches: 97,

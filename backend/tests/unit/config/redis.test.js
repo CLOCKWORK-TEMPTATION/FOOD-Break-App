@@ -1,110 +1,99 @@
 /**
- * Redis Configuration Tests
- * اختبارات شاملة لإعدادات Redis
+ * اختبارات وحدة Redis Configuration
+ * Unit tests for Redis configuration module
  */
-
-// Mock redis before requiring the module
-jest.mock('redis', () => ({
-  createClient: jest.fn()
-}));
-
-jest.mock('../../../src/utils/logger', () => ({
-  info: jest.fn(),
-  error: jest.fn(),
-  warn: jest.fn()
-}));
 
 const redis = require('redis');
 const logger = require('../../../src/utils/logger');
+const redisConfig = require('../../../src/config/redis');
 
-describe('Redis Configuration Tests', () => {
+// Mock Redis client
+jest.mock('redis');
+jest.mock('../../../src/utils/logger');
+
+describe('Redis Configuration', () => {
   let mockRedisClient;
-  let redisConfig;
 
   beforeEach(() => {
-    // Clear module cache to get fresh instance
-    jest.resetModules();
     jest.clearAllMocks();
 
-    // Setup mock Redis client
+    // Create mock Redis client
     mockRedisClient = {
       connect: jest.fn().mockResolvedValue(undefined),
-      disconnect: jest.fn().mockResolvedValue(undefined),
-      quit: jest.fn().mockResolvedValue(undefined),
       get: jest.fn(),
       setEx: jest.fn(),
       del: jest.fn(),
       keys: jest.fn(),
+      quit: jest.fn().mockResolvedValue(undefined),
       on: jest.fn()
     };
 
-    redis.createClient.mockReturnValue(mockRedisClient);
-
-    // Require fresh module after mocking
-    redisConfig = require('../../../src/config/redis');
-  });
-
-  afterEach(async () => {
-    // Clean up
-    if (redisConfig && redisConfig.disconnect) {
-      await redisConfig.disconnect();
-    }
+    redis.createClient = jest.fn().mockReturnValue(mockRedisClient);
   });
 
   describe('createRedisClient', () => {
-    it('should create Redis client with default URL', async () => {
+    it('should create and connect to Redis client successfully', async () => {
       const client = await redisConfig.createRedisClient();
 
       expect(redis.createClient).toHaveBeenCalledWith({
         url: 'redis://localhost:6379',
-        socket: expect.objectContaining({
+        socket: {
           reconnectStrategy: expect.any(Function)
-        })
+        }
       });
       expect(mockRedisClient.connect).toHaveBeenCalled();
       expect(client).toBe(mockRedisClient);
     });
 
-    it('should create Redis client with custom URL from env', async () => {
+    it('should use REDIS_URL from environment if available', async () => {
       process.env.REDIS_URL = 'redis://custom:6380';
 
-      // Reload module to pick up new env
-      jest.resetModules();
-      const freshRedisConfig = require('../../../src/config/redis');
-
-      await freshRedisConfig.createRedisClient();
+      await redisConfig.createRedisClient();
 
       expect(redis.createClient).toHaveBeenCalledWith({
         url: 'redis://custom:6380',
-        socket: expect.any(Object)
+        socket: {
+          reconnectStrategy: expect.any(Function)
+        }
       });
 
       delete process.env.REDIS_URL;
     });
 
     it('should return existing client if already created', async () => {
-      const client1 = await redisConfig.createRedisClient();
-      redis.createClient.mockClear();
+      const firstClient = await redisConfig.createRedisClient();
+      const secondClient = await redisConfig.createRedisClient();
 
-      const client2 = await redisConfig.createRedisClient();
-
-      expect(redis.createClient).not.toHaveBeenCalled();
-      expect(client1).toBe(client2);
+      expect(firstClient).toBe(secondClient);
+      expect(redis.createClient).toHaveBeenCalledTimes(1);
     });
 
-    it('should set up error event handler', async () => {
+    it('should setup error event handler', async () => {
       await redisConfig.createRedisClient();
 
       expect(mockRedisClient.on).toHaveBeenCalledWith('error', expect.any(Function));
     });
 
-    it('should set up connect event handler', async () => {
+    it('should setup connect event handler', async () => {
       await redisConfig.createRedisClient();
 
       expect(mockRedisClient.on).toHaveBeenCalledWith('connect', expect.any(Function));
     });
 
-    it('should log connection success', async () => {
+    it('should log error when Redis client error occurs', async () => {
+      await redisConfig.createRedisClient();
+
+      const errorHandler = mockRedisClient.on.mock.calls.find(
+        call => call[0] === 'error'
+      )[1];
+
+      const testError = new Error('Redis connection failed');
+      errorHandler(testError);
+
+      expect(logger.error).toHaveBeenCalledWith('Redis Client Error:', testError);
+    });
+
+    it('should log info when Redis client connects', async () => {
       await redisConfig.createRedisClient();
 
       const connectHandler = mockRedisClient.on.mock.calls.find(
@@ -116,56 +105,52 @@ describe('Redis Configuration Tests', () => {
       expect(logger.info).toHaveBeenCalledWith('Redis Client Connected');
     });
 
-    it('should log connection errors', async () => {
-      await redisConfig.createRedisClient();
-
-      const errorHandler = mockRedisClient.on.mock.calls.find(
-        call => call[0] === 'error'
-      )[1];
-
-      const testError = new Error('Connection failed');
-      errorHandler(testError);
-
-      expect(logger.error).toHaveBeenCalledWith('Redis Client Error:', testError);
-    });
-
-    it('should handle connection failure', async () => {
+    it('should handle connection errors and return null', async () => {
       mockRedisClient.connect.mockRejectedValue(new Error('Connection failed'));
 
       const client = await redisConfig.createRedisClient();
 
       expect(client).toBeNull();
-      expect(logger.error).toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to create Redis client:',
+        expect.any(Error)
+      );
     });
 
-    it('should implement reconnect strategy', async () => {
+    it('should implement reconnect strategy correctly', async () => {
       await redisConfig.createRedisClient();
 
-      const socketConfig = redis.createClient.mock.calls[0][0].socket;
-      const reconnectStrategy = socketConfig.reconnectStrategy;
+      const reconnectStrategy = redis.createClient.mock.calls[0][0].socket.reconnectStrategy;
 
-      // Test exponential backoff
+      // Test with less than 10 retries
       expect(reconnectStrategy(1)).toBe(100);
       expect(reconnectStrategy(5)).toBe(500);
       expect(reconnectStrategy(10)).toBe(1000);
-      expect(reconnectStrategy(50)).toBe(3000); // Max 3000ms
+
+      // Test max value capping at 3000
+      expect(reconnectStrategy(50)).toBe(3000);
     });
 
-    it('should stop reconnecting after max attempts', async () => {
+    it('should return error after max reconnection attempts', async () => {
       await redisConfig.createRedisClient();
 
-      const socketConfig = redis.createClient.mock.calls[0][0].socket;
-      const reconnectStrategy = socketConfig.reconnectStrategy;
-
+      const reconnectStrategy = redis.createClient.mock.calls[0][0].socket.reconnectStrategy;
       const result = reconnectStrategy(11);
+
       expect(result).toBeInstanceOf(Error);
       expect(result.message).toBe('Redis connection failed');
+      expect(logger.error).toHaveBeenCalledWith('Redis: Max reconnection attempts reached');
     });
   });
 
   describe('get', () => {
-    it('should get value from Redis and parse JSON', async () => {
-      const testData = { name: 'John', age: 30 };
+    beforeEach(async () => {
+      await redisConfig.createRedisClient();
+      jest.clearAllMocks();
+    });
+
+    it('should get and parse JSON value from cache', async () => {
+      const testData = { name: 'test', value: 123 };
       mockRedisClient.get.mockResolvedValue(JSON.stringify(testData));
 
       const result = await redisConfig.get('test-key');
@@ -182,28 +167,47 @@ describe('Redis Configuration Tests', () => {
       expect(result).toBeNull();
     });
 
-    it('should handle get errors', async () => {
-      mockRedisClient.get.mockRejectedValue(new Error('Get failed'));
+    it('should handle JSON parse errors and return null', async () => {
+      mockRedisClient.get.mockResolvedValue('invalid-json{');
 
-      const result = await redisConfig.get('test-key');
+      const result = await redisConfig.get('invalid-key');
 
       expect(result).toBeNull();
-      expect(logger.error).toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Redis GET error'),
+        expect.any(Error)
+      );
     });
 
-    it('should create client if not exists', async () => {
-      jest.resetModules();
-      const freshRedis = require('../../../src/config/redis');
+    it('should handle Redis errors gracefully', async () => {
+      mockRedisClient.get.mockRejectedValue(new Error('Redis error'));
+
+      const result = await redisConfig.get('error-key');
+
+      expect(result).toBeNull();
+      expect(logger.error).toHaveBeenCalledWith(
+        'Redis GET error for key error-key:',
+        expect.any(Error)
+      );
+    });
+
+    it('should create client if not already created', async () => {
+      // Disconnect first
+      await redisConfig.disconnect();
+      jest.clearAllMocks();
 
       mockRedisClient.get.mockResolvedValue(JSON.stringify({ test: 'data' }));
 
-      await freshRedis.get('test-key');
+      await redisConfig.get('test-key');
 
       expect(redis.createClient).toHaveBeenCalled();
     });
 
-    it('should handle null client gracefully', async () => {
-      mockRedisClient.connect.mockRejectedValue(new Error('Failed'));
+    it('should return null if client creation fails', async () => {
+      await redisConfig.disconnect();
+      jest.clearAllMocks();
+
+      mockRedisClient.connect.mockRejectedValue(new Error('Connection failed'));
 
       const result = await redisConfig.get('test-key');
 
@@ -212,53 +216,80 @@ describe('Redis Configuration Tests', () => {
   });
 
   describe('set', () => {
-    it('should set value in Redis with default expiration', async () => {
+    beforeEach(async () => {
+      await redisConfig.createRedisClient();
+      jest.clearAllMocks();
+    });
+
+    it('should set value in cache with default expiration', async () => {
+      const testData = { name: 'test', value: 123 };
       mockRedisClient.setEx.mockResolvedValue('OK');
 
-      const result = await redisConfig.set('test-key', { name: 'John' });
+      const result = await redisConfig.set('test-key', testData);
 
       expect(mockRedisClient.setEx).toHaveBeenCalledWith(
         'test-key',
         3600,
-        JSON.stringify({ name: 'John' })
+        JSON.stringify(testData)
       );
       expect(result).toBe(true);
     });
 
-    it('should set value with custom expiration', async () => {
+    it('should set value with custom expiration time', async () => {
+      const testData = { name: 'test' };
       mockRedisClient.setEx.mockResolvedValue('OK');
 
-      const result = await redisConfig.set('test-key', { data: 'test' }, 7200);
+      const result = await redisConfig.set('test-key', testData, 1800);
 
       expect(mockRedisClient.setEx).toHaveBeenCalledWith(
         'test-key',
-        7200,
-        JSON.stringify({ data: 'test' })
+        1800,
+        JSON.stringify(testData)
       );
       expect(result).toBe(true);
     });
 
-    it('should handle set errors', async () => {
-      mockRedisClient.setEx.mockRejectedValue(new Error('Set failed'));
+    it('should handle Redis errors and return false', async () => {
+      mockRedisClient.setEx.mockRejectedValue(new Error('Redis error'));
 
-      const result = await redisConfig.set('test-key', { data: 'test' });
-
-      expect(result).toBe(false);
-      expect(logger.error).toHaveBeenCalled();
-    });
-
-    it('should return false if client is null', async () => {
-      mockRedisClient.connect.mockRejectedValue(new Error('Failed'));
-
-      const result = await redisConfig.set('test-key', { data: 'test' });
+      const result = await redisConfig.set('error-key', { test: 'data' });
 
       expect(result).toBe(false);
+      expect(logger.error).toHaveBeenCalledWith(
+        'Redis SET error for key error-key:',
+        expect.any(Error)
+      );
     });
 
-    it('should serialize complex objects', async () => {
+    it('should create client if not already created', async () => {
+      await redisConfig.disconnect();
+      jest.clearAllMocks();
+
+      mockRedisClient.setEx.mockResolvedValue('OK');
+
+      await redisConfig.set('test-key', { test: 'data' });
+
+      expect(redis.createClient).toHaveBeenCalled();
+    });
+
+    it('should return false if client creation fails', async () => {
+      await redisConfig.disconnect();
+      jest.clearAllMocks();
+
+      mockRedisClient.connect.mockRejectedValue(new Error('Connection failed'));
+
+      const result = await redisConfig.set('test-key', { test: 'data' });
+
+      expect(result).toBe(false);
+    });
+
+    it('should stringify complex objects correctly', async () => {
       const complexData = {
-        user: { name: 'John', nested: { value: 123 } },
-        array: [1, 2, 3]
+        array: [1, 2, 3],
+        nested: { obj: 'value' },
+        number: 42,
+        boolean: true,
+        null: null
       };
       mockRedisClient.setEx.mockResolvedValue('OK');
 
@@ -273,7 +304,12 @@ describe('Redis Configuration Tests', () => {
   });
 
   describe('del', () => {
-    it('should delete key from Redis', async () => {
+    beforeEach(async () => {
+      await redisConfig.createRedisClient();
+      jest.clearAllMocks();
+    });
+
+    it('should delete key from cache successfully', async () => {
       mockRedisClient.del.mockResolvedValue(1);
 
       const result = await redisConfig.del('test-key');
@@ -282,17 +318,34 @@ describe('Redis Configuration Tests', () => {
       expect(result).toBe(true);
     });
 
-    it('should handle delete errors', async () => {
-      mockRedisClient.del.mockRejectedValue(new Error('Delete failed'));
+    it('should handle Redis errors and return false', async () => {
+      mockRedisClient.del.mockRejectedValue(new Error('Redis error'));
 
-      const result = await redisConfig.del('test-key');
+      const result = await redisConfig.del('error-key');
 
       expect(result).toBe(false);
-      expect(logger.error).toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        'Redis DEL error for key error-key:',
+        expect.any(Error)
+      );
     });
 
-    it('should return false if client is null', async () => {
-      mockRedisClient.connect.mockRejectedValue(new Error('Failed'));
+    it('should create client if not already created', async () => {
+      await redisConfig.disconnect();
+      jest.clearAllMocks();
+
+      mockRedisClient.del.mockResolvedValue(1);
+
+      await redisConfig.del('test-key');
+
+      expect(redis.createClient).toHaveBeenCalled();
+    });
+
+    it('should return false if client creation fails', async () => {
+      await redisConfig.disconnect();
+      jest.clearAllMocks();
+
+      mockRedisClient.connect.mockRejectedValue(new Error('Connection failed'));
 
       const result = await redisConfig.del('test-key');
 
@@ -301,19 +354,24 @@ describe('Redis Configuration Tests', () => {
   });
 
   describe('delPattern', () => {
+    beforeEach(async () => {
+      await redisConfig.createRedisClient();
+      jest.clearAllMocks();
+    });
+
     it('should delete all keys matching pattern', async () => {
-      const keys = ['user:1', 'user:2', 'user:3'];
-      mockRedisClient.keys.mockResolvedValue(keys);
+      const matchingKeys = ['user:1', 'user:2', 'user:3'];
+      mockRedisClient.keys.mockResolvedValue(matchingKeys);
       mockRedisClient.del.mockResolvedValue(3);
 
       const result = await redisConfig.delPattern('user:*');
 
       expect(mockRedisClient.keys).toHaveBeenCalledWith('user:*');
-      expect(mockRedisClient.del).toHaveBeenCalledWith(keys);
+      expect(mockRedisClient.del).toHaveBeenCalledWith(matchingKeys);
       expect(result).toBe(true);
     });
 
-    it('should handle case when no keys match pattern', async () => {
+    it('should handle empty key list', async () => {
       mockRedisClient.keys.mockResolvedValue([]);
 
       const result = await redisConfig.delPattern('nonexistent:*');
@@ -323,69 +381,152 @@ describe('Redis Configuration Tests', () => {
       expect(result).toBe(true);
     });
 
-    it('should handle delPattern errors', async () => {
-      mockRedisClient.keys.mockRejectedValue(new Error('Keys failed'));
+    it('should handle Redis errors and return false', async () => {
+      mockRedisClient.keys.mockRejectedValue(new Error('Redis error'));
 
-      const result = await redisConfig.delPattern('test:*');
+      const result = await redisConfig.delPattern('error:*');
 
       expect(result).toBe(false);
-      expect(logger.error).toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        'Redis DEL pattern error for error:*:',
+        expect.any(Error)
+      );
     });
 
-    it('should return false if client is null', async () => {
-      mockRedisClient.connect.mockRejectedValue(new Error('Failed'));
+    it('should create client if not already created', async () => {
+      await redisConfig.disconnect();
+      jest.clearAllMocks();
+
+      mockRedisClient.keys.mockResolvedValue([]);
+
+      await redisConfig.delPattern('test:*');
+
+      expect(redis.createClient).toHaveBeenCalled();
+    });
+
+    it('should return false if client creation fails', async () => {
+      await redisConfig.disconnect();
+      jest.clearAllMocks();
+
+      mockRedisClient.connect.mockRejectedValue(new Error('Connection failed'));
 
       const result = await redisConfig.delPattern('test:*');
 
       expect(result).toBe(false);
+    });
+
+    it('should handle pattern with multiple matching keys', async () => {
+      const manyKeys = Array.from({ length: 100 }, (_, i) => `cache:item:${i}`);
+      mockRedisClient.keys.mockResolvedValue(manyKeys);
+      mockRedisClient.del.mockResolvedValue(100);
+
+      const result = await redisConfig.delPattern('cache:item:*');
+
+      expect(mockRedisClient.del).toHaveBeenCalledWith(manyKeys);
+      expect(result).toBe(true);
     });
   });
 
   describe('disconnect', () => {
-    it('should disconnect Redis client', async () => {
+    it('should disconnect from Redis successfully', async () => {
       await redisConfig.createRedisClient();
-      mockRedisClient.quit.mockResolvedValue('OK');
+      jest.clearAllMocks();
 
       await redisConfig.disconnect();
 
       expect(mockRedisClient.quit).toHaveBeenCalled();
     });
 
-    it('should handle disconnect errors', async () => {
+    it('should handle disconnect errors gracefully', async () => {
       await redisConfig.createRedisClient();
-      mockRedisClient.quit.mockRejectedValue(new Error('Quit failed'));
+      jest.clearAllMocks();
+
+      mockRedisClient.quit.mockRejectedValue(new Error('Disconnect error'));
 
       await redisConfig.disconnect();
 
-      expect(logger.error).toHaveBeenCalledWith('Redis disconnect error:', expect.any(Error));
+      expect(logger.error).toHaveBeenCalledWith(
+        'Redis disconnect error:',
+        expect.any(Error)
+      );
     });
 
-    it('should handle disconnect when client is null', async () => {
-      // Don't create client
+    it('should do nothing if client is not connected', async () => {
       await redisConfig.disconnect();
 
-      // Should not throw
       expect(mockRedisClient.quit).not.toHaveBeenCalled();
+    });
+
+    it('should reset client to null after disconnect', async () => {
+      await redisConfig.createRedisClient();
+      await redisConfig.disconnect();
+      jest.clearAllMocks();
+
+      // Next operation should create a new client
+      mockRedisClient.get.mockResolvedValue(null);
+      await redisConfig.get('test-key');
+
+      expect(redis.createClient).toHaveBeenCalled();
     });
   });
 
-  describe('Module exports', () => {
-    it('should export all required functions', () => {
-      expect(redisConfig.createRedisClient).toBeDefined();
-      expect(redisConfig.get).toBeDefined();
-      expect(redisConfig.set).toBeDefined();
-      expect(redisConfig.del).toBeDefined();
-      expect(redisConfig.delPattern).toBeDefined();
-      expect(redisConfig.disconnect).toBeDefined();
+  describe('Integration scenarios', () => {
+    beforeEach(async () => {
+      await redisConfig.createRedisClient();
+      jest.clearAllMocks();
     });
 
-    it('all exported functions should be functions', () => {
-      expect(typeof redisConfig.createRedisClient).toBe('function');
-      expect(typeof redisConfig.get).toBe('function');
-      expect(typeof redisConfig.set).toBe('function');
-      expect(typeof redisConfig.del).toBe('function');
-      expect(typeof redisConfig.delPattern).toBe('function');
-      expect(typeof redisConfig.disconnect).toBe('function');
+    it('should handle complete set-get-delete cycle', async () => {
+      const testData = { userId: '123', name: 'Test User' };
+
+      // Set
+      mockRedisClient.setEx.mockResolvedValue('OK');
+      const setResult = await redisConfig.set('user:123', testData);
+      expect(setResult).toBe(true);
+
+      // Get
+      mockRedisClient.get.mockResolvedValue(JSON.stringify(testData));
+      const getData = await redisConfig.get('user:123');
+      expect(getData).toEqual(testData);
+
+      // Delete
+      mockRedisClient.del.mockResolvedValue(1);
+      const delResult = await redisConfig.del('user:123');
+      expect(delResult).toBe(true);
+    });
+
+    it('should handle pattern deletion workflow', async () => {
+      // Create multiple keys
+      mockRedisClient.setEx.mockResolvedValue('OK');
+      await redisConfig.set('session:1', { data: 'a' });
+      await redisConfig.set('session:2', { data: 'b' });
+      await redisConfig.set('session:3', { data: 'c' });
+
+      // Delete all sessions
+      mockRedisClient.keys.mockResolvedValue(['session:1', 'session:2', 'session:3']);
+      mockRedisClient.del.mockResolvedValue(3);
+      const result = await redisConfig.delPattern('session:*');
+
+      expect(result).toBe(true);
+      expect(mockRedisClient.del).toHaveBeenCalledWith(['session:1', 'session:2', 'session:3']);
+    });
+
+    it('should handle concurrent operations', async () => {
+      mockRedisClient.get.mockResolvedValue(JSON.stringify({ test: 1 }));
+      mockRedisClient.setEx.mockResolvedValue('OK');
+
+      const promises = [
+        redisConfig.get('key1'),
+        redisConfig.set('key2', { test: 2 }),
+        redisConfig.get('key3'),
+        redisConfig.del('key4')
+      ];
+
+      await Promise.all(promises);
+
+      expect(mockRedisClient.get).toHaveBeenCalledTimes(2);
+      expect(mockRedisClient.setEx).toHaveBeenCalledTimes(1);
+      expect(mockRedisClient.del).toHaveBeenCalledTimes(1);
     });
   });
 });

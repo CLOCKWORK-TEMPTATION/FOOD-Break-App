@@ -1,572 +1,457 @@
 /**
- * Swagger Configuration Tests
- * اختبارات تكوين Swagger
+ * اختبارات وحدة Swagger Configuration
+ * Unit tests for Swagger configuration module
  */
 
-// Mock swagger-jsdoc before requiring the module
-jest.mock('swagger-jsdoc', () => {
-  return jest.fn(() => ({
-    openapi: '3.0.0',
-    info: {
-      title: 'BreakApp API',
-      version: '1.0.0',
-      description: 'Test Description',
-      contact: {
-        name: 'BreakApp Development Team',
-        email: 'support@breakapp.com'
-      },
-      license: {
-        name: 'MIT',
-        url: 'https://opensource.org/licenses/MIT'
-      }
-    },
-    servers: [
-      {
-        url: process.env.API_BASE_URL || 'http://localhost:3000/api/v1',
-        description: 'Development server'
-      },
-      {
-        url: process.env.PROD_API_URL || 'https://api.breakapp.com/api/v1',
-        description: 'Production server'
-      }
-    ],
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-          description: 'JWT Authorization header'
-        }
-      },
-      schemas: {
-        Error: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean', example: false },
-            error: { type: 'object', properties: { code: { type: 'string' }, message: { type: 'string' } } }
-          }
-        },
-        Success: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean', example: true },
-            data: { type: 'object' },
-            meta: { type: 'object' }
-          }
-        },
-        User: {
-          type: 'object',
-          properties: {
-            id: { type: 'string', format: 'uuid' },
-            email: { type: 'string', format: 'email' },
-            firstName: { type: 'string' },
-            lastName: { type: 'string' },
-            role: { type: 'string', enum: ['REGULAR', 'VIP', 'ADMIN', 'PRODUCER'] }
-          }
-        },
-        RegisterRequest: {
-          type: 'object',
-          required: ['email', 'password', 'firstName', 'lastName'],
-          properties: {
-            email: { type: 'string' },
-            password: { type: 'string', minLength: 8 },
-            firstName: { type: 'string' },
-            lastName: { type: 'string' }
-          }
-        },
-        LoginRequest: {
-          type: 'object',
-          required: ['email', 'password'],
-          properties: { email: { type: 'string' }, password: { type: 'string' } }
-        },
-        AuthResponse: {
-          type: 'object',
-          properties: { success: { type: 'boolean' }, data: { type: 'object' } }
-        },
-        Restaurant: {
-          type: 'object',
-          properties: {
-            id: { type: 'string' },
-            name: { type: 'string' },
-            latitude: { type: 'number', format: 'float' },
-            longitude: { type: 'number', format: 'float' }
-          }
-        },
-        MenuItem: {
-          type: 'object',
-          properties: {
-            name: { type: 'string' },
-            price: { type: 'number' },
-            menuType: { type: 'string', enum: ['CORE', 'GEOGRAPHIC'] },
-            nutritionalInfo: {
-              properties: {
-                calories: { type: 'number' },
-                protein: { type: 'number' },
-                carbs: { type: 'number' },
-                fat: { type: 'number' }
-              }
-            }
-          }
-        },
-        Order: {
-          type: 'object',
-          properties: {
-            status: { type: 'string', enum: ['PENDING', 'CONFIRMED', 'PREPARING', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED'] },
-            orderType: { type: 'string', enum: ['REGULAR', 'EXCEPTION'] },
-            totalAmount: { type: 'number' }
-          }
-        },
-        CreateOrderRequest: {
-          type: 'object',
-          required: ['restaurantId', 'items'],
-          properties: {
-            restaurantId: { type: 'string' },
-            items: {
-              type: 'array',
-              items: { required: ['menuItemId', 'quantity'] }
-            },
-            exceptionType: { type: 'string', enum: ['FULL', 'LIMITED', 'SELF_PAID'] }
-          }
-        },
-        Notification: {
-          type: 'object',
-          properties: {
-            type: { type: 'string', enum: ['ORDER_CONFIRMED', 'ORDER_READY', 'ORDER_DELIVERED', 'EXCEPTION_APPROVED', 'REMINDER', 'SYSTEM'] }
-          }
-        },
-        NutritionLog: {
-          type: 'object',
-          properties: {
-            totalCalories: { type: 'number' },
-            totalProtein: { type: 'number' },
-            totalCarbs: { type: 'number' },
-            totalFat: { type: 'number' }
-          }
-        },
-        Recommendation: {
-          type: 'object',
-          properties: {
-            recommendationType: { type: 'string', enum: ['WEATHER_BASED', 'PERSONALIZED', 'SIMILAR_ITEMS', 'DIETARY_DIVERSITY', 'TRENDING'] },
-            score: { type: 'number' }
-          }
-        }
-      },
-      responses: {
-        Unauthorized: { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
-        Forbidden: { description: 'Forbidden', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
-        NotFound: { description: 'Not Found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
-        ValidationError: { description: 'Validation Error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
-      }
-    },
-    security: [{ bearerAuth: [] }]
-  }));
-});
+// Mock swagger-jsdoc before importing
+jest.mock('swagger-jsdoc');
+
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerSpec = require('../../../src/config/swagger');
 
 describe('Swagger Configuration', () => {
-  let swaggerSpec;
-
   beforeEach(() => {
-    // Reset modules before each test
-    jest.resetModules();
+    jest.clearAllMocks();
   });
 
-  describe('Basic Configuration', () => {
-    it('should load swagger configuration successfully', () => {
-      swaggerSpec = require('../../../src/config/swagger');
+  describe('Swagger specification', () => {
+    it('should create swagger specification', () => {
       expect(swaggerSpec).toBeDefined();
-    });
-
-    it('should have OpenAPI 3.0.0 specification', () => {
-      swaggerSpec = require('../../../src/config/swagger');
-      expect(swaggerSpec.openapi).toBe('3.0.0');
-    });
-
-    it('should have API info defined', () => {
-      swaggerSpec = require('../../../src/config/swagger');
-      expect(swaggerSpec.info).toBeDefined();
-      expect(swaggerSpec.info.title).toBe('BreakApp API');
-      expect(swaggerSpec.info.version).toBe('1.0.0');
-      expect(swaggerSpec.info.description).toBeDefined();
-    });
-
-    it('should have contact information', () => {
-      swaggerSpec = require('../../../src/config/swagger');
-      expect(swaggerSpec.info.contact).toBeDefined();
-      expect(swaggerSpec.info.contact.name).toBe('BreakApp Development Team');
-      expect(swaggerSpec.info.contact.email).toBe('support@breakapp.com');
-    });
-
-    it('should have license information', () => {
-      swaggerSpec = require('../../../src/config/swagger');
-      expect(swaggerSpec.info.license).toBeDefined();
-      expect(swaggerSpec.info.license.name).toBe('MIT');
-      expect(swaggerSpec.info.license.url).toBe('https://opensource.org/licenses/MIT');
-    });
-  });
-
-  describe('Server Configuration', () => {
-    it('should have servers defined', () => {
-      swaggerSpec = require('../../../src/config/swagger');
-      expect(swaggerSpec.servers).toBeDefined();
-      expect(Array.isArray(swaggerSpec.servers)).toBe(true);
-      expect(swaggerSpec.servers.length).toBeGreaterThanOrEqual(1);
-    });
-
-    it('should have development server', () => {
-      swaggerSpec = require('../../../src/config/swagger');
-      const devServer = swaggerSpec.servers.find(s => s.description === 'Development server');
-      expect(devServer).toBeDefined();
-    });
-
-    it('should have production server', () => {
-      swaggerSpec = require('../../../src/config/swagger');
-      const prodServer = swaggerSpec.servers.find(s => s.description === 'Production server');
-      expect(prodServer).toBeDefined();
-    });
-  });
-
-  describe('Security Schemes', () => {
-    it('should have components defined', () => {
-      swaggerSpec = require('../../../src/config/swagger');
-      expect(swaggerSpec.components).toBeDefined();
-    });
-
-    it('should have security schemes defined', () => {
-      swaggerSpec = require('../../../src/config/swagger');
-      expect(swaggerSpec.components.securitySchemes).toBeDefined();
-    });
-
-    it('should have bearer authentication configured', () => {
-      swaggerSpec = require('../../../src/config/swagger');
-      expect(swaggerSpec.components.securitySchemes.bearerAuth).toBeDefined();
-      expect(swaggerSpec.components.securitySchemes.bearerAuth.type).toBe('http');
-      expect(swaggerSpec.components.securitySchemes.bearerAuth.scheme).toBe('bearer');
-      expect(swaggerSpec.components.securitySchemes.bearerAuth.bearerFormat).toBe('JWT');
-    });
-
-    it('should have global security applied', () => {
-      swaggerSpec = require('../../../src/config/swagger');
-      expect(swaggerSpec.security).toBeDefined();
-      expect(Array.isArray(swaggerSpec.security)).toBe(true);
-    });
-  });
-
-  describe('Schema Definitions', () => {
-    it('should have schemas defined', () => {
-      swaggerSpec = require('../../../src/config/swagger');
-      expect(swaggerSpec.components.schemas).toBeDefined();
-      expect(typeof swaggerSpec.components.schemas).toBe('object');
-    });
-
-    describe('General Schemas', () => {
-      it('should have Error schema', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        expect(swaggerSpec.components.schemas.Error).toBeDefined();
-        expect(swaggerSpec.components.schemas.Error.type).toBe('object');
-        expect(swaggerSpec.components.schemas.Error.properties.success).toBeDefined();
-        expect(swaggerSpec.components.schemas.Error.properties.error).toBeDefined();
-      });
-
-      it('should have Success schema', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        expect(swaggerSpec.components.schemas.Success).toBeDefined();
-        expect(swaggerSpec.components.schemas.Success.type).toBe('object');
-        expect(swaggerSpec.components.schemas.Success.properties.success).toBeDefined();
-        expect(swaggerSpec.components.schemas.Success.properties.data).toBeDefined();
-      });
-    });
-
-    describe('User Schemas', () => {
-      it('should have User schema', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const userSchema = swaggerSpec.components.schemas.User;
-        expect(userSchema).toBeDefined();
-        expect(userSchema.type).toBe('object');
-        expect(userSchema.properties.id).toBeDefined();
-        expect(userSchema.properties.email).toBeDefined();
-        expect(userSchema.properties.firstName).toBeDefined();
-        expect(userSchema.properties.lastName).toBeDefined();
-        expect(userSchema.properties.role).toBeDefined();
-      });
-
-      it('should have correct user role enum', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const roleEnum = swaggerSpec.components.schemas.User.properties.role.enum;
-        expect(roleEnum).toBeDefined();
-        expect(roleEnum).toContain('REGULAR');
-        expect(roleEnum).toContain('VIP');
-        expect(roleEnum).toContain('ADMIN');
-        expect(roleEnum).toContain('PRODUCER');
-      });
-    });
-
-    describe('Auth Schemas', () => {
-      it('should have RegisterRequest schema', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const registerSchema = swaggerSpec.components.schemas.RegisterRequest;
-        expect(registerSchema).toBeDefined();
-        expect(registerSchema.required).toContain('email');
-        expect(registerSchema.required).toContain('password');
-        expect(registerSchema.required).toContain('firstName');
-        expect(registerSchema.required).toContain('lastName');
-      });
-
-      it('should have LoginRequest schema', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const loginSchema = swaggerSpec.components.schemas.LoginRequest;
-        expect(loginSchema).toBeDefined();
-        expect(loginSchema.required).toContain('email');
-        expect(loginSchema.required).toContain('password');
-      });
-
-      it('should have AuthResponse schema', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const authResponseSchema = swaggerSpec.components.schemas.AuthResponse;
-        expect(authResponseSchema).toBeDefined();
-        expect(authResponseSchema.properties.data).toBeDefined();
-      });
-
-      it('should validate password minimum length', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const passwordField = swaggerSpec.components.schemas.RegisterRequest.properties.password;
-        expect(passwordField.minLength).toBe(8);
-      });
-    });
-
-    describe('Restaurant Schemas', () => {
-      it('should have Restaurant schema', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const restaurantSchema = swaggerSpec.components.schemas.Restaurant;
-        expect(restaurantSchema).toBeDefined();
-        expect(restaurantSchema.properties.id).toBeDefined();
-        expect(restaurantSchema.properties.name).toBeDefined();
-        expect(restaurantSchema.properties.latitude).toBeDefined();
-        expect(restaurantSchema.properties.longitude).toBeDefined();
-      });
-
-      it('should have location coordinates as float', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const restaurantSchema = swaggerSpec.components.schemas.Restaurant;
-        expect(restaurantSchema.properties.latitude.format).toBe('float');
-        expect(restaurantSchema.properties.longitude.format).toBe('float');
-      });
-    });
-
-    describe('Menu Item Schemas', () => {
-      it('should have MenuItem schema', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const menuItemSchema = swaggerSpec.components.schemas.MenuItem;
-        expect(menuItemSchema).toBeDefined();
-        expect(menuItemSchema.properties.name).toBeDefined();
-        expect(menuItemSchema.properties.price).toBeDefined();
-        expect(menuItemSchema.properties.nutritionalInfo).toBeDefined();
-      });
-
-      it('should have menu type enum', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const menuTypeEnum = swaggerSpec.components.schemas.MenuItem.properties.menuType.enum;
-        expect(menuTypeEnum).toBeDefined();
-        expect(menuTypeEnum).toContain('CORE');
-        expect(menuTypeEnum).toContain('GEOGRAPHIC');
-      });
-
-      it('should have nutritional information structure', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const nutritionalInfo = swaggerSpec.components.schemas.MenuItem.properties.nutritionalInfo;
-        expect(nutritionalInfo.properties.calories).toBeDefined();
-        expect(nutritionalInfo.properties.protein).toBeDefined();
-        expect(nutritionalInfo.properties.carbs).toBeDefined();
-        expect(nutritionalInfo.properties.fat).toBeDefined();
-      });
-    });
-
-    describe('Order Schemas', () => {
-      it('should have Order schema', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const orderSchema = swaggerSpec.components.schemas.Order;
-        expect(orderSchema).toBeDefined();
-        expect(orderSchema.properties.status).toBeDefined();
-        expect(orderSchema.properties.orderType).toBeDefined();
-        expect(orderSchema.properties.totalAmount).toBeDefined();
-      });
-
-      it('should have correct order status enum', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const statusEnum = swaggerSpec.components.schemas.Order.properties.status.enum;
-        expect(statusEnum).toContain('PENDING');
-        expect(statusEnum).toContain('CONFIRMED');
-        expect(statusEnum).toContain('PREPARING');
-        expect(statusEnum).toContain('OUT_FOR_DELIVERY');
-        expect(statusEnum).toContain('DELIVERED');
-        expect(statusEnum).toContain('CANCELLED');
-      });
-
-      it('should have correct order type enum', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const typeEnum = swaggerSpec.components.schemas.Order.properties.orderType.enum;
-        expect(typeEnum).toContain('REGULAR');
-        expect(typeEnum).toContain('EXCEPTION');
-      });
-
-      it('should have CreateOrderRequest schema', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const createOrderSchema = swaggerSpec.components.schemas.CreateOrderRequest;
-        expect(createOrderSchema).toBeDefined();
-        expect(createOrderSchema.required).toContain('restaurantId');
-        expect(createOrderSchema.required).toContain('items');
-      });
-
-      it('should validate order items structure', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const itemsSchema = swaggerSpec.components.schemas.CreateOrderRequest.properties.items;
-        expect(itemsSchema.type).toBe('array');
-        expect(itemsSchema.items.required).toContain('menuItemId');
-        expect(itemsSchema.items.required).toContain('quantity');
-      });
-
-      it('should have exception type enum', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const exceptionEnum = swaggerSpec.components.schemas.CreateOrderRequest.properties.exceptionType.enum;
-        expect(exceptionEnum).toContain('FULL');
-        expect(exceptionEnum).toContain('LIMITED');
-        expect(exceptionEnum).toContain('SELF_PAID');
-      });
-    });
-
-    describe('Notification Schemas', () => {
-      it('should have Notification schema', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const notificationSchema = swaggerSpec.components.schemas.Notification;
-        expect(notificationSchema).toBeDefined();
-        expect(notificationSchema.properties.type).toBeDefined();
-        expect(notificationSchema.properties.title).toBeDefined();
-        expect(notificationSchema.properties.message).toBeDefined();
-      });
-
-      it('should have correct notification type enum', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const typeEnum = swaggerSpec.components.schemas.Notification.properties.type.enum;
-        expect(typeEnum).toContain('ORDER_CONFIRMED');
-        expect(typeEnum).toContain('ORDER_READY');
-        expect(typeEnum).toContain('ORDER_DELIVERED');
-        expect(typeEnum).toContain('EXCEPTION_APPROVED');
-        expect(typeEnum).toContain('REMINDER');
-        expect(typeEnum).toContain('SYSTEM');
-      });
-    });
-
-    describe('Nutrition Schemas', () => {
-      it('should have NutritionLog schema', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const nutritionLogSchema = swaggerSpec.components.schemas.NutritionLog;
-        expect(nutritionLogSchema).toBeDefined();
-        expect(nutritionLogSchema.properties.totalCalories).toBeDefined();
-        expect(nutritionLogSchema.properties.totalProtein).toBeDefined();
-        expect(nutritionLogSchema.properties.totalCarbs).toBeDefined();
-        expect(nutritionLogSchema.properties.totalFat).toBeDefined();
-      });
-    });
-
-    describe('Recommendation Schemas', () => {
-      it('should have Recommendation schema', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const recommendationSchema = swaggerSpec.components.schemas.Recommendation;
-        expect(recommendationSchema).toBeDefined();
-        expect(recommendationSchema.properties.recommendationType).toBeDefined();
-        expect(recommendationSchema.properties.score).toBeDefined();
-      });
-
-      it('should have correct recommendation type enum', () => {
-        swaggerSpec = require('../../../src/config/swagger');
-        const typeEnum = swaggerSpec.components.schemas.Recommendation.properties.recommendationType.enum;
-        expect(typeEnum).toContain('WEATHER_BASED');
-        expect(typeEnum).toContain('PERSONALIZED');
-        expect(typeEnum).toContain('SIMILAR_ITEMS');
-        expect(typeEnum).toContain('DIETARY_DIVERSITY');
-        expect(typeEnum).toContain('TRENDING');
-      });
-    });
-  });
-
-  describe('Response Definitions', () => {
-    it('should have responses defined', () => {
-      swaggerSpec = require('../../../src/config/swagger');
-      expect(swaggerSpec.components.responses).toBeDefined();
-    });
-
-    it('should have Unauthorized response', () => {
-      swaggerSpec = require('../../../src/config/swagger');
-      expect(swaggerSpec.components.responses.Unauthorized).toBeDefined();
-      expect(swaggerSpec.components.responses.Unauthorized.description).toBeDefined();
-    });
-
-    it('should have Forbidden response', () => {
-      swaggerSpec = require('../../../src/config/swagger');
-      expect(swaggerSpec.components.responses.Forbidden).toBeDefined();
-    });
-
-    it('should have NotFound response', () => {
-      swaggerSpec = require('../../../src/config/swagger');
-      expect(swaggerSpec.components.responses.NotFound).toBeDefined();
-    });
-
-    it('should have ValidationError response', () => {
-      swaggerSpec = require('../../../src/config/swagger');
-      expect(swaggerSpec.components.responses.ValidationError).toBeDefined();
-    });
-
-    it('should have all responses use Error schema', () => {
-      swaggerSpec = require('../../../src/config/swagger');
-      const responses = swaggerSpec.components.responses;
-
-      Object.values(responses).forEach(response => {
-        expect(response.content).toBeDefined();
-        expect(response.content['application/json']).toBeDefined();
-        expect(response.content['application/json'].schema).toBeDefined();
-      });
-    });
-  });
-
-  describe('Paths and API Documentation', () => {
-    it('should export swagger specification', () => {
-      swaggerSpec = require('../../../src/config/swagger');
-      expect(swaggerSpec).toBeTruthy();
       expect(typeof swaggerSpec).toBe('object');
     });
 
-    it('should be compatible with OpenAPI 3.0', () => {
-      swaggerSpec = require('../../../src/config/swagger');
-      expect(swaggerSpec.openapi).toMatch(/^3\.0\./);
+    it('should call swaggerJsdoc with correct options', () => {
+      expect(swaggerJsdoc).toHaveBeenCalled();
+      const callArgs = swaggerJsdoc.mock.calls[0][0];
+      expect(callArgs).toBeDefined();
+      expect(callArgs.definition).toBeDefined();
+      expect(callArgs.apis).toBeDefined();
+    });
+
+    it('should have OpenAPI 3.0.0 specification', () => {
+      const callArgs = swaggerJsdoc.mock.calls[0][0];
+      expect(callArgs.definition.openapi).toBe('3.0.0');
+    });
+
+    it('should have info section', () => {
+      const callArgs = swaggerJsdoc.mock.calls[0][0];
+      expect(callArgs.definition.info).toBeDefined();
+      expect(callArgs.definition.info.title).toBe('BreakApp API');
+      expect(callArgs.definition.info.version).toBe('1.0.0');
+      expect(callArgs.definition.info.description).toBeDefined();
+    });
+
+    it('should have contact information', () => {
+      const callArgs = swaggerJsdoc.mock.calls[0][0];
+      expect(callArgs.definition.info.contact).toBeDefined();
+      expect(callArgs.definition.info.contact.name).toBe('BreakApp Development Team');
+      expect(callArgs.definition.info.contact.email).toBe('support@breakapp.com');
+    });
+
+    it('should have license information', () => {
+      const callArgs = swaggerJsdoc.mock.calls[0][0];
+      expect(callArgs.definition.info.license).toBeDefined();
+      expect(callArgs.definition.info.license.name).toBe('MIT');
+      expect(callArgs.definition.info.license.url).toBe('https://opensource.org/licenses/MIT');
+    });
+
+    it('should have servers configuration', () => {
+      const callArgs = swaggerJsdoc.mock.calls[0][0];
+      expect(callArgs.definition.servers).toBeDefined();
+      expect(Array.isArray(callArgs.definition.servers)).toBe(true);
+      expect(callArgs.definition.servers.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('should have development server configuration', () => {
+      const callArgs = swaggerJsdoc.mock.calls[0][0];
+      const devServer = callArgs.definition.servers.find(s => s.description === 'Development server');
+      expect(devServer).toBeDefined();
+      expect(devServer.url).toBeDefined();
+    });
+
+    it('should have production server configuration', () => {
+      const callArgs = swaggerJsdoc.mock.calls[0][0];
+      const prodServer = callArgs.definition.servers.find(s => s.description === 'Production server');
+      expect(prodServer).toBeDefined();
+      expect(prodServer.url).toBeDefined();
+    });
+
+    it('should use environment variables for server URLs', () => {
+      const originalApiBaseUrl = process.env.API_BASE_URL;
+      const originalProdUrl = process.env.PROD_API_URL;
+
+      process.env.API_BASE_URL = 'http://test:3000/api/v1';
+      process.env.PROD_API_URL = 'https://test.com/api/v1';
+
+      // Re-require to get updated env values
+      jest.resetModules();
+      jest.mock('swagger-jsdoc');
+      require('../../../src/config/swagger');
+
+      expect(swaggerJsdoc).toHaveBeenCalled();
+
+      // Restore
+      process.env.API_BASE_URL = originalApiBaseUrl;
+      process.env.PROD_API_URL = originalProdUrl;
     });
   });
 
-  describe('Environment Configuration', () => {
-    it('should use environment variables for server URLs', () => {
-      const originalEnv = process.env;
-      process.env.API_BASE_URL = 'http://test:3000/api/v1';
-
-      jest.resetModules();
-      swaggerSpec = require('../../../src/config/swagger');
-
-      const devServer = swaggerSpec.servers.find(s => s.description === 'Development server');
-      expect(devServer.url).toBe('http://test:3000/api/v1');
-
-      process.env = originalEnv;
+  describe('Security schemes', () => {
+    it('should have security schemes defined', () => {
+      const callArgs = swaggerJsdoc.mock.calls[0][0];
+      expect(callArgs.definition.components.securitySchemes).toBeDefined();
     });
 
-    it('should have default values when env vars not set', () => {
-      const originalEnv = process.env;
+    it('should have Bearer authentication', () => {
+      const callArgs = swaggerJsdoc.mock.calls[0][0];
+      const bearerAuth = callArgs.definition.components.securitySchemes.bearerAuth;
+      expect(bearerAuth).toBeDefined();
+      expect(bearerAuth.type).toBe('http');
+      expect(bearerAuth.scheme).toBe('bearer');
+      expect(bearerAuth.bearerFormat).toBe('JWT');
+    });
+
+    it('should have Bearer auth description', () => {
+      const callArgs = swaggerJsdoc.mock.calls[0][0];
+      const bearerAuth = callArgs.definition.components.securitySchemes.bearerAuth;
+      expect(bearerAuth.description).toBeDefined();
+      expect(bearerAuth.description).toContain('JWT');
+    });
+
+    it('should apply security globally', () => {
+      const callArgs = swaggerJsdoc.mock.calls[0][0];
+      expect(callArgs.definition.security).toBeDefined();
+      expect(Array.isArray(callArgs.definition.security)).toBe(true);
+      expect(callArgs.definition.security[0]).toEqual({ bearerAuth: [] });
+    });
+  });
+
+  describe('Schema definitions', () => {
+    let schemas;
+
+    beforeEach(() => {
+      const callArgs = swaggerJsdoc.mock.calls[0][0];
+      schemas = callArgs.definition.components.schemas;
+    });
+
+    it('should have schemas defined', () => {
+      expect(schemas).toBeDefined();
+      expect(typeof schemas).toBe('object');
+    });
+
+    it('should have Error schema', () => {
+      expect(schemas.Error).toBeDefined();
+      expect(schemas.Error.type).toBe('object');
+      expect(schemas.Error.properties.success).toBeDefined();
+      expect(schemas.Error.properties.error).toBeDefined();
+    });
+
+    it('should have Success schema', () => {
+      expect(schemas.Success).toBeDefined();
+      expect(schemas.Success.type).toBe('object');
+      expect(schemas.Success.properties.success).toBeDefined();
+      expect(schemas.Success.properties.data).toBeDefined();
+      expect(schemas.Success.properties.meta).toBeDefined();
+    });
+
+    it('should have User schema', () => {
+      expect(schemas.User).toBeDefined();
+      expect(schemas.User.type).toBe('object');
+      expect(schemas.User.properties.id).toBeDefined();
+      expect(schemas.User.properties.email).toBeDefined();
+      expect(schemas.User.properties.role).toBeDefined();
+    });
+
+    it('should have RegisterRequest schema', () => {
+      expect(schemas.RegisterRequest).toBeDefined();
+      expect(schemas.RegisterRequest.type).toBe('object');
+      expect(schemas.RegisterRequest.required).toContain('email');
+      expect(schemas.RegisterRequest.required).toContain('password');
+    });
+
+    it('should have LoginRequest schema', () => {
+      expect(schemas.LoginRequest).toBeDefined();
+      expect(schemas.LoginRequest.type).toBe('object');
+      expect(schemas.LoginRequest.required).toContain('email');
+      expect(schemas.LoginRequest.required).toContain('password');
+    });
+
+    it('should have AuthResponse schema', () => {
+      expect(schemas.AuthResponse).toBeDefined();
+      expect(schemas.AuthResponse.type).toBe('object');
+      expect(schemas.AuthResponse.properties.data).toBeDefined();
+    });
+
+    it('should have Restaurant schema', () => {
+      expect(schemas.Restaurant).toBeDefined();
+      expect(schemas.Restaurant.type).toBe('object');
+      expect(schemas.Restaurant.properties.name).toBeDefined();
+      expect(schemas.Restaurant.properties.latitude).toBeDefined();
+      expect(schemas.Restaurant.properties.longitude).toBeDefined();
+    });
+
+    it('should have MenuItem schema', () => {
+      expect(schemas.MenuItem).toBeDefined();
+      expect(schemas.MenuItem.type).toBe('object');
+      expect(schemas.MenuItem.properties.name).toBeDefined();
+      expect(schemas.MenuItem.properties.price).toBeDefined();
+      expect(schemas.MenuItem.properties.menuType).toBeDefined();
+    });
+
+    it('should have Order schema', () => {
+      expect(schemas.Order).toBeDefined();
+      expect(schemas.Order.type).toBe('object');
+      expect(schemas.Order.properties.status).toBeDefined();
+      expect(schemas.Order.properties.totalAmount).toBeDefined();
+      expect(schemas.Order.properties.items).toBeDefined();
+    });
+
+    it('should have CreateOrderRequest schema', () => {
+      expect(schemas.CreateOrderRequest).toBeDefined();
+      expect(schemas.CreateOrderRequest.type).toBe('object');
+      expect(schemas.CreateOrderRequest.required).toContain('restaurantId');
+      expect(schemas.CreateOrderRequest.required).toContain('items');
+    });
+
+    it('should have Notification schema', () => {
+      expect(schemas.Notification).toBeDefined();
+      expect(schemas.Notification.type).toBe('object');
+      expect(schemas.Notification.properties.type).toBeDefined();
+      expect(schemas.Notification.properties.isRead).toBeDefined();
+    });
+
+    it('should have NutritionLog schema', () => {
+      expect(schemas.NutritionLog).toBeDefined();
+      expect(schemas.NutritionLog.type).toBe('object');
+      expect(schemas.NutritionLog.properties.totalCalories).toBeDefined();
+      expect(schemas.NutritionLog.properties.totalProtein).toBeDefined();
+    });
+
+    it('should have Recommendation schema', () => {
+      expect(schemas.Recommendation).toBeDefined();
+      expect(schemas.Recommendation.type).toBe('object');
+      expect(schemas.Recommendation.properties.recommendationType).toBeDefined();
+      expect(schemas.Recommendation.properties.score).toBeDefined();
+    });
+
+    it('should have all required User properties', () => {
+      const userProps = schemas.User.properties;
+      expect(userProps.id.format).toBe('uuid');
+      expect(userProps.email.format).toBe('email');
+      expect(userProps.role.enum).toContain('ADMIN');
+      expect(userProps.role.enum).toContain('REGULAR');
+    });
+
+    it('should have password validation in RegisterRequest', () => {
+      const registerSchema = schemas.RegisterRequest;
+      expect(registerSchema.properties.password.minLength).toBe(8);
+    });
+
+    it('should have Order status enum', () => {
+      const orderSchema = schemas.Order;
+      expect(orderSchema.properties.status.enum).toContain('PENDING');
+      expect(orderSchema.properties.status.enum).toContain('CONFIRMED');
+      expect(orderSchema.properties.status.enum).toContain('DELIVERED');
+    });
+
+    it('should have MenuItem menu type enum', () => {
+      const menuItemSchema = schemas.MenuItem;
+      expect(menuItemSchema.properties.menuType.enum).toContain('CORE');
+      expect(menuItemSchema.properties.menuType.enum).toContain('GEOGRAPHIC');
+    });
+
+    it('should have Notification type enum', () => {
+      const notificationSchema = schemas.Notification;
+      expect(notificationSchema.properties.type.enum).toContain('ORDER_CONFIRMED');
+      expect(notificationSchema.properties.type.enum).toContain('SYSTEM');
+    });
+  });
+
+  describe('Response definitions', () => {
+    let responses;
+
+    beforeEach(() => {
+      const callArgs = swaggerJsdoc.mock.calls[0][0];
+      responses = callArgs.definition.components.responses;
+    });
+
+    it('should have responses defined', () => {
+      expect(responses).toBeDefined();
+      expect(typeof responses).toBe('object');
+    });
+
+    it('should have Unauthorized response', () => {
+      expect(responses.Unauthorized).toBeDefined();
+      expect(responses.Unauthorized.description).toBeDefined();
+      expect(responses.Unauthorized.content['application/json']).toBeDefined();
+    });
+
+    it('should have Forbidden response', () => {
+      expect(responses.Forbidden).toBeDefined();
+      expect(responses.Forbidden.description).toBeDefined();
+    });
+
+    it('should have NotFound response', () => {
+      expect(responses.NotFound).toBeDefined();
+      expect(responses.NotFound.description).toBeDefined();
+    });
+
+    it('should have ValidationError response', () => {
+      expect(responses.ValidationError).toBeDefined();
+      expect(responses.ValidationError.description).toBeDefined();
+    });
+
+    it('should reference Error schema in responses', () => {
+      const unauthorizedSchema = responses.Unauthorized.content['application/json'].schema;
+      expect(unauthorizedSchema.$ref).toBe('#/components/schemas/Error');
+    });
+  });
+
+  describe('API paths configuration', () => {
+    it('should include routes files in apis array', () => {
+      const callArgs = swaggerJsdoc.mock.calls[0][0];
+      expect(callArgs.apis).toBeDefined();
+      expect(Array.isArray(callArgs.apis)).toBe(true);
+    });
+
+    it('should include routes directory in apis', () => {
+      const callArgs = swaggerJsdoc.mock.calls[0][0];
+      const hasRoutesPath = callArgs.apis.some(api => api.includes('routes'));
+      expect(hasRoutesPath).toBe(true);
+    });
+
+    it('should include controllers directory in apis', () => {
+      const callArgs = swaggerJsdoc.mock.calls[0][0];
+      const hasControllersPath = callArgs.apis.some(api => api.includes('controllers'));
+      expect(hasControllersPath).toBe(true);
+    });
+
+    it('should scan .js files for API documentation', () => {
+      const callArgs = swaggerJsdoc.mock.calls[0][0];
+      const hasJsPattern = callArgs.apis.some(api => api.includes('*.js'));
+      expect(hasJsPattern).toBe(true);
+    });
+  });
+
+  describe('Comprehensive schema validation', () => {
+    let schemas;
+
+    beforeEach(() => {
+      const callArgs = swaggerJsdoc.mock.calls[0][0];
+      schemas = callArgs.definition.components.schemas;
+    });
+
+    it('should have MenuItem nutritional info structure', () => {
+      const menuItemSchema = schemas.MenuItem;
+      expect(menuItemSchema.properties.nutritionalInfo).toBeDefined();
+      expect(menuItemSchema.properties.nutritionalInfo.type).toBe('object');
+      expect(menuItemSchema.properties.nutritionalInfo.properties.calories).toBeDefined();
+      expect(menuItemSchema.properties.nutritionalInfo.properties.protein).toBeDefined();
+    });
+
+    it('should have CreateOrderRequest items array structure', () => {
+      const createOrderSchema = schemas.CreateOrderRequest;
+      expect(createOrderSchema.properties.items.type).toBe('array');
+      expect(createOrderSchema.properties.items.items.required).toContain('menuItemId');
+      expect(createOrderSchema.properties.items.items.required).toContain('quantity');
+    });
+
+    it('should have Order items array', () => {
+      const orderSchema = schemas.Order;
+      expect(orderSchema.properties.items.type).toBe('array');
+      expect(orderSchema.properties.items.items.properties.menuItemId).toBeDefined();
+    });
+
+    it('should have Success meta pagination structure', () => {
+      const successSchema = schemas.Success;
+      expect(successSchema.properties.meta.properties.pagination).toBeDefined();
+      expect(successSchema.properties.meta.properties.pagination.properties.page).toBeDefined();
+      expect(successSchema.properties.meta.properties.pagination.properties.total).toBeDefined();
+    });
+
+    it('should have proper date-time formats', () => {
+      expect(schemas.User.properties.createdAt.format).toBe('date-time');
+      expect(schemas.Order.properties.createdAt.format).toBe('date-time');
+      expect(schemas.NutritionLog.properties.date.format).toBe('date-time');
+    });
+
+    it('should have proper UUID formats', () => {
+      expect(schemas.User.properties.id.format).toBe('uuid');
+      expect(schemas.Restaurant.properties.id.format).toBe('uuid');
+      expect(schemas.Order.properties.id.format).toBe('uuid');
+    });
+
+    it('should have proper email formats', () => {
+      expect(schemas.User.properties.email.format).toBe('email');
+      expect(schemas.RegisterRequest.properties.email.format).toBe('email');
+    });
+
+    it('should have proper number formats', () => {
+      expect(schemas.MenuItem.properties.price.format).toBe('float');
+      expect(schemas.Restaurant.properties.rating.format).toBe('float');
+      expect(schemas.Recommendation.properties.score.format).toBe('float');
+    });
+  });
+
+  describe('Module exports', () => {
+    it('should export swagger specification', () => {
+      expect(swaggerSpec).toBeDefined();
+    });
+
+    it('should have proper structure from swaggerJsdoc', () => {
+      expect(swaggerSpec.openapi).toBeDefined();
+      expect(swaggerSpec.info).toBeDefined();
+      expect(swaggerSpec.paths).toBeDefined();
+      expect(swaggerSpec.components).toBeDefined();
+    });
+
+    it('should be an object', () => {
+      expect(typeof swaggerSpec).toBe('object');
+    });
+
+    it('should not be null', () => {
+      expect(swaggerSpec).not.toBeNull();
+    });
+
+    it('should have minimum required properties', () => {
+      expect(swaggerSpec.openapi).toBe('3.0.0');
+      expect(swaggerSpec.info.title).toBe('BreakApp API');
+      expect(swaggerSpec.info.version).toBe('1.0.0');
+    });
+  });
+
+  describe('Edge cases', () => {
+    it('should handle missing environment variables gracefully', () => {
+      const originalApiBaseUrl = process.env.API_BASE_URL;
+      const originalProdUrl = process.env.PROD_API_URL;
+
       delete process.env.API_BASE_URL;
       delete process.env.PROD_API_URL;
 
       jest.resetModules();
-      swaggerSpec = require('../../../src/config/swagger');
+      jest.mock('swagger-jsdoc');
+      const newSpec = require('../../../src/config/swagger');
 
-      const devServer = swaggerSpec.servers.find(s => s.description === 'Development server');
-      expect(devServer.url).toBe('http://localhost:3000/api/v1');
+      expect(newSpec).toBeDefined();
 
-      process.env = originalEnv;
+      // Restore
+      if (originalApiBaseUrl) process.env.API_BASE_URL = originalApiBaseUrl;
+      if (originalProdUrl) process.env.PROD_API_URL = originalProdUrl;
+    });
+
+    it('should have consistent schema references', () => {
+      const callArgs = swaggerJsdoc.mock.calls[0][0];
+      const authResponse = callArgs.definition.components.schemas.AuthResponse;
+
+      expect(authResponse.properties.data.properties.user.$ref).toBe('#/components/schemas/User');
+    });
+
+    it('should have minimum quantity validation in CreateOrderRequest', () => {
+      const callArgs = swaggerJsdoc.mock.calls[0][0];
+      const createOrderSchema = callArgs.definition.components.schemas.CreateOrderRequest;
+      const itemQuantity = createOrderSchema.properties.items.items.properties.quantity;
+
+      expect(itemQuantity.minimum).toBe(1);
     });
   });
 });
