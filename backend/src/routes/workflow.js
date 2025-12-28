@@ -8,6 +8,7 @@ const router = express.Router();
 const { body, param, query } = require('express-validator');
 const workflowController = require('../controllers/workflowController');
 const { auth, producer } = require('../middleware/auth');
+const { checkOrderWindow, checkDuplicateOrder } = require('../middleware/orderWindow');
 
 /**
  * 1. التحقق من صحة رمز QR
@@ -20,12 +21,13 @@ router.post('/validate-qr', [
 /**
  * 2. تقديم طلب جديد
  * POST /api/v1/workflow/orders
+ * يتحقق من نافذة الطلب ومن عدم وجود طلب مكرر
  */
 router.post('/orders', auth, [
   body('projectId').notEmpty().withMessage('معرف المشروع مفقود'),
   body('restaurantId').notEmpty().withMessage('معرف المطعم مفقود'),
   body('menuItems').isArray().notEmpty().withMessage('قائمة الطلبات مفقودة')
-], workflowController.submitOrder);
+], checkOrderWindow, checkDuplicateOrder, workflowController.submitOrder);
 
 /**
  * 3. تأكيد الطلب
