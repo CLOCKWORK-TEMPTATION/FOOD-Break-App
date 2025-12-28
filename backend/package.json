@@ -12,7 +12,7 @@
     "test:integration": "jest --selectProjects integration --passWithNoTests",
     "test:e2e": "jest --selectProjects e2e --passWithNoTests --runInBand",
     "test:coverage": "jest --coverage --passWithNoTests",
-    "test:ci": "jest --ci --coverage --reporters=default --reporters=jest-junit --passWithNoTests",
+    "test:ci": "jest --ci --coverage --reporters=default --reporters=jest-junit --maxWorkers=2 --passWithNoTests",
     "test:verbose": "jest --verbose --passWithNoTests",
     "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e",
     "db:migrate": "prisma migrate dev",
