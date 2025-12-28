@@ -38,9 +38,11 @@ model User {
   nutritionLogs UserNutritionLog[]
   nutritionGoals NutritionGoal[]
   projectMemberships ProjectMember[]
+  payments      Payment[]
+  invoices      Invoice[]
+  consentRecords ConsentRecord[]
   moodLogs      UserMoodLog[]
   emotionProfile EmotionProfile?
-  consentRecords ConsentRecord[]
 
   @@map("users")
 }
@@ -362,6 +364,8 @@ model Order {
   items           OrderItem[]
   notifications   Notification[]
   trackingPoints  OrderTracking[]
+  payments        Payment[]
+  invoice         Invoice?
 
   @@map("orders")
 }
@@ -1466,4 +1470,123 @@ enum MedicalAlertSeverity {
   WARNING   // تحذير
   ERROR     // خطأ
   CRITICAL  // حرج
+}
+
+// ============================================
+// نظام المدفوعات والفواتير (Payment & Invoice System)
+// ============================================
+
+// نموذج المدفوعات
+model Payment {
+  id                String         @id @default(uuid())
+  userId            String
+  orderId           String?
+
+  // معلومات الدفع
+  paymentIntentId   String         @unique // معرف نية الدفع من Stripe/PayPal
+  paymentMethodId   String?        // معرف طريقة الدفع
+  amount            Float
+  currency          String         @default("EGP")
+
+  // الحالة
+  status            PaymentStatus  @default(PENDING)
+  provider          PaymentProvider @default(STRIPE)
+
+  // معلومات الاسترداد
+  refundId          String?
+  refundAmount      Float?
+  refundedAt        DateTime?
+
+  // البيانات الإضافية
+  metadata          Json?          // بيانات إضافية
+  errorMessage      String?        // رسالة الخطأ في حالة الفشل
+
+  // التواريخ
+  completedAt       DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  // Relations
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order             Order?         @relation(fields: [orderId], references: [id])
+  invoices          Invoice[]
+
+  @@index([userId])
+  @@index([orderId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("payments")
+}
+
+enum PaymentStatus {
+  PENDING      // في الانتظار
+  PROCESSING   // قيد المعالجة
+  COMPLETED    // مكتمل
+  FAILED       // فشل
+  REFUNDED     // تم الاسترداد
+  CANCELLED    // ملغى
+}
+
+enum PaymentProvider {
+  STRIPE       // Stripe
+  PAYPAL       // PayPal
+  APPLE_PAY    // Apple Pay
+  GOOGLE_PAY   // Google Pay
+  CASH         // نقدي
+  BANK_TRANSFER // تحويل بنكي
+}
+
+// نموذج الفواتير
+model Invoice {
+  id              String         @id @default(uuid())
+  userId          String
+  orderId         String?        @unique
+  paymentId       String?
+
+  // معلومات الفاتورة
+  invoiceNumber   String         @unique
+  amount          Float          // المبلغ الأساسي
+  tax             Float          @default(0) // الضريبة
+  discount        Float          @default(0) // الخصم
+  totalAmount     Float          // المبلغ الإجمالي
+  currency        String         @default("EGP")
+
+  // البنود
+  items           Json?          // بنود الفاتورة
+  notes           String?        // ملاحظات
+
+  // الحالة
+  status          InvoiceStatus  @default(PENDING)
+
+  // معلومات الدفع
+  paidAt          DateTime?
+  dueDate         DateTime?
+
+  // ملف PDF
+  pdfUrl          String?
+  pdfGenerated    Boolean        @default(false)
+
+  // التواريخ
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  // Relations
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order           Order?         @relation(fields: [orderId], references: [id])
+  payment         Payment?       @relation(fields: [paymentId], references: [id])
+
+  @@index([userId])
+  @@index([orderId])
+  @@index([paymentId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("invoices")
+}
+
+enum InvoiceStatus {
+  PENDING      // في الانتظار
+  PAID         // مدفوع
+  OVERDUE      // متأخر
+  CANCELLED    // ملغى
+  REFUNDED     // تم الاسترداد
 }
