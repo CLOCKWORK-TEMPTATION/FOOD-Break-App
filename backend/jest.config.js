@@ -31,14 +31,14 @@ module.exports = {
   
   coverageDirectory: 'coverage',
   
-  // Note: Coverage thresholds are set to 80% for production quality
-  // تشجيع مستوى تغطية إنتاجي عالي الجودة
+  // Note: Coverage thresholds are set to 95% for maximum quality
+  // تشجيع مستوى تغطية عالي الجودة للغاية
   coverageThreshold: {
     global: {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80,
+      branches: 95,
+      functions: 95,
+      lines: 95,
+      statements: 95,
     },
   },
   
@@ -73,6 +73,12 @@ module.exports = {
       displayName: 'e2e',
       testMatch: ['<rootDir>/tests/e2e/**/*.test.js'],
       setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+    },
+    {
+      displayName: 'performance',
+      testMatch: ['<rootDir>/tests/performance/**/*.test.js'],
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+      testTimeout: 60000, // Performance tests need more time
     },
   ],
   

@@ -12,7 +12,7 @@ jest.mock('@prisma/client');
 jest.mock('../../../src/services/notificationService');
 
 const mockPrisma = {
-  emergencyMode: {
+  emergencySession: {
     create: jest.fn(),
     findFirst: jest.fn(),
     update: jest.fn(),
@@ -24,6 +24,9 @@ const mockPrisma = {
     update: jest.fn(),
     findMany: jest.fn()
   },
+  emergencyLog: {
+    create: jest.fn()
+  },
   restaurant: {
     findMany: jest.fn()
   },
@@ -31,6 +34,9 @@ const mockPrisma = {
     findMany: jest.fn(),
     create: jest.fn(),
     update: jest.fn()
+  },
+  scheduleChangeNotification: {
+    create: jest.fn()
   },
   project: {
     findUnique: jest.fn()
@@ -63,20 +69,22 @@ describe('Emergency Service', () => {
         activatedAt: new Date()
       };
 
-      mockPrisma.emergencyMode.findFirst.mockResolvedValue(null); // No active emergency
-      mockPrisma.emergencyMode.create.mockResolvedValue(mockEmergency);
+      mockPrisma.emergencySession.findFirst.mockResolvedValue(null); // No active emergency
+      mockPrisma.emergencySession.create.mockResolvedValue(mockEmergency);
+      mockPrisma.emergencyLog.create.mockResolvedValue({ id: 'log-1' });
       mockPrisma.project.findUnique.mockResolvedValue({ id: 'project-1', name: 'Test Project' });
       mockPrisma.user.findMany.mockResolvedValue([{ id: 'user-1', email: 'test@test.com' }]);
 
       const result = await emergencyService.activateEmergencyMode(emergencyData);
 
       expect(result).toEqual(mockEmergency);
-      expect(mockPrisma.emergencyMode.create).toHaveBeenCalledWith({
+      expect(mockPrisma.emergencySession.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           projectId: 'project-1',
           emergencyType: 'SCHEDULE_CHANGE',
           isActive: true
-        })
+        }),
+        include: expect.any(Object)
       });
       expect(notificationService.sendBroadcastNotification).toHaveBeenCalled();
     });
@@ -87,14 +95,14 @@ describe('Emergency Service', () => {
         emergencyType: 'MEDICAL'
       };
 
-      mockPrisma.emergencyMode.findFirst.mockResolvedValue({
+      mockPrisma.emergencySession.findFirst.mockResolvedValue({
         id: 'existing-emergency',
         projectId: 'project-1',
         isActive: true
       });
 
       await expect(emergencyService.activateEmergencyMode(emergencyData))
-        .rejects.toThrow('Emergency mode already active for this project');
+        .rejects.toThrow('يوجد بالفعل جلسة طوارئ نشطة لهذا المشروع');
     });
   });
 
