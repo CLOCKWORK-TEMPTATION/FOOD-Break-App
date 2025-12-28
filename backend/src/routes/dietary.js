@@ -6,7 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const dietaryController = require('../controllers/dietaryController');
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 
 /**
  * ==========================================
@@ -15,16 +15,16 @@ const { authenticate, authorize } = require('../middleware/auth');
  */
 
 // الحصول على الملف الشخصي للحمية
-router.get('/profile', authenticate, dietaryController.getDietaryProfile);
+router.get('/profile', authenticateToken, dietaryController.getDietaryProfile);
 
 // تحديث الملف الشخصي للحمية
-router.post('/profile', authenticate, dietaryController.updateDietaryProfile);
+router.post('/profile', authenticateToken, dietaryController.updateDietaryProfile);
 
 // حذف الملف الشخصي للحمية
-router.delete('/profile', authenticate, dietaryController.deleteDietaryProfile);
+router.delete('/profile', authenticateToken, dietaryController.deleteDietaryProfile);
 
 // الحصول على الحميات النشطة
-router.get('/active-diets', authenticate, dietaryController.getActiveDiets);
+router.get('/active-diets', authenticateToken, dietaryController.getActiveDiets);
 
 // الحصول على أنواع الحميات المتاحة (عام)
 router.get('/diet-types', dietaryController.getAvailableDietTypes);
@@ -36,19 +36,19 @@ router.get('/diet-types', dietaryController.getAvailableDietTypes);
  */
 
 // الحصول على ملف الحساسية
-router.get('/allergies', authenticate, dietaryController.getAllergyProfile);
+router.get('/allergies', authenticateToken, dietaryController.getAllergyProfile);
 
 // تحديث ملف الحساسية
-router.post('/allergies', authenticate, dietaryController.updateAllergyProfile);
+router.post('/allergies', authenticateToken, dietaryController.updateAllergyProfile);
 
 // الحصول على الحساسيات النشطة
-router.get('/allergies/active', authenticate, dietaryController.getActiveAllergies);
+router.get('/allergies/active', authenticateToken, dietaryController.getActiveAllergies);
 
 // الحصول على مسببات الحساسية المتاحة (عام)
 router.get('/allergens', dietaryController.getAvailableAllergens);
 
 // فحص عنصر للحساسية
-router.get('/check-item/:menuItemId', authenticate, dietaryController.checkItemForAllergies);
+router.get('/check-item/:menuItemId', authenticateToken, dietaryController.checkItemForAllergies);
 
 /**
  * ==========================================
@@ -57,7 +57,7 @@ router.get('/check-item/:menuItemId', authenticate, dietaryController.checkItemF
  */
 
 // فلترة عناصر القائمة
-router.post('/filter-menu', authenticate, dietaryController.filterMenuItems);
+router.post('/filter-menu', authenticateToken, dietaryController.filterMenuItems);
 
 // البحث عن عناصر متوافقة
 router.get('/compatible-items/:restaurantId', dietaryController.findCompatibleItems);
@@ -119,10 +119,10 @@ router.post(
  */
 
 // إنشاء رسالة مخصصة
-router.post('/messages', authenticate, dietaryController.createOrderMessage);
+router.post('/messages', authenticateToken, dietaryController.createOrderMessage);
 
 // إنشاء رسائل تلقائية للطلب
-router.post('/messages/auto/:orderId', authenticate, dietaryController.createAutoMessages);
+router.post('/messages/auto/:orderId', authenticateToken, dietaryController.createAutoMessages);
 
 // إحصائيات رسائل المطعم
 router.get(
@@ -141,7 +141,7 @@ router.get(
 );
 
 // الحصول على رسائل طلب
-router.get('/messages/order/:orderId', authenticate, dietaryController.getOrderMessages);
+router.get('/messages/order/:orderId', authenticateToken, dietaryController.getOrderMessages);
 
 // الحصول على رسائل المطعم
 router.get(

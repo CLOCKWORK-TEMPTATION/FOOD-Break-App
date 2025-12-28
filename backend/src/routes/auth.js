@@ -4,13 +4,14 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 const { authenticateToken } = require('../middleware/auth');
 const { validate } = require('../middleware/validation');
+const { authLimiter } = require('../middleware/rateLimiter');
 
 /**
  * @route   POST /api/v1/auth/register
  * @desc    تسجيل مستخدم جديد
  * @access  Public
  */
-router.post('/register', [
+router.post('/register', authLimiter, [
   body('email')
     .isEmail()
     .withMessage('البريد الإلكتروني غير صالح')
@@ -41,7 +42,7 @@ router.post('/register', [
  * @desc    تسجيل الدخول
  * @access  Public
  */
-router.post('/login', [
+router.post('/login', authLimiter, [
   body('email')
     .isEmail()
     .withMessage('البريد الإلكتروني غير صالح')

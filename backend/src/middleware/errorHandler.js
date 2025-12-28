@@ -9,20 +9,22 @@ const { captureException } = require('../utils/monitoring');
  * @param {Function} next - الوظيفة التالية
  */
 const errorHandler = (err, req, res, next) => {
-  // تسجيل الخطأ
+  // تسجيل الخطأ (بدون البيانات الحساسة)
   logger.error({
     message: err.message,
     stack: err.stack,
     path: req.path,
     method: req.method,
-    body: req.body
+    query: req.query,
+    // SECURITY: Never log req.body as it may contain passwords/sensitive data
   });
 
-  // Monitoring (Sentry)
+  // Monitoring (Sentry) - بدون البيانات الحساسة
   captureException(err, {
     path: req.path,
     method: req.method,
-    body: req.body
+    query: req.query
+    // SECURITY: Never log req.body in monitoring
   });
 
   // Prisma errors

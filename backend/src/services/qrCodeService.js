@@ -4,7 +4,14 @@ const crypto = require('crypto');
 
 class QRCodeService {
   constructor() {
-    this.secretKey = process.env.QR_SECRET_KEY || 'breakapp-qr-secret';
+    // SECURITY: Never use fallback secret in production
+    if (!process.env.QR_SECRET_KEY) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('CRITICAL: QR_SECRET_KEY must be set in production environment');
+      }
+      console.warn('⚠️  WARNING: Using default QR_SECRET_KEY. Set QR_SECRET_KEY environment variable for production.');
+    }
+    this.secretKey = process.env.QR_SECRET_KEY || 'breakapp-qr-secret-dev-only';
   }
 
   /**

@@ -1,7 +1,7 @@
 const express = require('express');
 const { body, param, query } = require('express-validator');
 const costAlertController = require('../controllers/costAlertController');
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 const { validateRequest } = require('../middleware/validation');
 
 const router = express.Router();

@@ -3,6 +3,7 @@ const router = express.Router();
 
 // استيراد Routes
 const authRoutes = require('./auth');
+const adminRoutes = require('./admin');
 const menuRoutes = require('./menus');
 const restaurantRoutes = require('./restaurants');
 const exceptionRoutes = require('./exceptions');
@@ -23,6 +24,7 @@ const reminderRoutes = require('./reminders');
 
 // ربط Routes
 router.use('/auth', authRoutes);
+router.use('/admin', adminRoutes);
 router.use('/menus', menuRoutes);
 router.use('/restaurants', restaurantRoutes);
 router.use('/exceptions', exceptionRoutes);
@@ -48,6 +50,7 @@ router.get('/', (req, res) => {
     version: process.env.API_VERSION || 'v1',
     endpoints: {
       auth: '/auth',
+      admin: '/admin',
       menus: '/menus',
       restaurants: '/restaurants',
       exceptions: '/exceptions',

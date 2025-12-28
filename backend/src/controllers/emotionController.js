@@ -6,10 +6,15 @@ class EmotionController {
   async logMood(req, res) {
     try {
       const { mood, intensity, notes, context } = req.body;
-      // Assuming req.user is populated by auth middleware
-      const userId = req.user?.id || req.body.userId; // Fallback for dev
+      // SECURITY: userId MUST come from authenticated token only
+      const userId = req.user?.id;
 
-      if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+      if (!userId) {
+        return res.status(401).json({ 
+          success: false,
+          message: 'Unauthorized: Authentication required' 
+        });
+      }
 
       const log = await emotionService.logMood(userId, { mood, intensity, notes, context });
       res.json({ success: true, data: log });
@@ -23,9 +28,22 @@ class EmotionController {
   async getRecommendations(req, res) {
     try {
       const { mood } = req.query;
-      const userId = req.user?.id || req.query.userId;
+      // SECURITY: userId MUST come from authenticated token only
+      const userId = req.user?.id;
 
-      if (!mood) return res.status(400).json({ message: 'Mood is required' });
+      if (!userId) {
+        return res.status(401).json({ 
+          success: false,
+          message: 'Unauthorized: Authentication required' 
+        });
+      }
+
+      if (!mood) {
+        return res.status(400).json({ 
+          success: false,
+          message: 'Mood is required' 
+        });
+      }
 
       const recs = await emotionService.getMoodRecommendations(userId, mood);
       res.json({ success: true, data: recs });
@@ -39,7 +57,15 @@ class EmotionController {
   async updateConsent(req, res) {
     try {
       const { type, status, version } = req.body;
-      const userId = req.user?.id || req.body.userId;
+      // SECURITY: userId MUST come from authenticated token only
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ 
+          success: false,
+          message: 'Unauthorized: Authentication required' 
+        });
+      }
 
       const meta = {
         ip: req.ip,

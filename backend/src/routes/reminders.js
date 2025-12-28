@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const reminderController = require('../controllers/reminderController');
-const auth = require('../middleware/auth');
+const { authenticateToken, requireAdminOrProducer } = require('../middleware/auth');
 
 /**
  * Routes for Reminder System
@@ -18,7 +18,7 @@ const auth = require('../middleware/auth');
  */
 router.get(
   '/projects/:projectId/settings',
-  auth.authenticate,
+  authenticateToken,
   reminderController.getProjectReminderSettings
 );
 
@@ -28,7 +28,7 @@ router.get(
  */
 router.put(
   '/projects/:projectId/settings',
-  auth.authenticate,
+  authenticateToken,
   reminderController.updateProjectReminderSettings
 );
 
@@ -42,7 +42,7 @@ router.put(
  */
 router.get(
   '/preferences',
-  auth.authenticate,
+  authenticateToken,
   reminderController.getUserReminderPreferences
 );
 
@@ -52,7 +52,7 @@ router.get(
  */
 router.put(
   '/preferences',
-  auth.authenticate,
+  authenticateToken,
   reminderController.updateUserReminderPreferences
 );
 
@@ -66,7 +66,7 @@ router.put(
  */
 router.get(
   '/logs',
-  auth.authenticate,
+  authenticateToken,
   reminderController.getUserReminderLogs
 );
 
@@ -76,7 +76,7 @@ router.get(
  */
 router.patch(
   '/:reminderId/read',
-  auth.authenticate,
+  authenticateToken,
   reminderController.markReminderAsRead
 );
 
@@ -86,7 +86,7 @@ router.patch(
  */
 router.post(
   '/:reminderId/action',
-  auth.authenticate,
+  authenticateToken,
   reminderController.recordReminderAction
 );
 
@@ -100,7 +100,7 @@ router.post(
  */
 router.post(
   '/projects/:projectId/send',
-  auth.authenticate,
+  authenticateToken,
   reminderController.sendImmediateReminder
 );
 
@@ -114,7 +114,7 @@ router.post(
  */
 router.get(
   '/system/status',
-  auth.authenticate,
+  authenticateToken,
   reminderController.getReminderSystemStatus
 );
 
@@ -124,7 +124,7 @@ router.get(
  */
 router.get(
   '/projects/:projectId/stats',
-  auth.authenticate,
+  authenticateToken,
   reminderController.getProjectReminderStats
 );
 

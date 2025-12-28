@@ -6,7 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const nutritionController = require('../controllers/nutritionController');
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 
 // جميع المسارات تتطلب المصادقة
 router.use(authenticate);
