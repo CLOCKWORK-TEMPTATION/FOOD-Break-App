@@ -44,11 +44,35 @@ app.use(notFound);
 // معالجة الأخطاء المركزية
 app.use(errorHandler);
 
+// تهيئة نظام التذكيرات النصف ساعية
+const reminderScheduler = require('./services/reminderSchedulerService');
+
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 BreakApp Backend Server running on port ${PORT}`);
   console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 API Version: ${API_VERSION}`);
+
+  // تشغيل نظام التذكيرات
+  try {
+    await reminderScheduler.initialize();
+    console.log('✅ نظام التذكيرات النصف ساعية تم تشغيله بنجاح');
+  } catch (error) {
+    console.error('❌ فشل تشغيل نظام التذكيرات:', error);
+  }
+});
+
+// معالجة إيقاف التطبيق بشكل صحيح
+process.on('SIGTERM', () => {
+  console.log('⚠️  إيقاف التطبيق...');
+  reminderScheduler.stopAll();
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('⚠️  إيقاف التطبيق...');
+  reminderScheduler.stopAll();
+  process.exit(0);
 });
 
 module.exports = app;

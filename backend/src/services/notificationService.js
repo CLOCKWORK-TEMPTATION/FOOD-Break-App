@@ -348,6 +348,296 @@ class NotificationService {
       throw new Error(`خطأ في تحديد الإشعار كمقروء: ${error.message}`);
     }
   }
+
+  // ============================================
+  // نظام التذكيرات النصف ساعية
+  // Half-Hourly Reminder System
+  // ============================================
+
+  /**
+   * إرسال تذكير نصف ساعي للمستخدم
+   * @param {Object} user - بيانات المستخدم
+   * @param {Object} project - بيانات المشروع
+   * @param {Object} reminderMessage - رسالة التذكير
+   * @param {Array} channels - قنوات الإرسال ['push', 'email', 'sms']
+   * @returns {Object} حالة الإرسال
+   */
+  async sendHalfHourlyReminder(user, project, reminderMessage, channels = ['push']) {
+    try {
+      const deliveryStatus = {
+        push: false,
+        email: false,
+        sms: false,
+        overallStatus: 'FAILED'
+      };
+
+      let successCount = 0;
+
+      // إرسال Push Notification
+      if (channels.includes('push')) {
+        const pushResult = await this.sendPushNotification(user.id, {
+          type: 'ORDER_REMINDER',
+          title: reminderMessage.title,
+          message: reminderMessage.message,
+          data: {
+            projectId: project.id,
+            projectName: project.name,
+            timeRemaining: reminderMessage.timeRemaining,
+            reminderType: 'HALF_HOURLY'
+          }
+        });
+
+        deliveryStatus.push = pushResult.sent;
+        if (pushResult.sent) successCount++;
+      }
+
+      // إرسال Email
+      if (channels.includes('email') && user.email) {
+        const emailResult = await this.sendReminderEmail(user.email, reminderMessage, project);
+        deliveryStatus.email = emailResult.sent;
+        if (emailResult.sent) successCount++;
+      }
+
+      // إرسال SMS (إذا كان متاحاً)
+      if (channels.includes('sms') && user.phoneNumber) {
+        const smsResult = await this.sendReminderSMS(user.phoneNumber, reminderMessage);
+        deliveryStatus.sms = smsResult.sent;
+        if (smsResult.sent) successCount++;
+      }
+
+      // حفظ الإشعار في قاعدة البيانات
+      await this.saveNotification({
+        type: 'REMINDER',
+        title: reminderMessage.title,
+        message: reminderMessage.message,
+        userId: user.id,
+        projectId: project.id,
+        data: {
+          projectName: project.name,
+          timeRemaining: reminderMessage.timeRemaining,
+          channels: channels,
+          deliveryStatus: deliveryStatus
+        }
+      });
+
+      // تحديد الحالة العامة
+      if (successCount > 0) {
+        deliveryStatus.overallStatus = successCount === channels.length ? 'SENT' : 'PARTIAL';
+      }
+
+      return deliveryStatus;
+    } catch (error) {
+      console.error('خطأ في إرسال التذكير النصف ساعي:', error);
+      return {
+        push: false,
+        email: false,
+        sms: false,
+        overallStatus: 'FAILED',
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * إرسال بريد إلكتروني للتذكير
+   */
+  async sendReminderEmail(email, reminderMessage, project) {
+    try {
+      if (!this.emailTransporter) {
+        return { sent: false, reason: 'Email transporter not configured' };
+      }
+
+      const mailOptions = {
+        from: process.env.SMTP_FROM || 'noreply@breakapp.com',
+        to: email,
+        subject: reminderMessage.title,
+        html: this.generateReminderEmailTemplate(reminderMessage, project)
+      };
+
+      const result = await this.emailTransporter.sendMail(mailOptions);
+
+      return { sent: true, messageId: result.messageId };
+    } catch (error) {
+      console.error('خطأ في إرسال البريد الإلكتروني للتذكير:', error);
+      return { sent: false, error: error.message };
+    }
+  }
+
+  /**
+   * توليد قالب البريد الإلكتروني للتذكير
+   */
+  generateReminderEmailTemplate(reminderMessage, project) {
+    const urgencyColor = reminderMessage.timeRemaining <= 15 ? '#e74c3c' :
+                        reminderMessage.timeRemaining <= 30 ? '#f39c12' : '#3498db';
+
+    return `
+      <!DOCTYPE html>
+      <html dir="rtl" lang="ar">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${reminderMessage.title}</title>
+        <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+          }
+          .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+          }
+          .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, ${urgencyColor} 0%, ${urgencyColor}dd 100%);
+            border-radius: 8px;
+            color: white;
+          }
+          .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+          }
+          .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+          }
+          .message {
+            color: #2c3e50;
+            font-size: 18px;
+            line-height: 1.8;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-right: 4px solid ${urgencyColor};
+          }
+          .time-remaining {
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: ${urgencyColor};
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #fff3cd;
+            border-radius: 8px;
+          }
+          .cta-button {
+            display: block;
+            width: fit-content;
+            margin: 30px auto;
+            padding: 15px 40px;
+            background-color: ${urgencyColor};
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+          }
+          .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+            font-size: 14px;
+          }
+          .project-info {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+          }
+          .project-name {
+            font-weight: bold;
+            color: #2e7d32;
+            font-size: 16px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="icon">🔔</div>
+            <h1 class="title">${reminderMessage.title}</h1>
+          </div>
+
+          <div class="message">
+            <p>${reminderMessage.message}</p>
+          </div>
+
+          <div class="project-info">
+            <div class="project-name">📋 المشروع: ${project.name}</div>
+          </div>
+
+          <div class="time-remaining">
+            ⏰ ${reminderMessage.timeRemaining} دقيقة متبقية
+          </div>
+
+          <a href="${process.env.APP_URL || 'https://breakapp.com'}/orders/new?projectId=${project.id}" class="cta-button">
+            قدّم طلبك الآن
+          </a>
+
+          <div class="footer">
+            <p>تطبيق BreakApp - إدارة الطعام للفرق الإنتاجية</p>
+            <p style="font-size: 12px; color: #adb5bd;">
+              إذا كنت قد قدمت طلبك بالفعل، يرجى تجاهل هذه الرسالة.
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  /**
+   * إرسال رسالة نصية (SMS) للتذكير
+   * يمكن التكامل مع خدمات مثل Twilio أو local SMS gateway
+   */
+  async sendReminderSMS(phoneNumber, reminderMessage) {
+    try {
+      // TODO: التكامل مع خدمة SMS (Twilio, etc.)
+      // هذا مثال افتراضي
+      console.log(`📱 إرسال SMS إلى ${phoneNumber}: ${reminderMessage.message}`);
+
+      // في الإنتاج، سيتم التكامل مع خدمة حقيقية
+      return { sent: false, reason: 'SMS service not configured' };
+    } catch (error) {
+      console.error('خطأ في إرسال الرسالة النصية:', error);
+      return { sent: false, error: error.message };
+    }
+  }
+
+  /**
+   * إرسال تذكير فوري لمشروع معين (استدعاء يدوي)
+   */
+  async sendImmediateProjectReminder(projectId) {
+    try {
+      const project = await prisma.project.findUnique({
+        where: { id: projectId }
+      });
+
+      if (!project) {
+        throw new Error('المشروع غير موجود');
+      }
+
+      // استدعاء خدمة التذكير
+      const reminderScheduler = require('./reminderSchedulerService');
+      await reminderScheduler.processProjectReminders(project, new Date());
+
+      return { success: true, message: 'تم إرسال التذكيرات بنجاح' };
+    } catch (error) {
+      throw new Error(`خطأ في إرسال التذكير الفوري: ${error.message}`);
+    }
+  }
 }
 
 module.exports = new NotificationService();
