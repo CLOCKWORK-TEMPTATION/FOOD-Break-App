@@ -44,11 +44,28 @@ app.use(notFound);
 // معالجة الأخطاء المركزية
 app.use(errorHandler);
 
+// بدء خدمة الجدولة (Scheduler)
+const schedulerService = require('./services/schedulerService');
+if (process.env.REMINDER_ENABLED === 'true') {
+  console.log('⏰ Starting Scheduler Service...');
+  schedulerService.start();
+}
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 BreakApp Backend Server running on port ${PORT}`);
   console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 API Version: ${API_VERSION}`);
+
+  if (process.env.PUSH_NOTIFICATIONS_ENABLED === 'true') {
+    console.log('✅ Push Notifications: Enabled');
+  }
+  if (process.env.SMS_ENABLED === 'true') {
+    console.log('✅ SMS Notifications: Enabled');
+  }
+  if (process.env.SMTP_ENABLED === 'true') {
+    console.log('✅ Email Notifications: Enabled');
+  }
 });
 
 module.exports = app;
