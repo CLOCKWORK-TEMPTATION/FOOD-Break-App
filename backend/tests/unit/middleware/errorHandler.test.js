@@ -7,7 +7,16 @@ describe('Error Handler Middleware', () => {
   let req, res, next;
 
   beforeEach(() => {
-    req = { path: '/test', method: 'GET', body: {} };
+    req = {
+      path: '/test',
+      method: 'GET',
+      body: {},
+      ip: '127.0.0.1',
+      get: jest.fn((header) => {
+        if (header === 'user-agent') return 'test-agent';
+        return null;
+      })
+    };
     res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn().mockReturnThis()

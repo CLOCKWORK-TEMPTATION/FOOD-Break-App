@@ -1,355 +1,342 @@
 /**
- * Analytics Controller Unit Tests
- * اختبارات وحدة متحكم التحليلات
+ * Analytics Controller Tests
+ * اختبارات شاملة لمتحكم التحليلات
  */
+
+jest.mock('../../../src/services/analyticsService');
+jest.mock('../../../src/utils/logger');
 
 const analyticsController = require('../../../src/controllers/analyticsController');
 const analyticsService = require('../../../src/services/analyticsService');
+const logger = require('../../../src/utils/logger');
 
-jest.mock('../../../src/services/analyticsService');
-
-describe('Analytics Controller', () => {
-  let mockReq, mockRes, mockNext;
+describe('Analytics Controller Tests', () => {
+  let req, res;
 
   beforeEach(() => {
-    mockReq = {
-      user: { id: 'test-user-id', role: 'ADMIN' },
-      body: {},
+    req = {
+      query: {},
       params: {},
-      query: {}
+      body: {},
+      user: { id: 'user-123' }
     };
-    mockRes = {
+    res = {
       json: jest.fn().mockReturnThis(),
       status: jest.fn().mockReturnThis()
     };
-    mockNext = jest.fn();
     jest.clearAllMocks();
   });
 
   describe('getDashboardStats', () => {
-    it('should return dashboard statistics', async () => {
+    it('should get dashboard stats successfully', async () => {
       const mockStats = {
-        totalUsers: 1500,
-        totalOrders: 5000,
-        totalRevenue: 250000,
-        activeRestaurants: 75,
-        todayOrders: 150
+        totalOrders: 100,
+        totalSpent: 5000,
+        averageOrderValue: 50
       };
-
       analyticsService.getDashboardStats.mockResolvedValue(mockStats);
 
-      await analyticsController.getDashboardStats(mockReq, mockRes, mockNext);
+      req.query = { projectId: 'project-123' };
 
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({
+      await analyticsController.getDashboardStats(req, res);
+
+      expect(analyticsService.getDashboardStats).toHaveBeenCalledWith('project-123', null);
+      expect(res.json).toHaveBeenCalledWith({
         success: true,
         data: mockStats
       });
     });
 
-    it('should filter by date range', async () => {
-      mockReq.query.startDate = '2025-01-01';
-      mockReq.query.endDate = '2025-12-31';
+    it('should get dashboard stats with date range', async () => {
+      const mockStats = { totalOrders: 50 };
+      analyticsService.getDashboardStats.mockResolvedValue(mockStats);
 
-      analyticsService.getDashboardStats.mockResolvedValue({});
+      req.query = {
+        projectId: 'project-123',
+        startDate: '2024-01-01',
+        endDate: '2024-01-31'
+      };
 
-      await analyticsController.getDashboardStats(mockReq, mockRes, mockNext);
+      await analyticsController.getDashboardStats(req, res);
 
       expect(analyticsService.getDashboardStats).toHaveBeenCalledWith(
-        expect.objectContaining({
-          startDate: expect.any(String),
-          endDate: expect.any(String)
-        })
+        'project-123',
+        { start: '2024-01-01', end: '2024-01-31' }
       );
-    });
-  });
-
-  describe('getOrderStats', () => {
-    it('should return order statistics', async () => {
-      const mockStats = {
-        total: 5000,
-        pending: 50,
-        confirmed: 150,
-        preparing: 100,
-        delivered: 4500,
-        cancelled: 200
-      };
-
-      analyticsService.getOrderStats.mockResolvedValue(mockStats);
-
-      await analyticsController.getOrderStats(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({
+      expect(res.json).toHaveBeenCalledWith({
         success: true,
         data: mockStats
       });
     });
+
+    it('should handle errors', async () => {
+      const error = new Error('Service error');
+      analyticsService.getDashboardStats.mockRejectedValue(error);
+
+      await analyticsController.getDashboardStats(req, res);
+
+      expect(logger.error).toHaveBeenCalledWith('Error getting dashboard stats:', error);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: { message: 'Service error' }
+      });
+    });
   });
 
-  describe('getRevenueStats', () => {
-    it('should return revenue statistics', async () => {
-      const mockStats = {
-        totalRevenue: 250000,
-        averageOrderValue: 50,
-        revenueByRestaurant: [
-          { restaurantId: 'r1', revenue: 50000 },
-          { restaurantId: 'r2', revenue: 30000 }
-        ],
-        dailyRevenue: [
-          { date: '2025-01-01', revenue: 5000 },
-          { date: '2025-01-02', revenue: 5500 }
+  describe('getSpendingReport', () => {
+    it('should get spending report successfully', async () => {
+      const mockReport = {
+        spending: [
+          { date: '2024-01-01', amount: 100 },
+          { date: '2024-01-02', amount: 150 }
         ]
       };
+      analyticsService.getSpendingReport.mockResolvedValue(mockReport);
 
-      analyticsService.getRevenueStats.mockResolvedValue(mockStats);
+      req.params = { projectId: 'project-123' };
+      req.query = { period: 'daily', limit: '30' };
 
-      await analyticsController.getRevenueStats(mockReq, mockRes, mockNext);
+      await analyticsController.getSpendingReport(req, res);
 
-      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(analyticsService.getSpendingReport).toHaveBeenCalledWith('project-123', 'daily', 30);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        data: mockReport
+      });
+    });
+
+    it('should use default values for period and limit', async () => {
+      const mockReport = { spending: [] };
+      analyticsService.getSpendingReport.mockResolvedValue(mockReport);
+
+      req.params = { projectId: 'project-123' };
+
+      await analyticsController.getSpendingReport(req, res);
+
+      expect(analyticsService.getSpendingReport).toHaveBeenCalledWith('project-123', 'daily', 30);
+    });
+
+    it('should handle errors', async () => {
+      const error = new Error('Report error');
+      analyticsService.getSpendingReport.mockRejectedValue(error);
+
+      req.params = { projectId: 'project-123' };
+
+      await analyticsController.getSpendingReport(req, res);
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(500);
     });
   });
 
-  describe('getUserStats', () => {
-    it('should return user statistics', async () => {
-      const mockStats = {
-        totalUsers: 1500,
-        activeUsers: 1200,
-        newUsersThisMonth: 150,
-        usersByRole: {
-          REGULAR: 1200,
-          VIP: 200,
-          ADMIN: 50,
-          PRODUCER: 50
-        }
+  describe('forecastBudget', () => {
+    it('should forecast budget successfully', async () => {
+      const mockForecast = {
+        projectedSpending: 10000,
+        confidence: 0.85
       };
+      analyticsService.forecastBudget.mockResolvedValue(mockForecast);
 
-      analyticsService.getUserStats.mockResolvedValue(mockStats);
+      req.params = { projectId: 'project-123' };
+      req.query = { daysAhead: '60' };
 
-      await analyticsController.getUserStats(mockReq, mockRes, mockNext);
+      await analyticsController.forecastBudget(req, res);
 
-      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(analyticsService.forecastBudget).toHaveBeenCalledWith('project-123', 60);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        data: mockForecast
+      });
+    });
+
+    it('should use default daysAhead value', async () => {
+      const mockForecast = { projectedSpending: 5000 };
+      analyticsService.forecastBudget.mockResolvedValue(mockForecast);
+
+      req.params = { projectId: 'project-123' };
+
+      await analyticsController.forecastBudget(req, res);
+
+      expect(analyticsService.forecastBudget).toHaveBeenCalledWith('project-123', 30);
+    });
+
+    it('should handle errors', async () => {
+      const error = new Error('Forecast error');
+      analyticsService.forecastBudget.mockRejectedValue(error);
+
+      req.params = { projectId: 'project-123' };
+
+      await analyticsController.forecastBudget(req, res);
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(500);
     });
   });
 
-  describe('getRestaurantStats', () => {
-    it('should return restaurant statistics', async () => {
-      const mockStats = {
-        totalRestaurants: 75,
-        activeRestaurants: 60,
-        averageRating: 4.3,
-        topRestaurants: [
-          { id: 'r1', name: 'مطعم 1', orders: 500 },
-          { id: 'r2', name: 'مطعم 2', orders: 450 }
-        ]
-      };
-
-      analyticsService.getRestaurantStats.mockResolvedValue(mockStats);
-
-      await analyticsController.getRestaurantStats(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-    });
-  });
-
-  describe('getPopularItems', () => {
-    it('should return popular menu items', async () => {
-      const mockItems = [
-        { menuItemId: 'm1', name: 'طبق شعبي', orderCount: 300 },
-        { menuItemId: 'm2', name: 'أرز بالخضار', orderCount: 250 }
-      ];
-
-      mockReq.query.limit = '10';
-
-      analyticsService.getPopularItems.mockResolvedValue(mockItems);
-
-      await analyticsController.getPopularItems(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(analyticsService.getPopularItems).toHaveBeenCalledWith(10);
-    });
-  });
-
-  describe('getRecommendationStats', () => {
-    it('should return recommendation statistics', async () => {
-      const mockStats = {
-        totalRecommendations: 5000,
-        acceptedRecommendations: 3000,
-        acceptanceRate: 0.6,
-        recommendationTypes: {
-          PERSONALIZED: 2000,
-          WEATHER_BASED: 1500,
-          TRENDING: 1000,
-          SIMILAR_ITEMS: 500
-        }
-      };
-
-      analyticsService.getRecommendationStats.mockResolvedValue(mockStats);
-
-      await analyticsController.getRecommendationStats(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-    });
-  });
-
-  describe('getNutritionStats', () => {
-    it('should return nutrition statistics', async () => {
-      const mockStats = {
-        averageDailyCalories: 2000,
-        averageDailyProtein: 150,
-        usersWithGoals: 500,
-        goalAchievementRate: 0.75
-      };
-
-      analyticsService.getNutritionStats.mockResolvedValue(mockStats);
-
-      await analyticsController.getNutritionStats(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-    });
-  });
-
-  describe('getFinancialReport', () => {
-    it('should return financial report', async () => {
-      const mockReport = {
-        period: 'monthly',
-        totalRevenue: 50000,
-        totalCosts: 30000,
-        netProfit: 20000,
-        profitMargin: 0.4,
-        breakdown: {
-          orders: 45000,
-          exceptions: 5000
-        }
-      };
-
-      mockReq.query.period = 'monthly';
-      mockReq.query.month = '1';
-      mockReq.query.year = '2025';
-
-      analyticsService.getFinancialReport.mockResolvedValue(mockReport);
-
-      await analyticsController.getFinancialReport(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-    });
-  });
-
-  describe('exportReport', () => {
-    it('should export report as PDF', async () => {
-      const mockReport = {
-        buffer: Buffer.from('test'),
-        filename: 'report-2025-01.pdf'
-      };
-
-      mockReq.query.type = 'financial';
-      mockReq.query.format = 'pdf';
-
-      analyticsService.exportReport.mockResolvedValue(mockReport);
-
-      await analyticsController.exportReport(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-    });
-
-    it('should export report as Excel', async () => {
-      const mockReport = {
-        buffer: Buffer.from('test'),
-        filename: 'report-2025-01.xlsx'
-      };
-
-      mockReq.query.type = 'orders';
-      mockReq.query.format = 'excel';
-
-      analyticsService.exportReport.mockResolvedValue(mockReport);
-
-      await analyticsController.exportReport(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-    });
-  });
-
-  describe('getRealTimeStats', () => {
-    it('should return real-time statistics', async () => {
-      const mockStats = {
-        activeOrders: 25,
-        onlineUsers: 150,
-        pendingNotifications: 50,
-        serverLoad: 0.45
-      };
-
-      analyticsService.getRealTimeStats.mockResolvedValue(mockStats);
-
-      await analyticsController.getRealTimeStats(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-    });
-  });
-
-  describe('getCustomReport', () => {
-    it('should generate custom report', async () => {
-      const mockReport = {
-        metrics: ['orders', 'revenue', 'users'],
-        data: {},
-        generatedAt: new Date()
-      };
-
-      mockReq.body = {
-        metrics: ['orders', 'revenue', 'users'],
-        startDate: '2025-01-01',
-        endDate: '2025-12-31',
-        groupBy: 'month'
-      };
-
-      analyticsService.generateCustomReport.mockResolvedValue(mockReport);
-
-      await analyticsController.getCustomReport(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-    });
-
-    it('should validate required metrics', async () => {
-      mockReq.body = {
-        // Missing metrics
-      };
-
-      await analyticsController.getCustomReport(mockReq, mockRes, mockNext);
-
-      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
-    });
-  });
-
-  describe('getComparisonReport', () => {
-    it('should compare two periods', async () => {
+  describe('compareProjects', () => {
+    it('should compare projects successfully', async () => {
       const mockComparison = {
-        period1: {
-          start: '2025-01-01',
-          end: '2025-01-31',
-          orders: 1000,
-          revenue: 50000
-        },
-        period2: {
-          start: '2025-02-01',
-          end: '2025-02-28',
-          orders: 1200,
-          revenue: 60000
-        },
-        changes: {
-          orders: '+20%',
-          revenue: '+20%'
-        }
+        projects: [
+          { id: 'project-1', totalSpent: 5000 },
+          { id: 'project-2', totalSpent: 7000 }
+        ]
+      };
+      analyticsService.compareProjects.mockResolvedValue(mockComparison);
+
+      req.body = {
+        projectIds: ['project-1', 'project-2'],
+        startDate: '2024-01-01',
+        endDate: '2024-01-31'
       };
 
-      mockReq.query.period1Start = '2025-01-01';
-      mockReq.query.period1End = '2025-01-31';
-      mockReq.query.period2Start = '2025-02-01';
-      mockReq.query.period2End = '2025-02-28';
+      await analyticsController.compareProjects(req, res);
 
-      analyticsService.getComparisonReport.mockResolvedValue(mockComparison);
+      expect(analyticsService.compareProjects).toHaveBeenCalledWith(
+        ['project-1', 'project-2'],
+        { start: '2024-01-01', end: '2024-01-31' }
+      );
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        data: mockComparison
+      });
+    });
 
-      await analyticsController.getComparisonReport(mockReq, mockRes, mockNext);
+    it('should return error if projectIds is missing', async () => {
+      req.body = {};
 
-      expect(mockRes.status).toHaveBeenCalledWith(200);
+      await analyticsController.compareProjects(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: { message: 'projectIds array is required' }
+      });
+      expect(analyticsService.compareProjects).not.toHaveBeenCalled();
+    });
+
+    it('should return error if projectIds is not an array', async () => {
+      req.body = { projectIds: 'not-an-array' };
+
+      await analyticsController.compareProjects(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(analyticsService.compareProjects).not.toHaveBeenCalled();
+    });
+
+    it('should work without date range', async () => {
+      const mockComparison = { projects: [] };
+      analyticsService.compareProjects.mockResolvedValue(mockComparison);
+
+      req.body = { projectIds: ['project-1'] };
+
+      await analyticsController.compareProjects(req, res);
+
+      expect(analyticsService.compareProjects).toHaveBeenCalledWith(['project-1'], null);
+    });
+
+    it('should handle errors', async () => {
+      const error = new Error('Comparison error');
+      analyticsService.compareProjects.mockRejectedValue(error);
+
+      req.body = { projectIds: ['project-1'] };
+
+      await analyticsController.compareProjects(req, res);
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(500);
+    });
+  });
+
+  describe('analyzeExceptions', () => {
+    it('should analyze exceptions successfully', async () => {
+      const mockAnalysis = {
+        totalExceptions: 15,
+        approvedExceptions: 10,
+        rejectedExceptions: 5
+      };
+      analyticsService.analyzeExceptions.mockResolvedValue(mockAnalysis);
+
+      req.query = {
+        projectId: 'project-123',
+        startDate: '2024-01-01',
+        endDate: '2024-01-31'
+      };
+
+      await analyticsController.analyzeExceptions(req, res);
+
+      expect(analyticsService.analyzeExceptions).toHaveBeenCalledWith(
+        'project-123',
+        { start: '2024-01-01', end: '2024-01-31' }
+      );
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        data: mockAnalysis
+      });
+    });
+
+    it('should work without date range', async () => {
+      const mockAnalysis = { totalExceptions: 5 };
+      analyticsService.analyzeExceptions.mockResolvedValue(mockAnalysis);
+
+      req.query = { projectId: 'project-123' };
+
+      await analyticsController.analyzeExceptions(req, res);
+
+      expect(analyticsService.analyzeExceptions).toHaveBeenCalledWith('project-123', null);
+    });
+
+    it('should handle errors', async () => {
+      const error = new Error('Analysis error');
+      analyticsService.analyzeExceptions.mockRejectedValue(error);
+
+      await analyticsController.analyzeExceptions(req, res);
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(500);
+    });
+  });
+
+  describe('getTopRestaurants', () => {
+    it('should get top restaurants successfully', async () => {
+      const mockRestaurants = [
+        { id: 'rest-1', name: 'Restaurant 1', orderCount: 50 },
+        { id: 'rest-2', name: 'Restaurant 2', orderCount: 30 }
+      ];
+      analyticsService.getTopRestaurants.mockResolvedValue(mockRestaurants);
+
+      req.query = { projectId: 'project-123', limit: '5' };
+
+      await analyticsController.getTopRestaurants(req, res);
+
+      expect(analyticsService.getTopRestaurants).toHaveBeenCalledWith('project-123', 5);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        data: mockRestaurants
+      });
+    });
+
+    it('should use default limit', async () => {
+      const mockRestaurants = [];
+      analyticsService.getTopRestaurants.mockResolvedValue(mockRestaurants);
+
+      req.query = { projectId: 'project-123' };
+
+      await analyticsController.getTopRestaurants(req, res);
+
+      expect(analyticsService.getTopRestaurants).toHaveBeenCalledWith('project-123', 10);
+    });
+
+    it('should handle errors', async () => {
+      const error = new Error('Restaurant error');
+      analyticsService.getTopRestaurants.mockRejectedValue(error);
+
+      req.query = { projectId: 'project-123' };
+
+      await analyticsController.getTopRestaurants(req, res);
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(500);
     });
   });
 });

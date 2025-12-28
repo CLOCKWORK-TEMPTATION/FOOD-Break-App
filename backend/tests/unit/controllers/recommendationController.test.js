@@ -1,196 +1,135 @@
 /**
- * Recommendation Controller Unit Tests
- * اختبارات وحدة متحكم التوصيات
+ * Recommendation Controller Tests
+ * اختبارات شاملة لمتحكم التوصيات
  */
+
+jest.mock('../../../src/services/recommendationService');
+jest.mock('../../../src/services/weatherService');
+jest.mock('../../../src/utils/logger');
 
 const recommendationController = require('../../../src/controllers/recommendationController');
 const recommendationService = require('../../../src/services/recommendationService');
+const weatherService = require('../../../src/services/weatherService');
+const logger = require('../../../src/utils/logger');
 
-jest.mock('../../../src/services/recommendationService');
-
-describe('Recommendation Controller', () => {
-  let mockReq, mockRes, mockNext;
+describe('Recommendation Controller Tests', () => {
+  let req, res;
 
   beforeEach(() => {
-    mockReq = {
-      user: { id: 'test-user-id' },
+    req = {
+      query: {},
       body: {},
-      params: {},
-      query: {}
+      user: { id: 'user-123' }
     };
-    mockRes = {
+    res = {
       json: jest.fn().mockReturnThis(),
       status: jest.fn().mockReturnThis()
     };
-    mockNext = jest.fn();
     jest.clearAllMocks();
   });
 
-  describe('getRecommendations', () => {
-    it('should return personalized recommendations', async () => {
+  describe('getUserRecommendations', () => {
+    it('should get user recommendations successfully', async () => {
       const mockRecommendations = [
-        {
-          id: 'rec-1',
-          menuItemId: 'menu-1',
-          score: 0.95,
-          reason: 'يفضل الأطباق الإيطالية'
-        }
+        { id: 'rec-1', menuItemId: 'item-1', score: 0.95 },
+        { id: 'rec-2', menuItemId: 'item-2', score: 0.90 },
+        { id: 'rec-3', menuItemId: 'item-3', score: 0.85 }
       ];
 
-      recommendationService.getPersonalizedRecommendations.mockResolvedValue(mockRecommendations);
+      recommendationService.getUserRecommendations.mockResolvedValue(mockRecommendations);
 
-      await recommendationController.getRecommendations(mockReq, mockRes, mockNext);
+      await recommendationController.getUserRecommendations(req, res);
 
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({
+      expect(recommendationService.getUserRecommendations).toHaveBeenCalledWith('user-123', null);
+      expect(res.json).toHaveBeenCalledWith({
         success: true,
-        data: mockRecommendations
+        data: mockRecommendations.slice(0, 20)
       });
     });
 
-    it('should filter by type when provided', async () => {
-      mockReq.query.type = 'WEATHER_BASED';
+    it('should get recommendations with location', async () => {
+      const mockRecommendations = [];
+      req.query = { lat: '40.7128', lon: '-74.0060' };
 
-      recommendationService.getRecommendationsByType.mockResolvedValue([]);
+      recommendationService.getUserRecommendations.mockResolvedValue(mockRecommendations);
 
-      await recommendationController.getRecommendations(mockReq, mockRes, mockNext);
+      await recommendationController.getUserRecommendations(req, res);
 
-      expect(recommendationService.getRecommendationsByType).toHaveBeenCalledWith(
-        'test-user-id',
-        'WEATHER_BASED'
+      expect(recommendationService.getUserRecommendations).toHaveBeenCalledWith(
+        'user-123',
+        { lat: 40.7128, lon: -74.0060 }
       );
     });
 
-    it('should handle service errors', async () => {
-      recommendationService.getPersonalizedRecommendations.mockRejectedValue(
-        new Error('Service unavailable')
-      );
+    it('should handle errors', async () => {
+      const error = new Error('Recommendation fetch failed');
+      recommendationService.getUserRecommendations.mockRejectedValue(error);
 
-      await recommendationController.getRecommendations(mockReq, mockRes, mockNext);
+      await recommendationController.getUserRecommendations(req, res);
 
-      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+      expect(logger.error).toHaveBeenCalledWith('Error getting recommendations:', error);
+      expect(res.status).toHaveBeenCalledWith(500);
     });
   });
 
-  describe('generateRecommendations', () => {
-    it('should generate new recommendations', async () => {
-      const mockGenerated = [
-        {
-          id: 'new-rec-1',
-          menuItemId: 'menu-2',
-          recommendationType: 'PERSONALIZED'
-        }
-      ];
-
-      recommendationService.generateRecommendations.mockResolvedValue(mockGenerated);
-
-      await recommendationController.generateRecommendations(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(201);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        success: true,
-        data: mockGenerated,
-        count: mockGenerated.length
-      });
-    });
-  });
-
-  describe('getRecommendationById', () => {
-    it('should return recommendation by id', async () => {
-      const mockRec = {
-        id: 'rec-1',
-        menuItemId: 'menu-1',
-        score: 0.95
+  describe('getWeatherRecommendations', () => {
+    it('should get weather recommendations successfully', async () => {
+      const mockWeatherRecs = {
+        weather: { temp: 25, condition: 'sunny' },
+        recommendations: [{ id: 'item-1', name: 'Ice Cream', score: 0.95 }]
       };
 
-      mockReq.params.id = 'rec-1';
+      req.query = { lat: '40.7128', lon: '-74.0060' };
+      weatherService.getWeatherRecommendations.mockResolvedValue(mockWeatherRecs);
 
-      recommendationService.getRecommendationById.mockResolvedValue(mockRec);
+      await recommendationController.getWeatherRecommendations(req, res);
 
-      await recommendationController.getRecommendationById(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({
+      expect(weatherService.getWeatherRecommendations).toHaveBeenCalledWith(40.7128, -74.0060);
+      expect(res.json).toHaveBeenCalledWith({
         success: true,
-        data: mockRec
+        data: mockWeatherRecs
       });
     });
 
-    it('should return 404 for non-existent recommendation', async () => {
-      mockReq.params.id = 'non-existent';
+    it('should return error if location is missing', async () => {
+      req.query = {};
 
-      recommendationService.getRecommendationById.mockResolvedValue(null);
+      await recommendationController.getWeatherRecommendations(req, res);
 
-      await recommendationController.getRecommendationById(mockReq, mockRes, mockNext);
-
-      const error = mockNext.mock.calls[0][0];
-      expect(error.statusCode).toBe(404);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(weatherService.getWeatherRecommendations).not.toHaveBeenCalled();
     });
   });
 
-  describe('dismissRecommendation', () => {
-    it('should mark recommendation as inactive', async () => {
-      mockReq.params.id = 'rec-1';
+  describe('recordInteraction', () => {
+    it('should record interaction successfully', async () => {
+      req.body = { recommendationId: 'rec-123', action: 'click', menuItemId: 'item-456' };
 
-      recommendationService.dismissRecommendation.mockResolvedValue(true);
+      await recommendationController.recordInteraction(req, res);
 
-      await recommendationController.dismissRecommendation(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({
+      expect(res.json).toHaveBeenCalledWith({
         success: true,
-        message: 'تم تجاهل التوصية'
+        message: 'تم تسجيل التفاعل بنجاح'
       });
     });
   });
 
-  describe('updateRecommendationPreferences', () => {
-    it('should update user preferences', async () => {
-      const mockPrefs = {
-        allowRecommendations: true,
-        diversityFactor: 0.7
-      };
-
-      mockReq.body = mockPrefs;
-
-      recommendationService.updatePreferences.mockResolvedValue(mockPrefs);
-
-      await recommendationController.updateRecommendationPreferences(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        success: true,
-        data: mockPrefs
-      });
-    });
-  });
-
-  describe('getTrendingItems', () => {
-    it('should return trending menu items', async () => {
-      const mockTrending = [
-        { menuItemId: 'menu-1', orderCount: 150 },
-        { menuItemId: 'menu-2', orderCount: 125 }
+  describe('getSavedRecommendations', () => {
+    it('should get saved recommendations successfully', async () => {
+      const mockSaved = [
+        { id: 'saved-1', menuItemId: 'item-1', savedAt: new Date() },
+        { id: 'saved-2', menuItemId: 'item-2', savedAt: new Date() }
       ];
 
-      recommendationService.getTrendingItems.mockResolvedValue(mockTrending);
+      recommendationService.getSavedRecommendations.mockResolvedValue(mockSaved);
 
-      await recommendationController.getTrendingItems(mockReq, mockRes, mockNext);
+      await recommendationController.getSavedRecommendations(req, res);
 
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({
+      expect(recommendationService.getSavedRecommendations).toHaveBeenCalledWith('user-123');
+      expect(res.json).toHaveBeenCalledWith({
         success: true,
-        data: mockTrending
+        data: mockSaved
       });
-    });
-
-    it('should limit results when limit query is provided', async () => {
-      mockReq.query.limit = '10';
-
-      recommendationService.getTrendingItems.mockResolvedValue([]);
-
-      await recommendationController.getTrendingItems(mockReq, mockRes, mockNext);
-
-      expect(recommendationService.getTrendingItems).toHaveBeenCalledWith(10);
     });
   });
 });

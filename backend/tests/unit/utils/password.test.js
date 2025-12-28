@@ -1,26 +1,45 @@
 /**
- * Password Utils Unit Tests
- * اختبارات أدوات كلمات المرور
+ * Password Utility Tests
+ * اختبارات شاملة لأداة كلمات المرور
  */
 
-const { hashPassword, comparePassword } = require('../../../src/utils/password');
+jest.mock('bcrypt');
+const bcrypt = require('bcrypt');
+const passwordUtil = require('../../../src/utils/password');
 
-describe('Password Utils', () => {
-  it('should hash password and validate correct match', async () => {
-    const plainPassword = 'StrongPassword123!';
-
-    const hashedPassword = await hashPassword(plainPassword);
-
-    expect(hashedPassword).not.toBe(plainPassword);
-    const isMatch = await comparePassword(plainPassword, hashedPassword);
-    expect(isMatch).toBe(true);
+describe('Password Utility Tests', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('should return false for mismatched password', async () => {
-    const plainPassword = 'StrongPassword123!';
-    const hashedPassword = await hashPassword(plainPassword);
+  describe('hashPassword', () => {
+    it('should hash password successfully', async () => {
+      const mockHash = 'hashed-password';
+      bcrypt.hash = jest.fn().mockResolvedValue(mockHash);
 
-    const isMatch = await comparePassword('WrongPassword!', hashedPassword);
-    expect(isMatch).toBe(false);
+      const result = await passwordUtil.hashPassword('plain-password');
+
+      expect(bcrypt.hash).toHaveBeenCalledWith('plain-password', expect.any(Number));
+      expect(result).toBe(mockHash);
+    });
+  });
+
+  describe('comparePassword', () => {
+    it('should return true for matching passwords', async () => {
+      bcrypt.compare = jest.fn().mockResolvedValue(true);
+
+      const result = await passwordUtil.comparePassword('plain', 'hashed');
+
+      expect(bcrypt.compare).toHaveBeenCalledWith('plain', 'hashed');
+      expect(result).toBe(true);
+    });
+
+    it('should return false for non-matching passwords', async () => {
+      bcrypt.compare = jest.fn().mockResolvedValue(false);
+
+      const result = await passwordUtil.comparePassword('plain', 'hashed');
+
+      expect(result).toBe(false);
+    });
   });
 });

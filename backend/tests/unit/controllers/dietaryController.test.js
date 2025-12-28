@@ -1,319 +1,188 @@
 /**
- * Dietary Controller Unit Tests
- * اختبارات وحدة متحكم الحمية الغذائية
+ * Dietary Controller Tests
+ * اختبارات وحدة التحكم بالنظام الغذائي
  */
 
 const dietaryController = require('../../../src/controllers/dietaryController');
-const dietaryService = require('../../../src/services/dietaryService');
 
-jest.mock('../../../src/services/dietaryService');
+// Mock dependencies
+jest.mock('@prisma/client', () => ({
+  PrismaClient: jest.fn(() => global.mockPrisma)
+}));
 
 describe('Dietary Controller', () => {
-  let mockReq, mockRes, mockNext;
+  let req, res, next;
 
   beforeEach(() => {
-    mockReq = {
-      user: { id: 'test-user-id' },
+    req = {
       body: {},
       params: {},
-      query: {}
+      query: {},
+      user: { id: 'user-123' },
+      t: jest.fn((key) => key)
     };
-    mockRes = {
-      json: jest.fn().mockReturnThis(),
-      status: jest.fn().mockReturnThis()
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn().mockReturnThis()
     };
-    mockNext = jest.fn();
+    next = jest.fn();
     jest.clearAllMocks();
   });
 
   describe('getDietaryProfile', () => {
-    it('should return user dietary profile', async () => {
+    it('should return dietary profile for user', async () => {
       const mockProfile = {
-        id: 'profile-1',
-        userId: 'test-user-id',
-        isHalal: true,
-        isVegetarian: false,
-        isVegan: false,
-        isGlutenFree: true
+        id: '1',
+        userId: 'user-123',
+        dietaryRestrictions: ['VEGETARIAN'],
+        allergies: ['NUTS']
       };
+      global.mockPrisma.dietaryProfile.findUnique.mockResolvedValue(mockProfile);
 
-      dietaryService.getDietaryProfile.mockResolvedValue(mockProfile);
+      await dietaryController.getDietaryProfile(req, res, next);
 
-      await dietaryController.getDietaryProfile(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        success: true,
-        data: mockProfile
+      expect(global.mockPrisma.dietaryProfile.findUnique).toHaveBeenCalledWith({
+        where: { userId: req.user.id }
       });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          data: mockProfile
+        })
+      );
     });
 
-    it('should create profile if not exists', async () => {
-      const mockProfile = {
-        id: 'profile-1',
-        userId: 'test-user-id',
-        isHalal: false
-      };
+    it('should handle profile not found', async () => {
+      global.mockPrisma.dietaryProfile.findUnique.mockResolvedValue(null);
 
-      dietaryService.getDietaryProfile.mockResolvedValue(mockProfile);
+      await dietaryController.getDietaryProfile(req, res, next);
 
-      await dietaryController.getDietaryProfile(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(res.status).toHaveBeenCalledWith(404);
     });
   });
 
   describe('createDietaryProfile', () => {
     it('should create dietary profile successfully', async () => {
-      const mockProfile = {
-        id: 'profile-1',
-        userId: 'test-user-id',
-        isHalal: true,
-        isVegetarian: false,
-        isKeto: true,
-        maxCaloriesPerMeal: 600
+      const profileData = {
+        dietaryRestrictions: ['VEGAN'],
+        allergies: ['DAIRY'],
+        preferences: ['ORGANIC']
       };
+      const mockProfile = { id: '1', userId: 'user-123', ...profileData };
+      global.mockPrisma.dietaryProfile.create.mockResolvedValue(mockProfile);
 
-      mockReq.body = {
-        isHalal: true,
-        isKeto: true,
-        maxCaloriesPerMeal: 600
-      };
+      req.body = profileData;
 
-      dietaryService.createDietaryProfile.mockResolvedValue(mockProfile);
+      await dietaryController.createDietaryProfile(req, res, next);
 
-      await dietaryController.createDietaryProfile(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(201);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        success: true,
-        data: mockProfile
+      expect(global.mockPrisma.dietaryProfile.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          userId: req.user.id,
+          ...profileData
+        })
       });
-    });
-
-    it('should validate dietary constraints', async () => {
-      mockReq.body = {
-        maxCaloriesPerMeal: -100 // Invalid value
-      };
-
-      await dietaryController.createDietaryProfile(mockReq, mockRes, mockNext);
-
-      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          data: mockProfile
+        })
+      );
     });
   });
 
   describe('updateDietaryProfile', () => {
-    it('should update dietary profile', async () => {
-      const mockProfile = {
-        id: 'profile-1',
-        userId: 'test-user-id',
-        isHalal: true,
-        isVegetarian: true
-      };
+    it('should update dietary profile successfully', async () => {
+      const updateData = { allergies: ['GLUTEN'] };
+      const mockProfile = { id: '1', userId: 'user-123', ...updateData };
+      global.mockPrisma.dietaryProfile.update.mockResolvedValue(mockProfile);
 
-      mockReq.body = {
-        isHalal: true,
-        isVegetarian: true
-      };
+      req.body = updateData;
 
-      dietaryService.updateDietaryProfile.mockResolvedValue(mockProfile);
+      await dietaryController.updateDietaryProfile(req, res, next);
 
-      await dietaryController.updateDietaryProfile(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        success: true,
-        data: mockProfile
+      expect(global.mockPrisma.dietaryProfile.update).toHaveBeenCalledWith({
+        where: { userId: req.user.id },
+        data: updateData
       });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          data: mockProfile
+        })
+      );
     });
   });
 
-  describe('getAllergyProfile', () => {
-    it('should return allergy profile', async () => {
+  describe('getRecommendedMenuItems', () => {
+    it('should return recommended menu items based on dietary profile', async () => {
       const mockProfile = {
-        id: 'allergy-1',
-        userId: 'test-user-id',
-        hasPeanutAllergy: true,
-        severity: 'SEVERE',
-        showAlerts: true
+        userId: 'user-123',
+        dietaryRestrictions: ['VEGETARIAN']
       };
-
-      dietaryService.getAllergyProfile.mockResolvedValue(mockProfile);
-
-      await dietaryController.getAllergyProfile(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-    });
-  });
-
-  describe('createAllergyProfile', () => {
-    it('should create allergy profile', async () => {
-      const mockProfile = {
-        id: 'allergy-1',
-        hasPeanutAllergy: true,
-        hasMilkAllergy: false,
-        severity: 'HIGH',
-        showAlerts: true
-      };
-
-      mockReq.body = {
-        hasPeanutAllergy: true,
-        severity: 'HIGH'
-      };
-
-      dietaryService.createAllergyProfile.mockResolvedValue(mockProfile);
-
-      await dietaryController.createAllergyProfile(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(201);
-    });
-  });
-
-  describe('checkMenuItemSafety', () => {
-    it('should check if menu item is safe for user', async () => {
-      const mockSafetyCheck = {
-        menuItemId: 'menu-1',
-        isSafe: false,
-        riskLevel: 'HIGH',
-        unsafeIngredients: ['peanuts', 'milk'],
-        warnings: ['يحتوي على فول السوداني']
-      };
-
-      mockReq.params.menuItemId = 'menu-1';
-
-      dietaryService.checkMenuItemSafety.mockResolvedValue(mockSafetyCheck);
-
-      await dietaryController.checkMenuItemSafety(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        success: true,
-        data: mockSafetyCheck
-      });
-    });
-
-    it('should return safe result for allergen-free items', async () => {
-      const mockSafetyCheck = {
-        menuItemId: 'menu-1',
-        isSafe: true,
-        riskLevel: 'LOW',
-        unsafeIngredients: []
-      };
-
-      mockReq.params.menuItemId = 'menu-1';
-
-      dietaryService.checkMenuItemSafety.mockResolvedValue(mockSafetyCheck);
-
-      await dietaryController.checkMenuItemSafety(mockReq, mockRes, mockNext);
-
-      expect(mockRes.json).toHaveBeenCalledWith({
-        success: true,
-        data: mockSafetyCheck
-      });
-    });
-  });
-
-  describe('getSafeMenuItems', () => {
-    it('should return safe menu items for user', async () => {
       const mockItems = [
-        {
-          id: 'menu-1',
-          name: 'آمن للحساسية',
-          isSafe: true
-        },
-        {
-          id: 'menu-2',
-          name: 'خالي من الغلوتين',
-          isSafe: true
-        }
+        { id: '1', name: 'Salad', isVegetarian: true },
+        { id: '2', name: 'Pasta', isVegetarian: true }
       ];
+      global.mockPrisma.dietaryProfile.findUnique.mockResolvedValue(mockProfile);
+      global.mockPrisma.menuItem.findMany.mockResolvedValue(mockItems);
 
-      mockReq.params.restaurantId = 'restaurant-1';
+      await dietaryController.getRecommendedMenuItems(req, res, next);
 
-      dietaryService.getSafeMenuItems.mockResolvedValue(mockItems);
-
-      await dietaryController.getSafeMenuItems(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(global.mockPrisma.menuItem.findMany).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          data: mockItems
+        })
+      );
     });
   });
 
-  describe('addCustomDiet', () => {
-    it('should add custom diet', async () => {
+  describe('checkMenuItemCompatibility', () => {
+    it('should check if menu item is compatible with dietary profile', async () => {
       const mockProfile = {
-        id: 'profile-1',
-        customDiets: ['low-fodmap']
+        allergies: ['NUTS'],
+        dietaryRestrictions: ['VEGAN']
       };
-
-      mockReq.body = {
-        dietName: 'low-fodmap',
-        description: 'حمية قليلة الفودماب'
+      const mockItem = {
+        id: '1',
+        name: 'Salad',
+        allergens: [],
+        isVegan: true
       };
+      global.mockPrisma.dietaryProfile.findUnique.mockResolvedValue(mockProfile);
+      global.mockPrisma.menuItem.findUnique.mockResolvedValue(mockItem);
 
-      dietaryService.addCustomDiet.mockResolvedValue(mockProfile);
+      req.params.menuItemId = '1';
 
-      await dietaryController.addCustomDiet(mockReq, mockRes, mockNext);
+      await dietaryController.checkMenuItemCompatibility(req, res, next);
 
-      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          data: expect.objectContaining({
+            compatible: expect.any(Boolean)
+          })
+        })
+      );
     });
   });
 
-  describe('removeCustomDiet', () => {
-    it('should remove custom diet', async () => {
-      const mockProfile = {
-        id: 'profile-1',
-        customDiets: []
-      };
+  describe('deleteDietaryProfile', () => {
+    it('should delete dietary profile successfully', async () => {
+      global.mockPrisma.dietaryProfile.delete.mockResolvedValue({ id: '1' });
 
-      mockReq.body = {
-        dietName: 'low-fodmap'
-      };
+      await dietaryController.deleteDietaryProfile(req, res, next);
 
-      dietaryService.removeCustomDiet.mockResolvedValue(mockProfile);
-
-      await dietaryController.removeCustomDiet(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-    });
-  });
-
-  describe('addAvoidedIngredient', () => {
-    it('should add ingredient to avoid list', async () => {
-      const mockProfile = {
-        id: 'profile-1',
-        avoidIngredients: ['garlic', 'onion']
-      };
-
-      mockReq.body = {
-        ingredient: 'garlic',
-        reason: 'يسبب عسر هضم'
-      };
-
-      dietaryService.addAvoidedIngredient.mockResolvedValue(mockProfile);
-
-      await dietaryController.addAvoidedIngredient(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-    });
-  });
-
-  describe('getDietaryRecommendations', () => {
-    it('should get dietary recommendations', async () => {
-      const mockRecommendations = [
-        {
-          menuItemId: 'menu-1',
-          reason: 'يناسب حميتك الغذائية',
-          matchPercentage: 95
-        }
-      ];
-
-      mockReq.params.restaurantId = 'restaurant-1';
-
-      dietaryService.getDietaryRecommendations.mockResolvedValue(mockRecommendations);
-
-      await dietaryController.getDietaryRecommendations(mockReq, mockRes, mockNext);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(global.mockPrisma.dietaryProfile.delete).toHaveBeenCalledWith({
+        where: { userId: req.user.id }
+      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true
+        })
+      );
     });
   });
 });

@@ -81,9 +81,8 @@ jest.mock('@paypal/checkout-server-sdk', () => ({
 }));
 
 // Mock OpenAI and other AI services
-jest.mock('openai', () => ({
-  __esModule: true,
-  default: jest.fn(() => ({
+jest.mock('openai', () => {
+  return jest.fn().mockImplementation(() => ({
     chat: {
       completions: {
         create: jest.fn().mockResolvedValue({
@@ -91,12 +90,19 @@ jest.mock('openai', () => ({
         }),
       },
     },
-  })),
-}));
+  }));
+});
 
 jest.mock('@anthropic-ai/sdk', () => ({
   __esModule: true,
-  default: jest.fn(() => ({
+  Anthropic: jest.fn().mockImplementation(() => ({
+    messages: {
+      create: jest.fn().mockResolvedValue({
+        content: [{ text: 'Test Anthropic response' }]
+      }),
+    },
+  })),
+  default: jest.fn().mockImplementation(() => ({
     messages: {
       create: jest.fn().mockResolvedValue({
         content: [{ text: 'Test Anthropic response' }]
@@ -116,6 +122,32 @@ jest.mock('@google/generative-ai', () => ({
     })),
   })),
 }));
+
+// Mock Groq SDK
+jest.mock('groq-sdk', () => {
+  return jest.fn().mockImplementation(() => ({
+    chat: {
+      completions: {
+        create: jest.fn().mockResolvedValue({
+          choices: [{ message: { content: 'Test Groq response' } }]
+        }),
+      },
+    },
+  }));
+});
+
+// Mock Together AI
+jest.mock('together-ai', () => {
+  return jest.fn().mockImplementation(() => ({
+    chat: {
+      completions: {
+        create: jest.fn().mockResolvedValue({
+          choices: [{ message: { content: 'Test Together AI response' } }]
+        }),
+      },
+    },
+  }));
+});
 
 // Mock nodemailer
 jest.mock('nodemailer', () => ({
@@ -404,7 +436,10 @@ const mockPrisma = {
   // Emotion AI Models
   emotionLog: {
     create: jest.fn(),
+    findUnique: jest.fn(),
     findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
     deleteMany: jest.fn()
   },
   userMoodLog: {
@@ -420,18 +455,11 @@ const mockPrisma = {
   },
   userConsent: {
     create: jest.fn(),
-    findMany: jest.fn(),
-    upsert: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  // Exception Models
-  exception: {
-    create: jest.fn(),
     findUnique: jest.fn(),
     findMany: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
-    count: jest.fn(),
+    upsert: jest.fn(),
     deleteMany: jest.fn()
   },
   // Notification Models
@@ -445,24 +473,125 @@ const mockPrisma = {
     deleteMany: jest.fn(),
     count: jest.fn()
   },
+  // Exception Models
+  exception: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    count: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  costAlert: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  budget: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn()
+  },
   userReminderPreferences: {
     create: jest.fn(),
     findUnique: jest.fn(),
     upsert: jest.fn(),
     deleteMany: jest.fn()
   },
-  // Medical Models
-  medicalConsent: {
+  nutritionGoal: {
     create: jest.fn(),
-    findMany: jest.fn(),
-    upsert: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  ingredient: {
-    create: jest.fn(),
+    findUnique: jest.fn(),
     findMany: jest.fn(),
     update: jest.fn(),
-    delete: jest.fn()
+    delete: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  mealPlan: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  production: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  invoice: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  qRCode: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  reminder: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  mlModel: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  prediction: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  workflow: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  admin: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  analytics: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn()
   },
   // Voice Models
   voiceSession: {
@@ -478,25 +607,10 @@ const mockPrisma = {
     }),
     deleteMany: jest.fn()
   },
-  voicePreferences: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    upsert: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  voiceShortcut: {
-    create: jest.fn(),
-    findMany: jest.fn(),
-    deleteMany: jest.fn()
-  },
-  personalVoiceModel: {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    deleteMany: jest.fn()
-  },
   // Transaction support
   $transaction: jest.fn((callback) => callback(mockPrisma)),
-  $disconnect: jest.fn()
+  $disconnect: jest.fn(),
+  $connect: jest.fn()
 };
 
 // Make mockPrisma available globally
