@@ -1,6 +1,15 @@
-const nodemailer = require('nodemailer');
 const { PrismaClient } = require('@prisma/client');
+const logger = require('../utils/logger');
+
 const prisma = new PrismaClient();
+
+let nodemailer = null;
+try {
+  // اختياري: لا نكسر السيرفر إذا لم تُثبت الحزمة في بيئة معينة
+  nodemailer = require('nodemailer');
+} catch (_) {
+  nodemailer = null;
+}
 
 class NotificationService {
   constructor() {
@@ -8,241 +17,84 @@ class NotificationService {
     this.pushNotificationConfig = this.initializePushNotifications();
   }
 
-  // إعداد خدمة البريد الإلكتروني
   initializeEmailTransporter() {
-    return nodemailer.createTransporter({
-      host: process.env.SMTP_HOST,
-      port: process.env.SMTP_PORT || 587,
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-      }
-    });
+    try {
+      if (!nodemailer) return null;
+      if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) return null;
+
+      return nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: Number(process.env.SMTP_PORT || 587),
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS
+        }
+      });
+    } catch (error) {
+      logger.warn(`تعذر تهيئة SMTP: ${error.message}`);
+      return null;
+    }
   }
 
-  // إعداد الإشعارات الفورية
   initializePushNotifications() {
-    // يمكن إضافة Firebase Cloud Messaging أو خدمة أخرى
+    // Placeholder: يمكن ربط FCM لاحقاً عبر server key + device tokens
     return {
       enabled: process.env.PUSH_NOTIFICATIONS_ENABLED === 'true',
-      serverKey: process.env.FCM_SERVER_KEY
+      provider: process.env.PUSH_PROVIDER || 'NONE'
     };
   }
 
-  // إرسال إشعار تأكيد الطلب
-  async sendOrderConfirmation(orderData) {
-    try {
-      const notification = {
-        type: 'ORDER_CONFIRMATION',
-        title: 'تم تأكيد طلبك',
-        message: `تم تأكيد طلبك رقم ${orderData.id} من مطعم ${orderData.restaurant.name}`,
-        userId: orderData.userId,
-        orderId: orderData.id,
-        data: {
-          orderId: orderData.id,
-          restaurantName: orderData.restaurant.name,
-          totalAmount: orderData.totalAmount,
-          estimatedDelivery: orderData.estimatedDelivery
-        }
-      };
-
-      await this.saveNotification(notification);
-      await this.sendPushNotification(orderData.userId, notification);
-      await this.sendEmailNotification(orderData.user.email, notification);
-
-      return notification;
-    } catch (error) {
-      throw new Error(`خطأ في إرسال إشعار تأكيد الطلب: ${error.message}`);
+  /**
+   * Why: توحيد mapping إلى NotificationType (enum) لمنع أخطاء Prisma runtime.
+   */
+  mapOrderStatusToNotificationType(orderStatus) {
+    switch (orderStatus) {
+      case 'CONFIRMED':
+        return 'ORDER_CONFIRMED';
+      case 'READY':
+        return 'ORDER_READY';
+      case 'DELIVERED':
+        return 'ORDER_DELIVERED';
+      default:
+        return 'SYSTEM';
     }
   }
 
-  // إرسال إشعار تحديث حالة الطلب
-  async sendOrderStatusUpdate(orderData, newStatus) {
-    try {
-      const statusMessages = {
-        CONFIRMED: 'تم تأكيد طلبك',
-        PREPARING: 'جاري تحضير طلبك',
-        READY: 'طلبك جاهز للاستلام',
-        OUT_FOR_DELIVERY: 'طلبك في الطريق إليك',
-        DELIVERED: 'تم تسليم طلبك بنجاح',
-        CANCELLED: 'تم إلغاء طلبك'
-      };
-
-      const notification = {
-        type: 'ORDER_STATUS_UPDATE',
-        title: 'تحديث حالة الطلب',
-        message: statusMessages[newStatus] || 'تم تحديث حالة طلبك',
-        userId: orderData.userId,
-        orderId: orderData.id,
-        data: {
-          orderId: orderData.id,
-          newStatus,
-          restaurantName: orderData.restaurant.name,
-          updatedAt: new Date().toISOString()
-        }
-      };
-
-      await this.saveNotification(notification);
-      await this.sendPushNotification(orderData.userId, notification);
-
-      return notification;
-    } catch (error) {
-      throw new Error(`خطأ في إرسال إشعار تحديث الحالة: ${error.message}`);
-    }
-  }
-
-  // إرسال تذكير بموعد الطلب
-  async sendOrderReminder(projectId) {
-    try {
-      // الحصول على جميع أعضاء المشروع الذين لم يقدموا طلبات
-      const projectMembers = await prisma.projectMember.findMany({
-        where: { projectId },
-        include: { user: true }
-      });
-
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      const notifications = [];
-
-      for (const member of projectMembers) {
-        // التحقق من وجود طلب لليوم
-        const existingOrder = await prisma.order.findFirst({
-          where: {
-            userId: member.userId,
-            projectId,
-            createdAt: {
-              gte: today
-            }
-          }
-        });
-
-        if (!existingOrder) {
-          const notification = {
-            type: 'ORDER_REMINDER',
-            title: 'تذكير: موعد تقديم الطلبات',
-            message: 'لا تنس تقديم طلب الطعام لليوم. الموعد النهائي خلال ساعة واحدة.',
-            userId: member.userId,
-            projectId,
-            data: {
-              projectId,
-              deadline: new Date(Date.now() + 60 * 60 * 1000).toISOString()
-            }
-          };
-
-          await this.saveNotification(notification);
-          await this.sendPushNotification(member.userId, notification);
-          notifications.push(notification);
-        }
-      }
-
-      return notifications;
-    } catch (error) {
-      throw new Error(`خطأ في إرسال تذكير الطلبات: ${error.message}`);
-    }
-  }
-
-  // إرسال إشعار تتبع GPS
-  async sendDeliveryLocationUpdate(orderData, locationData) {
-    try {
-      const notification = {
-        type: 'DELIVERY_LOCATION_UPDATE',
-        title: 'تحديث موقع التوصيل',
-        message: `المندوب على بعد ${locationData.distanceKm} كم من موقعك`,
-        userId: orderData.userId,
-        orderId: orderData.id,
-        data: {
-          orderId: orderData.id,
-          latitude: locationData.latitude,
-          longitude: locationData.longitude,
-          distanceKm: locationData.distanceKm,
-          estimatedArrival: locationData.estimatedArrival
-        }
-      };
-
-      await this.saveNotification(notification);
-      await this.sendPushNotification(orderData.userId, notification);
-
-      return notification;
-    } catch (error) {
-      throw new Error(`خطأ في إرسال تحديث الموقع: ${error.message}`);
-    }
-  }
-
-  // إرسال إشعار الاستثناءات
-  async sendExceptionNotification(exceptionData) {
-    try {
-      const notification = {
-        type: 'EXCEPTION_NOTIFICATION',
-        title: 'طلب استثناء جديد',
-        message: `تم تقديم طلب استثناء من ${exceptionData.user.name}`,
-        userId: exceptionData.approvedBy || exceptionData.projectManagerId,
-        data: {
-          exceptionId: exceptionData.id,
-          requestedBy: exceptionData.user.name,
-          reason: exceptionData.reason,
-          amount: exceptionData.additionalCost
-        }
-      };
-
-      await this.saveNotification(notification);
-      await this.sendPushNotification(notification.userId, notification);
-
-      return notification;
-    } catch (error) {
-      throw new Error(`خطأ في إرسال إشعار الاستثناء: ${error.message}`);
-    }
-  }
-
-  // حفظ الإشعار في قاعدة البيانات
   async saveNotification(notificationData) {
     try {
-      const notification = await prisma.notification.create({
+      return await prisma.notification.create({
         data: {
           type: notificationData.type,
           title: notificationData.title,
           message: notificationData.message,
           userId: notificationData.userId,
-          orderId: notificationData.orderId,
-          projectId: notificationData.projectId,
-          data: notificationData.data,
-          isRead: false,
-          createdAt: new Date()
+          orderId: notificationData.orderId || null,
+          projectId: notificationData.projectId || null,
+          data: notificationData.data || null,
+          isRead: false
         }
       });
-
-      return notification;
     } catch (error) {
       throw new Error(`خطأ في حفظ الإشعار: ${error.message}`);
     }
   }
 
-  // إرسال إشعار فوري (Push Notification)
   async sendPushNotification(userId, notificationData) {
     try {
-      if (!this.pushNotificationConfig.enabled) {
-        return { sent: false, reason: 'Push notifications disabled' };
-      }
-
-      // هنا يمكن إضافة منطق إرسال الإشعارات الفورية
-      // مثل Firebase Cloud Messaging أو OneSignal
-      
-      console.log(`إرسال إشعار فوري للمستخدم ${userId}:`, notificationData.title);
-      
-      return { sent: true, userId, title: notificationData.title };
+      if (!this.pushNotificationConfig.enabled) return { sent: false, reason: 'disabled' };
+      logger.info({ msg: 'Push notification placeholder', userId, title: notificationData.title });
+      return { sent: true };
     } catch (error) {
-      console.error('خطأ في إرسال الإشعار الفوري:', error);
+      logger.warn(`فشل إرسال Push: ${error.message}`);
       return { sent: false, error: error.message };
     }
   }
 
-  // إرسال إشعار بالبريد الإلكتروني
   async sendEmailNotification(email, notificationData) {
     try {
-      if (!this.emailTransporter) {
-        return { sent: false, reason: 'Email transporter not configured' };
-      }
+      if (!this.emailTransporter) return { sent: false, reason: 'smtp_not_configured' };
+      if (!email) return { sent: false, reason: 'missing_email' };
 
       const mailOptions = {
         from: process.env.SMTP_FROM || 'noreply@breakapp.com',
@@ -252,15 +104,13 @@ class NotificationService {
       };
 
       const result = await this.emailTransporter.sendMail(mailOptions);
-      
       return { sent: true, messageId: result.messageId };
     } catch (error) {
-      console.error('خطأ في إرسال البريد الإلكتروني:', error);
+      logger.warn(`فشل إرسال البريد: ${error.message}`);
       return { sent: false, error: error.message };
     }
   }
 
-  // توليد قالب البريد الإلكتروني
   generateEmailTemplate(notificationData) {
     return `
       <!DOCTYPE html>
@@ -272,81 +122,239 @@ class NotificationService {
         <style>
           body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; }
           .container { max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-          .header { text-align: center; margin-bottom: 30px; }
-          .title { color: #2c3e50; font-size: 24px; margin-bottom: 10px; }
-          .message { color: #34495e; font-size: 16px; line-height: 1.6; margin-bottom: 20px; }
-          .footer { text-align: center; margin-top: 30px; color: #7f8c8d; font-size: 14px; }
+          .title { color: #2c3e50; font-size: 22px; margin-bottom: 10px; }
+          .message { color: #34495e; font-size: 16px; line-height: 1.6; }
+          .footer { text-align: center; margin-top: 24px; color: #7f8c8d; font-size: 13px; }
         </style>
       </head>
       <body>
         <div class="container">
-          <div class="header">
-            <h1 class="title">${notificationData.title}</h1>
-          </div>
-          <div class="message">
-            <p>${notificationData.message}</p>
-          </div>
-          <div class="footer">
-            <p>تطبيق BreakApp - إدارة الطعام للفرق الإنتاجية</p>
-          </div>
+          <h1 class="title">${notificationData.title}</h1>
+          <div class="message">${notificationData.message}</div>
+          <div class="footer">BreakApp</div>
         </div>
       </body>
       </html>
     `;
   }
 
-  // الحصول على إشعارات المستخدم
-  async getUserNotifications(userId, options = {}) {
-    try {
-      const { page = 1, limit = 20, unreadOnly = false } = options;
-      const skip = (page - 1) * limit;
+  // ============ Phase 1: Order workflow notifications ============
 
-      const where = { userId };
-      if (unreadOnly) {
-        where.isRead = false;
+  async sendOrderConfirmation(order) {
+    const restaurantName = order.restaurant?.name || 'المطعم';
+    const userEmail = order.user?.email;
+
+    const payload = {
+      type: 'ORDER_CONFIRMED',
+      title: 'تم تأكيد طلبك',
+      message: `تم استلام طلبك رقم ${order.id} من ${restaurantName}`,
+      userId: order.userId,
+      orderId: order.id,
+      projectId: order.projectId || null,
+      data: {
+        orderId: order.id,
+        restaurantName,
+        totalAmount: order.totalAmount
       }
+    };
 
-      const notifications = await prisma.notification.findMany({
-        where,
-        skip,
-        take: parseInt(limit),
-        orderBy: { createdAt: 'desc' }
+    const saved = await this.saveNotification(payload);
+    await this.sendPushNotification(order.userId, payload);
+    await this.sendEmailNotification(userEmail, payload);
+    return saved;
+  }
+
+  async sendOrderStatusUpdate(order, newStatus) {
+    const restaurantName = order.restaurant?.name || 'المطعم';
+    const type = this.mapOrderStatusToNotificationType(newStatus);
+
+    const statusMessages = {
+      CONFIRMED: 'تم تأكيد طلبك',
+      PREPARING: 'جاري تحضير طلبك',
+      READY: 'طلبك جاهز',
+      OUT_FOR_DELIVERY: 'طلبك في الطريق إليك',
+      DELIVERED: 'تم تسليم طلبك بنجاح',
+      CANCELLED: 'تم إلغاء طلبك'
+    };
+
+    const payload = {
+      type,
+      title: 'تحديث حالة الطلب',
+      message: statusMessages[newStatus] || `تم تحديث حالة طلبك إلى: ${newStatus}`,
+      userId: order.userId,
+      orderId: order.id,
+      projectId: order.projectId || null,
+      data: {
+        orderId: order.id,
+        newStatus,
+        restaurantName
+      }
+    };
+
+    const saved = await this.saveNotification(payload);
+    await this.sendPushNotification(order.userId, payload);
+    return saved;
+  }
+
+  // توافق مع استدعاءات workflowController القديمة
+  async sendOrderStatus(order, messageOrStatus) {
+    if (typeof messageOrStatus === 'string' && messageOrStatus.startsWith('تم ')) {
+      const payload = {
+        type: 'SYSTEM',
+        title: 'تحديث',
+        message: messageOrStatus,
+        userId: order.userId,
+        orderId: order.id,
+        projectId: order.projectId || null,
+        data: { orderId: order.id }
+      };
+      const saved = await this.saveNotification(payload);
+      await this.sendPushNotification(order.userId, payload);
+      return saved;
+    }
+    return this.sendOrderStatusUpdate(order, messageOrStatus);
+  }
+
+  async sendDeliveryNotification(order) {
+    const payload = {
+      type: 'ORDER_DELIVERED',
+      title: 'تم تسليم الطلب',
+      message: `تم تسليم طلبك رقم ${order.id}`,
+      userId: order.userId,
+      orderId: order.id,
+      projectId: order.projectId || null,
+      data: { orderId: order.id, deliveredAt: order.deliveredAt }
+    };
+    const saved = await this.saveNotification(payload);
+    await this.sendPushNotification(order.userId, payload);
+    return saved;
+  }
+
+  async notifyProducersNewOrder(order) {
+    try {
+      const producers = await prisma.user.findMany({
+        where: { role: { in: ['PRODUCER', 'ADMIN'] }, isActive: true },
+        select: { id: true }
       });
 
-      const total = await prisma.notification.count({ where });
+      const title = 'طلب جديد';
+      const message = `تم تقديم طلب جديد للمشروع ${order.projectId || ''}`.trim();
 
-      return {
-        notifications,
-        pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total,
-          pages: Math.ceil(total / limit)
-        }
-      };
+      await Promise.all(
+        producers.map((u) =>
+          this.saveNotification({
+            type: 'SYSTEM',
+            title,
+            message,
+            userId: u.id,
+            orderId: order.id,
+            projectId: order.projectId || null,
+            data: { orderId: order.id, projectId: order.projectId }
+          })
+        )
+      );
     } catch (error) {
-      throw new Error(`خطأ في جلب الإشعارات: ${error.message}`);
+      logger.warn(`فشل إشعار المنتجين: ${error.message}`);
     }
   }
 
-  // تحديد الإشعار كمقروء
-  async markAsRead(notificationId, userId) {
-    try {
-      const notification = await prisma.notification.updateMany({
+  async sendReminder(userId, projectId, remainingText) {
+    const payload = {
+      type: 'REMINDER',
+      title: 'تذكير: موعد تقديم الطلبات',
+      message: `الموعد النهائي لتقديم الطلبات خلال ${remainingText}`,
+      userId,
+      projectId,
+      data: { projectId }
+    };
+    const saved = await this.saveNotification(payload);
+    await this.sendPushNotification(userId, payload);
+    return saved;
+  }
+
+  async sendOrderReminder(projectId) {
+    const projectMembers = await prisma.projectMember.findMany({
+      where: { projectId },
+      select: { userId: true }
+    });
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const notifications = [];
+    for (const member of projectMembers) {
+      const existingOrder = await prisma.order.findFirst({
         where: {
-          id: notificationId,
-          userId: userId
+          userId: member.userId,
+          projectId,
+          createdAt: { gte: today }
         },
-        data: {
-          isRead: true,
-          readAt: new Date()
-        }
+        select: { id: true }
       });
 
-      return notification;
-    } catch (error) {
-      throw new Error(`خطأ في تحديد الإشعار كمقروء: ${error.message}`);
+      if (!existingOrder) {
+        notifications.push(await this.sendReminder(member.userId, projectId, 'ساعة واحدة'));
+      }
     }
+    return notifications;
+  }
+
+  /**
+   * إشعار تحديث موقع التوصيل (DB-backed)
+   * Why: نحتاج End-to-End بدون WebSocket حالياً.
+   */
+  async sendLocationUpdate(orderId, { latitude, longitude, etaMinutes }) {
+    try {
+      const order = await prisma.order.findUnique({
+        where: { id: orderId },
+        select: { id: true, userId: true, projectId: true }
+      });
+      if (!order) return null;
+
+      const payload = {
+        type: 'SYSTEM',
+        title: 'تحديث موقع التوصيل',
+        message: etaMinutes ? `الوقت المتوقع للوصول: ${etaMinutes} دقيقة` : 'تم تحديث موقع المندوب',
+        userId: order.userId,
+        orderId: order.id,
+        projectId: order.projectId || null,
+        data: { latitude, longitude, etaMinutes }
+      };
+
+      const saved = await this.saveNotification(payload);
+      await this.sendPushNotification(order.userId, payload);
+      return saved;
+    } catch (error) {
+      logger.warn(`فشل إشعار الموقع: ${error.message}`);
+      return null;
+    }
+  }
+
+  async getUserNotifications(userId, options = {}) {
+    const page = Number(options.page || 1);
+    const limit = Math.min(Number(options.limit || 20), 100);
+    const unreadOnly = options.unreadOnly === 'true' || options.unreadOnly === true;
+    const skip = (page - 1) * limit;
+
+    const where = { userId, ...(unreadOnly ? { isRead: false } : {}) };
+
+    const [notifications, total] = await Promise.all([
+      prisma.notification.findMany({ where, skip, take: limit, orderBy: { createdAt: 'desc' } }),
+      prisma.notification.count({ where })
+    ]);
+
+    return {
+      notifications,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) }
+    };
+  }
+
+  async markAsRead(notificationId, userId) {
+    const result = await prisma.notification.updateMany({
+      where: { id: notificationId, userId },
+      data: { isRead: true, readAt: new Date() }
+    });
+    return result;
   }
 }
 

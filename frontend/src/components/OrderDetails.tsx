@@ -3,7 +3,7 @@
  * Order Details Modal Component
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ordersService, Order } from '../services/dashboardService';
 import styles from './OrderDetails.module.css';
 

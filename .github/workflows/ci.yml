@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      JWT_SECRET: test_secret
+      DATABASE_URL: postgresql://user:pass@localhost:5432/db?schema=public
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install (root + backend workspace)
+        run: npm ci --legacy-peer-deps
+      - name: Prisma validate (backend)
+        run: npm run db:generate --workspace=backend && npx prisma validate --schema backend/prisma/schema.prisma
+      - name: Test (backend)
+        run: npm test --workspace=backend --if-present
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install (frontend)
+        working-directory: frontend
+        run: npm ci
+      - name: Type-check (frontend)
+        working-directory: frontend
+        run: npm run type-check
+      - name: Lint (frontend)
+        working-directory: frontend
+        run: npm run lint
+      - name: Build (frontend)
+        working-directory: frontend
+        run: npm run build
+
+  mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install (root + mobile workspace)
+        run: npm ci --legacy-peer-deps
+      - name: Lint (mobile)
+        run: npm run lint --workspace=mobile --if-present
+      - name: Test (mobile)
+        run: npm test --workspace=mobile --if-present
+

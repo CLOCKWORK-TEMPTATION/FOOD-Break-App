@@ -3,6 +3,7 @@ const { body, query } = require('express-validator');
 const router = express.Router();
 const restaurantController = require('../controllers/restaurantController');
 const { authenticateToken, requireAdminOrProducer } = require('../middleware/auth');
+const restaurantService = require('../services/restaurantService');
 
 /**
  * @route   GET /api/v1/restaurants/nearby
@@ -17,6 +18,50 @@ router.get('/nearby',
     query('radius').optional().isFloat({ min: 0.5, max: 10 }).withMessage('نصف القطر يجب أن يكون بين 0.5 و 10 كم')
   ],
   restaurantController.getNearbyRestaurants
+);
+
+/**
+ * @route   GET /api/v1/restaurants/reviews/due
+ * @desc    المطاعم المستحقة للمراجعة الدورية (شهري/ربع سنوي)
+ * @access  Admin/Producer
+ */
+router.get(
+  '/reviews/due',
+  authenticateToken,
+  requireAdminOrProducer,
+  [
+    query('frequency')
+      .optional()
+      .isIn(['monthly', 'quarterly'])
+      .withMessage('frequency غير صالح')
+  ],
+  async (req, res, next) => {
+    try {
+      const result = await restaurantService.getRestaurantsDueForReview(req.query.frequency);
+      res.json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * @route   PATCH /api/v1/restaurants/:id/reviews/complete
+ * @desc    تأكيد إتمام مراجعة مطعم (تحديث lastReviewed)
+ * @access  Admin/Producer
+ */
+router.patch(
+  '/:id/reviews/complete',
+  authenticateToken,
+  requireAdminOrProducer,
+  async (req, res, next) => {
+    try {
+      const updated = await restaurantService.markRestaurantReviewed(req.params.id);
+      res.json({ success: true, data: updated });
+    } catch (error) {
+      next(error);
+    }
+  }
 );
 
 /**

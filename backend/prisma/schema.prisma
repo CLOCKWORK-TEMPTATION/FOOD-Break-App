@@ -37,6 +37,10 @@ model User {
   autoSuggestions AutoOrderSuggestion[]
   nutritionLogs UserNutritionLog[]
   nutritionGoals NutritionGoal[]
+  projectMemberships ProjectMember[]
+  moodLogs      UserMoodLog[]
+  emotionProfile EmotionProfile?
+  consentRecords ConsentRecord[]
 
   @@map("users")
 }
@@ -354,9 +358,28 @@ model Order {
   // Relations
   user            User        @relation(fields: [userId], references: [id])
   restaurant      Restaurant? @relation(fields: [restaurantId], references: [id])
+  project         Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
   items           OrderItem[]
+  notifications   Notification[]
+  trackingPoints  OrderTracking[]
 
   @@map("orders")
+}
+
+// نقاط تتبع الطلب (GPS Tracking History)
+model OrderTracking {
+  id          String   @id @default(uuid())
+  orderId     String
+  latitude    Float
+  longitude   Float
+  etaMinutes  Int?
+  recordedAt  DateTime @default(now())
+
+  // Relations
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, recordedAt])
+  @@map("order_tracking")
 }
 
 enum OrderStatus {
@@ -440,10 +463,15 @@ model Notification {
   message   String
   data      Json?            // Additional data
   isRead    Boolean          @default(false)
+  readAt    DateTime?
+  orderId   String?
+  projectId String?
   createdAt DateTime         @default(now())
 
   // Relations
   user      User             @relation(fields: [userId], references: [id])
+  order     Order?           @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  project   Project?         @relation(fields: [projectId], references: [id], onDelete: SetNull)
 
   @@map("notifications")
 }
@@ -532,10 +560,39 @@ model Project {
   startDate   DateTime
   endDate     DateTime?
   isActive    Boolean  @default(true)
+  lastAccessedAt DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Relations
+  orders      Order[]
+  members     ProjectMember[]
+  notifications Notification[]
+
   @@map("projects")
+}
+
+// عضوية المستخدمين في المشروع (للتحكم بالوصول + التذكيرات)
+model ProjectMember {
+  id        String   @id @default(uuid())
+  projectId String
+  userId    String
+  role      ProjectMemberRole @default(MEMBER)
+  joinedAt  DateTime @default(now())
+
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@index([userId])
+  @@map("project_members")
+}
+
+enum ProjectMemberRole {
+  MEMBER
+  VIP
+  PRODUCER
+  ADMIN
 }
 
 // Recommendation Models
@@ -1286,7 +1343,7 @@ model AllergyAlert {
   // معلومات التنبيه
   allergen          String   // المسبب للحساسية
   severity          AllergySeverity
-  alertType         AlertType @default(WARNING)
+  alertType         MedicalAlertType @default(WARNING)
   
   // تفاصيل الخطر
   riskLevel         RiskLevel @default(HIGH)
@@ -1308,9 +1365,9 @@ model AllergyAlert {
   @@map("allergy_alerts")
 }
 
-enum AlertType {
-  WARNING     // تحذير
-  BLOCKING    // منع
+enum MedicalAlertType {
+  WARNING      // تحذير
+  BLOCKING     // منع
   CONFIRMATION // تأكيد
 }
 
@@ -1388,7 +1445,7 @@ model MedicalAlertLog {
   // تفاصيل التنبيه
   triggerCondition  String   // شرط التفعيل
   alertMessage      String   // رسالة التنبيه
-  severity          AlertSeverity
+  severity          MedicalAlertSeverity
   
   // النتائج
   userAction        String?  // إجراء المستخدم
@@ -1404,7 +1461,7 @@ model MedicalAlertLog {
   @@map("medical_alert_logs")
 }
 
-enum AlertSeverity {
+enum MedicalAlertSeverity {
   INFO      // معلومات
   WARNING   // تحذير
   ERROR     // خطأ

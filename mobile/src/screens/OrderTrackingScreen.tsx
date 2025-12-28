@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import * as Location from 'expo-location';
+import { orderService } from '../services/apiService';
 
 const OrderTrackingScreen = ({ route, navigation }) => {
   const { orderId } = route.params;
@@ -24,11 +25,11 @@ const OrderTrackingScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     getUserLocation();
-    loadOrderStatus();
+    loadTracking();
     
     // تحديث الموقع كل 30 ثانية
     const locationInterval = setInterval(() => {
-      updateDriverLocation();
+      loadTracking();
     }, 30000);
     
     return () => clearInterval(locationInterval);
@@ -60,48 +61,40 @@ const OrderTrackingScreen = ({ route, navigation }) => {
     }
   };
 
-  // تحميل حالة الطلب
-  const loadOrderStatus = async () => {
+  // تحميل حالة الطلب + التتبع من الـ API
+  const loadTracking = async () => {
     try {
-      const response = await fetch(`/api/v1/workflow/orders/${orderId}/status`);
-      const result = await response.json();
-      
-      setOrderStatus(result.status);
-      
-      if (result.trackingInfo && result.trackingInfo.hasGPS) {
-        updateDriverLocation();
+      const result = await orderService.getOrderTracking(orderId);
+      if (!result?.success) return;
+
+      const status = result.data?.status;
+      if (status) {
+        const normalized = String(status);
+        const mapped =
+          normalized === 'OUT_FOR_DELIVERY' ? 'in_transit'
+          : normalized === 'CONFIRMED' ? 'confirmed'
+          : normalized === 'PREPARING' ? 'preparing'
+          : normalized === 'DELIVERED' ? 'delivered'
+          : normalized === 'READY' ? 'ready'
+          : String(status).toLowerCase();
+        setOrderStatus(mapped);
+      }
+
+      const latest = result.data?.tracking?.latest;
+      if (latest?.latitude && latest?.longitude) {
+        setDriverLocation({ latitude: latest.latitude, longitude: latest.longitude });
+      }
+
+      if (latest?.etaMinutes) {
+        setEta(latest.etaMinutes);
       }
     } catch (error) {
-      console.error('خطأ في تحميل حالة الطلب:', error);
+      console.error('خطأ في تحميل التتبع:', error);
     }
   };
 
-  // تحديث موقع المندوب
-  const updateDriverLocation = async () => {
-    try {
-      const response = await fetch(`/api/v1/workflow/delivery/DEL123/location`);
-      const result = await response.json();
-      
-      if (result.driverLocation) {
-        setDriverLocation(result.driverLocation);
-        
-        // حساب ETA
-        if (userLocation) {
-          const distance = calculateDistance(
-            result.driverLocation.latitude,
-            result.driverLocation.longitude,
-            userLocation.latitude,
-            userLocation.longitude
-          );
-          
-          const estimatedTime = Math.ceil(distance * 2); // افتراض 2 دقيقة لكل كيلومتر
-          setEta(estimatedTime);
-        }
-      }
-    } catch (error) {
-      console.error('خطأ في تحديث موقع المندوب:', error);
-    }
-  };
+  // تحديث يدوي
+  const updateDriverLocation = async () => loadTracking();
 
   // حساب المسافة بين نقطتين
   const calculateDistance = (lat1, lon1, lat2, lon2) => {

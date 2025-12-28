@@ -9,12 +9,14 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-import { recommendationService } from '../services/apiService';
+import * as Location from 'expo-location';
+import { menuService, recommendationService } from '../services/apiService';
 
 const MenuScreen = ({ route, navigation }) => {
   const { projectData } = route.params;
   const [menuItems, setMenuItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
+  const [selectedRestaurantId, setSelectedRestaurantId] = useState<string | null>(null);
   const [orderWindow, setOrderWindow] = useState(null);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [recommendations, setRecommendations] = useState([]);
@@ -36,35 +38,35 @@ const MenuScreen = ({ route, navigation }) => {
   // تحميل عناصر القائمة
   const loadMenuItems = async () => {
     try {
-      // TODO: جلب القائمة من API
-      const mockMenuItems = [
-        {
-          id: '1',
-          name: 'شاورما دجاج',
-          restaurant: 'مطعم الأصالة',
-          price: 25,
-          image: 'https://example.com/shawarma.jpg',
-          description: 'شاورما دجاج طازجة مع الخضار',
-        },
-        {
-          id: '2',
-          name: 'كشري',
-          restaurant: 'أبو طارق',
-          price: 15,
-          image: 'https://example.com/koshari.jpg',
-          description: 'كشري مصري أصلي',
-        },
-        {
-          id: '3',
-          name: 'فراخ مشوية',
-          restaurant: 'الدجاج الذهبي',
-          price: 35,
-          image: 'https://example.com/chicken.jpg',
-          description: 'فراخ مشوية مع الأرز والسلطة',
-        },
-      ];
+      // محاولة جلب قائمة جغرافية (Location-aware) ثم fallback إلى CORE
+      let response;
+      try {
+        const perm = await Location.requestForegroundPermissionsAsync();
+        if (perm.status === 'granted') {
+          const loc = await Location.getCurrentPositionAsync({});
+          response = await menuService.getGeographicMenu(loc.coords.latitude, loc.coords.longitude, 3);
+        }
+      } catch (_) {
+        // تجاهل - سنسقط إلى CORE
+      }
 
-      setMenuItems(mockMenuItems);
+      if (!response) {
+        response = await menuService.getMenus({ menuType: 'CORE', isAvailable: true, limit: 50 });
+      }
+
+      const apiItems = response?.data?.menuItems || [];
+      const normalized = apiItems.map((item) => ({
+        id: item.id,
+        menuItemId: item.id,
+        name: item.nameAr || item.name,
+        restaurant: item.restaurant?.name || 'مطعم',
+        restaurantId: item.restaurantId,
+        price: item.price,
+        image: item.imageUrl || 'https://example.com/default.jpg',
+        description: item.descriptionAr || item.description || '',
+      }));
+
+      setMenuItems(normalized);
     } catch (error) {
       Alert.alert('خطأ', 'فشل في تحميل القائمة');
     }
@@ -107,6 +109,15 @@ const MenuScreen = ({ route, navigation }) => {
 
   // إضافة عنصر للطلب
   const addToOrder = (item) => {
+    if (selectedRestaurantId && item.restaurantId && item.restaurantId !== selectedRestaurantId) {
+      Alert.alert('تنبيه', 'يمكنك الطلب من مطعم واحد فقط في نفس الطلب');
+      return;
+    }
+
+    if (!selectedRestaurantId && item.restaurantId) {
+      setSelectedRestaurantId(item.restaurantId);
+    }
+
     const existingItem = selectedItems.find(selected => selected.id === item.id);
     
     if (existingItem) {
@@ -131,7 +142,11 @@ const MenuScreen = ({ route, navigation }) => {
           : selected
       ));
     } else {
-      setSelectedItems(selectedItems.filter(selected => selected.id !== itemId));
+      const nextItems = selectedItems.filter(selected => selected.id !== itemId);
+      setSelectedItems(nextItems);
+      if (nextItems.length === 0) {
+        setSelectedRestaurantId(null);
+      }
     }
   };
 

@@ -4,10 +4,16 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const compression = require('compression');
+const logger = require('./utils/logger');
+const { startJobs } = require('./jobs');
+const { initMonitoring } = require('./utils/monitoring');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const API_VERSION = process.env.API_VERSION || 'v1';
+
+// Monitoring (Sentry) - اختياري عبر env
+initMonitoring();
 
 // Middleware
 app.use(helmet());
@@ -46,9 +52,10 @@ app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 BreakApp Backend Server running on port ${PORT}`);
-  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔗 API Version: ${API_VERSION}`);
+  logger.info(`BreakApp Backend Server running on port ${PORT}`);
+  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.info(`API Version: ${API_VERSION}`);
+  startJobs();
 });
 
 module.exports = app;

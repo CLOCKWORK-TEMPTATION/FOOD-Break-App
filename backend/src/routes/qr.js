@@ -9,7 +9,7 @@ router.post('/project/:projectId', auth, async (req, res) => {
     const { projectId } = req.params;
     
     // التحقق من صلاحية المستخدم لإنشاء QR Code للمشروع
-    if (req.user.role !== 'ADMIN' && req.user.role !== 'PROJECT_MANAGER') {
+    if (req.user.role !== 'ADMIN' && req.user.role !== 'PRODUCER') {
       return res.status(403).json({
         success: false,
         error: {

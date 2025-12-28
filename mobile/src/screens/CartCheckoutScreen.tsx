@@ -15,6 +15,7 @@ import {
   ActivityIndicator,
   ScrollView,
   Modal,
+  TextInput,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import apiService from '../services/apiService';
@@ -266,8 +267,6 @@ export default function CartCheckoutScreen({ navigation, route }) {
     </SafeAreaView>
   );
 }
-
-import { TextInput } from 'react-native';
 
 const styles = StyleSheet.create({
   container: {
