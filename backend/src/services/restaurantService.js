@@ -271,6 +271,41 @@ const updateRestaurantRating = async (restaurantId) => {
   }
 };
 
+/**
+ * نظام المراجعة الدورية للمطاعم (شهري/ربع سنوي)
+ * Why: جودة البيانات (القائمة/التوفر) تتدهور بدون حوكمة زمنية.
+ */
+const getRestaurantsDueForReview = async (frequency = 'monthly') => {
+  const normalized = String(frequency || 'monthly').toLowerCase();
+  const days = normalized === 'quarterly' ? 90 : 30;
+
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+
+  const restaurants = await prisma.restaurant.findMany({
+    where: {
+      isActive: true,
+      OR: [{ lastReviewed: null }, { lastReviewed: { lt: cutoff } }]
+    },
+    orderBy: [{ lastReviewed: 'asc' }, { createdAt: 'asc' }]
+  });
+
+  return {
+    frequency: normalized,
+    cutoff,
+    total: restaurants.length,
+    restaurants
+  };
+};
+
+const markRestaurantReviewed = async (restaurantId) => {
+  const updated = await prisma.restaurant.update({
+    where: { id: restaurantId },
+    data: { lastReviewed: new Date() }
+  });
+  return updated;
+};
+
 module.exports = {
   getAllRestaurants,
   getRestaurantById,
@@ -279,5 +314,7 @@ module.exports = {
   deleteRestaurant,
   getNearbyRestaurants,
   updateRestaurantRating,
-  calculateDistance
+  calculateDistance,
+  getRestaurantsDueForReview,
+  markRestaurantReviewed
 };

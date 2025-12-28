@@ -3,8 +3,7 @@
  * Predictive Insights Component
  */
 
-import React, { useState, useEffect } from 'react';
-import { predictiveService } from '../services/dashboardService';
+import { useState, useEffect } from 'react';
 import styles from './PredictiveInsights.module.css';
 
 interface Insight {

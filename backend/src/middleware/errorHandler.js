@@ -1,4 +1,5 @@
 const logger = require('../utils/logger');
+const { captureException } = require('../utils/monitoring');
 
 /**
  * Middleware لمعالجة الأخطاء المركزية
@@ -12,6 +13,13 @@ const errorHandler = (err, req, res, next) => {
   logger.error({
     message: err.message,
     stack: err.stack,
+    path: req.path,
+    method: req.method,
+    body: req.body
+  });
+
+  // Monitoring (Sentry)
+  captureException(err, {
     path: req.path,
     method: req.method,
     body: req.body

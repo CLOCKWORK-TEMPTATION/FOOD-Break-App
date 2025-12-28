@@ -27,8 +27,8 @@ const validateProjectQR = async (req, res, next) => {
       });
     }
 
-    // التحقق من رمز QR
-    const validation = await qrCodeService.validateQRCode(qrCode);
+    // التحقق من رمز QR (يدعم QR كنص JSON أو token مباشر)
+    const validation = await qrCodeService.validateQRCodeFromInput(qrCode, 'PROJECT_ACCESS');
 
     if (!validation.valid) {
       return res.status(401).json({
@@ -37,11 +37,19 @@ const validateProjectQR = async (req, res, next) => {
       });
     }
 
-    // تحديث آخر وقت وصول المستخدم للمشروع
+    // تحديث آخر وقت وصول المستخدم للمشروع + تسجيل العضوية (Access Management)
     await prisma.project.update({
       where: { id: validation.projectId },
       data: { lastAccessedAt: new Date() }
     });
+
+    if (req.user?.id) {
+      await prisma.projectMember.upsert({
+        where: { projectId_userId: { projectId: validation.projectId, userId: req.user.id } },
+        update: {},
+        create: { projectId: validation.projectId, userId: req.user.id }
+      });
+    }
 
     res.json({
       success: true,
@@ -70,7 +78,8 @@ const submitOrder = async (req, res, next) => {
       });
     }
 
-    const { userId, projectId, restaurantId, menuItems, notes, deliveryAddress } = req.body;
+    const userId = req.user.id;
+    const { projectId, restaurantId, menuItems, notes, deliveryAddress } = req.body;
 
     // التحقق من وجود المشروع
     const project = await prisma.project.findUnique({
@@ -81,6 +90,19 @@ const submitOrder = async (req, res, next) => {
       return res.status(404).json({
         success: false,
         error: { code: 'PROJECT_NOT_FOUND', message: 'المشروع غير موجود' }
+      });
+    }
+
+    // Access management: يجب أن يكون المستخدم عضوًا في المشروع (يُسجَّل عبر validate-qr)
+    const membership = await prisma.projectMember.findUnique({
+      where: { projectId_userId: { projectId, userId } },
+      select: { id: true }
+    });
+
+    if (!membership && req.user.role !== 'ADMIN' && req.user.role !== 'PRODUCER') {
+      return res.status(403).json({
+        success: false,
+        error: { code: 'PROJECT_ACCESS_DENIED', message: 'غير مصرح لك بالطلب لهذا المشروع' }
       });
     }
 
@@ -236,7 +258,7 @@ const confirmOrder = async (req, res, next) => {
  */
 const getUserOrders = async (req, res, next) => {
   try {
-    const { userId } = req.user;
+    const userId = req.user.id;
     const { projectId, status, page = 1, limit = 10 } = req.query;
 
     const where = { userId };
@@ -411,26 +433,35 @@ const sendOrderReminders = async (req, res, next) => {
       });
     }
 
-    // جلب جميع مستخدمي المشروع
-    const projectUsers = await prisma.user.findMany({
+    // جلب أعضاء المشروع (مصدر الحقيقة)
+    const members = await prisma.projectMember.findMany({
+      where: { projectId },
+      select: { userId: true }
+    });
+
+    const memberIds = members.map(m => m.userId);
+
+    // نطاق اليوم
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // المستخدمون الذين لديهم طلب اليوم
+    const usersWithOrders = await prisma.order.groupBy({
+      by: ['userId'],
       where: {
-        // يمكن إضافة علاقة مشروع-مستخدم في قاعدة البيانات
+        projectId,
+        userId: { in: memberIds },
+        createdAt: { gte: today }
       }
     });
 
-    // جلب المستخدمين الذين لم يقدموا طلبات
-    const usersWithOrders = await prisma.order.groupBy({
-      by: ['userId'],
-      where: { projectId }
-    });
-
-    const usersWithOrderIds = usersWithOrders.map(o => o.userId);
-    const usersWithoutOrders = projectUsers.filter(u => !usersWithOrderIds.includes(u.id));
+    const usersWithOrderIds = new Set(usersWithOrders.map(o => o.userId));
+    const usersWithoutOrders = memberIds.filter((id) => !usersWithOrderIds.has(id));
 
     // إرسال تذكيرات
     let remindersSent = 0;
-    for (const user of usersWithoutOrders) {
-      await notificationService.sendReminder(user.id, projectId, 'ساعة واحدة');
+    for (const userId of usersWithoutOrders) {
+      await notificationService.sendReminder(userId, projectId, 'ساعة واحدة');
       remindersSent++;
     }
 
@@ -517,25 +548,21 @@ const updateDeliveryLocation = async (req, res, next) => {
 
     const order = await prisma.order.update({
       where: { id: orderId },
-      data: {
-        deliveryLat: latitude,
-        deliveryLng: longitude,
-        status: 'OUT_FOR_DELIVERY'
-      }
+      data: { status: 'OUT_FOR_DELIVERY' }
     });
 
-    // حساب ETA
-    const eta = await gpsTrackingService.calculateETA(orderId, { latitude, longitude });
+    // حفظ نقطة تتبع + حساب ETA (إن توفرت إحداثيات الوجهة)
+    const { etaMinutes } = await gpsTrackingService.recordOrderTrackingPoint(orderId, { latitude, longitude });
 
-    // إرسال تحديث موقع للمستخدم
-    await notificationService.sendLocationUpdate(orderId, { latitude, longitude, eta });
+    // إشعار المستخدم (اختياري/DB-backed)
+    await notificationService.sendLocationUpdate(orderId, { latitude, longitude, etaMinutes });
 
     res.json({
       success: true,
       data: {
         orderId: order.id,
         location: { latitude, longitude },
-        eta: eta,
+        eta: etaMinutes,
         message: 'تم تحديث الموقع'
       }
     });

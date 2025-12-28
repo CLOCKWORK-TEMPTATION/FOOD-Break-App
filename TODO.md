@@ -79,8 +79,6 @@
 -     Create billing and invoice system
 -     Build financial reporting
 
----
-
 ## Phase 2: Intelligence (AI/ML)
 
 ### 8. Feature #1: Smart Recommendations (نظام التوصيات الذكية)
@@ -297,6 +295,198 @@
 -     Set up alerts and notifications for system issues
 
 ---
+
+## Current gap snapshot (from latest merge)
+Phase 1: Foundation (MVP)
+1) Core Infrastructure
+ Set up cloud infrastructure (AWS/GCP/Azure)
+ Implement CI/CD pipeline
+ Set up monitoring and logging (Sentry, DataDog, etc.) (تكامل فعلي مش مجرد logs محلية)
+2) Part 1: Basic Menu System
+ Periodic review system (monthly/quarterly) (آلية مراجعة دورية + jobs)
+ Integration with mapping services (Google Maps API)
+3) Part 2: Exception & Special Orders
+ (لا شيء واضح متبقّي هنا من منظور TODO — الموجود يبدو منفّذ)
+4) Part 3: Order Workflow
+ Implement QR code generation for projects (موجود كملف لكن غير مفعّل/مربوط بالكامل)
+ Create QR code scanning and access management (موجود بالموبايل، يحتاج ربط End-to-End مع API)
+ Build daily order submission system (موجود جزئياً؛ يحتاج تفعيل/تكامل نهائي)
+ Order window (first hour of shooting)
+ Meal selection interface (على الموبايل موجود UI، يحتاج ربط API نهائي)
+ Order confirmation (موجود UI، يحتاج ربط API نهائي)
+ Implement order aggregation for production team (جزئي)
+ Create notification system (غير مكتمل: Push/SMS/سيرفر فعلي)
+ Half-hourly reminders for non-submitters
+ Order status updates
+ Delivery notifications
+ Build GPS tracking feature for delivery (جزئي)
+ Real-time location tracking
+ ETA calculation and display
+ Map view for crew members
+5) Alert System for Cost Management
+ Implement Cost Threshold Alert System (جزئي/غير مفعّل بالكامل)
+ Set maximum budget limits per VIP exception
+ Automatic alert to producer/logistics manager
+ Alert logging for financial monitoring
+ Budget tracking dashboard
+6) Basic UI/UX
+ إلغاء/منع Mock Data في الويب (تشغيل Dashboard على API فقط + حالات Error/Empty)
+7) Payment Integration
+ Integrate payment gateway (Stripe/PayPal/Local) (غير صالح للتشغيل حالياً—نواقص dependencies/DB layer)
+ Implement payment processing for exceptions
+ Create billing and invoice system (جزئي: PDF/ربط كامل)
+ Build financial reporting
+Phase 2: Intelligence (AI/ML)
+8) Smart Recommendations
+ Set up ML infrastructure (TensorFlow/PyTorch) (تشغيل/بايبلاين حقيقي)
+ Collect and prepare training data
+ User order history
+ Weather data integration
+ Nutritional preferences
+ Build recommendation engine
+ Weather-based recommendations
+ Personalized suggestions based on order history
+ “Try this, similar to your favorite”
+ Dietary diversity alerts
+ Implement recommendation UI in app (ربط نهائي وتجربة مستخدم)
+ A/B test recommendation effectiveness
+9) Predictive Ordering
+ Build predictive ML models
+ User behavior analysis
+ Pattern recognition for regular orderers
+ Quantity forecasting
+ Implement auto-order suggestions
+ Pre-fill orders for regular users (with edit option)
+ Smart defaults based on history
+ Optimize delivery scheduling
+ Predict peak times
+ Optimize route planning
+ Build restaurant negotiation tools
+ Quantity predictions for bulk discounts
+ Demand forecasting reports
+10) Smart Restaurant Discovery
+ Build web scraping system (if legal/allowed)
+ Integrate with restaurant rating APIs
+ Google Places API
+ Facebook ratings
+ Delivery app APIs (if available)
+ Implement quality analysis algorithm
+ Multi-platform rating aggregation
+ Health certificate verification
+ Review sentiment analysis
+ Create automatic restaurant suggestion system
+ Build testing and trial workflow for new restaurants
+Phase 4: Innovation (Advanced Tech)
+17) Health & Wellness
+Feature #4: Personal Nutrition Dashboard
+ Integrate nutrition database (مصدر بيانات/تغذية فعلي)
+ Build nutrition tracking system (ربط كامل)
+ Create weekly nutrition reports (ربط/توليد فعلي)
+ Implement team health challenges (ربط كامل)
+ Design nutrition dashboard UI (موجود بالموبايل؛ يحتاج استكمال ربط وتوحيد)
+Feature #5: Custom Diet Filters
+ Implement dietary preference system (ربط كامل)
+ Create allergy alert system (ربط كامل + red alerts فعلي)
+ Build custom order communication with restaurants
+ Implement clear labeling system (جزئي)
+19) Advanced Tech
+Feature #15: Voice Ordering
+ Siri integration
+ Google Assistant integration
+ Alexa integration (optional)
+ Voice command processing
+ Voice confirmation system
+ Voice UX testing
+20) Emergency & Safety
+Feature #23: Emergency Mode
+ Implement fast-track ordering system (قد توجد سكافولد، يحتاج تكامل نهائي)
+ Create emergency restaurant network
+ Build schedule change notification system
+ Implement pre-prepared meal inventory
+ Create emergency protocol workflows
+Feature #24: Allergy & Medical Alerts
+ Build optional medical profile system (ربط UI/API كامل)
+ Implement red alert system for allergen detection (تشغيل فعلي)
+ Create medical emergency hotline integration
+ Build ingredient cross-checking system
+ Ensure HIPAA/GDPR compliance for medical data (تنفيذ فعلي)
+Phase 5: Ecosystem (Platform)
+21) Analytics & Financial Intelligence
+Feature #17: Production Dashboard
+ Build comprehensive analytics system
+ Daily/weekly/monthly spending reports
+ Budget forecasting based on patterns
+ Cross-project cost comparisons
+ Create producer admin panel (موجود UI جزئياً؛ يحتاج استكمال)
+ Implement data visualization (charts, graphs)
+ Build export functionality (PDF, Excel)
+ Create custom report builder
+22) Production Integration
+Feature #25: Sync with Shooting Schedule
+ Integrate with production scheduling software
+ Auto-adjust delivery times based on breaks
+ Implement schedule change handling (delays/cancellations/time modifications)
+ Create automatic crew notifications
+ Build conflict resolution system
+Feature #26: Attendance Integration
+ Integrate with crew attendance systems
+ Auto-cancel orders for absent crew
+ Link check-in to order activation
+ Generate combined attendance + meal reports
+ Build absence pattern analysis
+23) Futuristic
+Feature #28: Emotion-Based AI
+ (مذكور كمنفّذ ✅ في التغيير/الملفات — لن أعدّه ضمن المتبقي)
+Additional Cross-Cutting Tasks
+24) Security & Compliance
+ Implement data encryption (at rest and in transit)
+ Ensure GDPR compliance (تنفيذ فعلي: consent/data rights flows)
+ Implement HIPAA compliance for medical data
+ Set up regular security audits
+ Implement secure payment processing (PCI DSS)
+ Create privacy policy and terms of service
+ Build user consent management system
+ Implement role-based access control (RBAC) (موجود أساساً؛ راجع/استكمال إن لزم)
+25) Testing
+ Write unit tests (target 80%+ coverage)
+ Write integration tests
+ Write end-to-end tests
+ Perform load testing
+ Conduct security penetration testing
+ User acceptance testing (UAT)
+ Beta testing with real production crews
+26) Documentation
+ Create API documentation
+ Write user manuals (Arabic and English)
+ Create admin guides
+ Document system architecture (جزئي—استكمال)
+ Write deployment guides
+ Create troubleshooting documentation
+ Build in-app help system
+27) Localization
+ Implement i18n framework
+ Create Arabic translations (primary)
+ Create English translations
+ Add RTL support for Arabic (تطبيق/اختبارات شاملة)
+ Test localization across all features
+ Create locale-specific content
+28) Performance Optimization
+ Optimize database queries
+ Implement caching strategies (Redis/Memcached)
+ Optimize image loading and storage
+ Implement lazy loading
+ Minimize API calls
+ Optimize mobile app size
+ Implement progressive web app (PWA) features
+29) DevOps & Monitoring
+ Set up production monitoring
+ Implement error tracking
+ Create automated backups
+ Set up disaster recovery
+ Implement automated deployment
+ Create staging environment
+ Build health check endpoints (جزئي: موجود /health فقط)
+ Set up alerts and notifications for system issues
 
 ## Implementation Priority Guide
 
