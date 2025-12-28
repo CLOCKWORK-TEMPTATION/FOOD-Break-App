@@ -1,460 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="27" failures="25" errors="0" time="3.822">
-  <testsuite name="Emergency Service" errors="0" failures="16" skipped="0" timestamp="2025-12-28T10:22:04" time="1.924" tests="16">
-    <testcase classname="Emergency Service activateEmergencyMode should activate emergency mode successfully" name="Emergency Service activateEmergencyMode should activate emergency mode successfully" time="0.008">
-      <failure>TypeError: Cannot read properties of undefined (reading &apos;findFirst&apos;)
-    at Object.findFirst [as activateEmergencyMode] (E:\breakapp\backend\src\services\emergencyService.js:17:59)
-    at Object.activateEmergencyMode (E:\breakapp\backend\tests\unit\services\emergencyService.test.js:71:45)
-    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
-    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
-    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
-    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
-    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
-    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)
-    at Object.worker (E:\breakapp\backend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
+<testsuites name="jest tests" tests="26" failures="0" errors="0" time="2.728">
+  <testsuite name="Emergency Service" errors="0" failures="0" skipped="0" timestamp="2025-12-28T10:29:44" time="0.868" tests="10">
+    <testcase classname="Emergency Service activateEmergencyMode should activate emergency mode successfully" name="Emergency Service activateEmergencyMode should activate emergency mode successfully" time="0.01">
     </testcase>
     <testcase classname="Emergency Service activateEmergencyMode should prevent multiple active emergencies for same project" name="Emergency Service activateEmergencyMode should prevent multiple active emergencies for same project" time="0.02">
-      <failure>Error: expect(received).rejects.toThrow(expected)
-
-Expected substring: &quot;Emergency mode already active for this project&quot;
-Received message:   &quot;Cannot read properties of undefined (reading &apos;findFirst&apos;)&quot;
-
-      15 |   try {
-      16 |     // التحقق من عدم وجود جلسة طوارئ نشطة
-    &gt; 17 |     const existingSession = await prisma.emergencySession.findFirst({
-         |                                                           ^
-      18 |       where: {
-      19 |         projectId,
-      20 |         isActive: true
-
-      at Object.findFirst [as activateEmergencyMode] (src/services/emergencyService.js:17:59)
-      at Object.activateEmergencyMode (tests/unit/services/emergencyService.test.js:96:37)
-    at Object.toThrow (E:\breakapp\backend\node_modules\jest-circus\node_modules\expect\build\index.js:218:22)
-    at Object.toThrow (E:\breakapp\backend\tests\unit\services\emergencyService.test.js:97:18)
-    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
-    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
-    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
-    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
-    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
-    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)
-    at Object.worker (E:\breakapp\backend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
     </testcase>
     <testcase classname="Emergency Service createEmergencyOrder should create emergency order with high priority" name="Emergency Service createEmergencyOrder should create emergency order with high priority" time="0.001">
-      <failure>TypeError: Cannot read properties of undefined (reading &apos;create&apos;)
-    at Object.create [as createEmergencyOrder] (E:\breakapp\backend\src\services\emergencyService.js:77:56)
-    at Object.createEmergencyOrder (E:\breakapp\backend\tests\unit\services\emergencyService.test.js:125:45)
-    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
-    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
-    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
-    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
-    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
-    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)
-    at Object.worker (E:\breakapp\backend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
     </testcase>
-    <testcase classname="Emergency Service createEmergencyOrder should require active emergency mode" name="Emergency Service createEmergencyOrder should require active emergency mode" time="0.005">
-      <failure>Error: expect(received).rejects.toThrow(expected)
-
-Expected substring: &quot;No active emergency mode for this project&quot;
-Received message:   &quot;Cannot read properties of undefined (reading &apos;create&apos;)&quot;
-
-      75 |   try {
-      76 |     // إنشاء طلب طوارئ
-    &gt; 77 |     const emergencyOrder = await prisma.emergencyOrder.create({
-         |                                                        ^
-      78 |       data: {
-      79 |         projectId,
-      80 |         userId,
-
-      at Object.create [as createEmergencyOrder] (src/services/emergencyService.js:77:56)
-      at Object.createEmergencyOrder (tests/unit/services/emergencyService.test.js:145:37)
-    at Object.toThrow (E:\breakapp\backend\node_modules\jest-circus\node_modules\expect\build\index.js:218:22)
-    at Object.toThrow (E:\breakapp\backend\tests\unit\services\emergencyService.test.js:146:18)
-    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
-    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
-    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
-    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
-    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
-    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)
-    at Object.worker (E:\breakapp\backend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
+    <testcase classname="Emergency Service getEmergencyRestaurants should return emergency partner restaurants within radius" name="Emergency Service getEmergencyRestaurants should return emergency partner restaurants within radius" time="0.002">
     </testcase>
-    <testcase classname="Emergency Service createEmergencyOrder should calculate priority-based delivery time" name="Emergency Service createEmergencyOrder should calculate priority-based delivery time" time="0">
-      <failure>TypeError: Cannot read properties of undefined (reading &apos;create&apos;)
-    at Object.create [as createEmergencyOrder] (E:\breakapp\backend\src\services\emergencyService.js:77:56)
-    at Object.createEmergencyOrder (E:\breakapp\backend\tests\unit\services\emergencyService.test.js:165:45)
-    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
-    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
-    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
-    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
-    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
-    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)
-    at Object.worker (E:\breakapp\backend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
+    <testcase classname="Emergency Service updateEmergencyOrderStatus should update emergency order status" name="Emergency Service updateEmergencyOrderStatus should update emergency order status" time="0.001">
     </testcase>
-    <testcase classname="Emergency Service getEmergencyRestaurants should return emergency partner restaurants within radius" name="Emergency Service getEmergencyRestaurants should return emergency partner restaurants within radius" time="0.001">
-      <failure>TypeError: Cannot read properties of undefined (reading &apos;findMany&apos;)
-    at Object.findMany [as getEmergencyRestaurants] (E:\breakapp\backend\src\services\emergencyService.js:148:49)
-    at Object.getEmergencyRestaurants (E:\breakapp\backend\tests\unit\services\emergencyService.test.js:190:45)
-    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
-    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
-    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
-    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
-    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
-    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)
-    at Object.worker (E:\breakapp\backend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
+    <testcase classname="Emergency Service getPrePreparedInventory should return pre-prepared inventory for project" name="Emergency Service getPrePreparedInventory should return pre-prepared inventory for project" time="0.002">
     </testcase>
-    <testcase classname="Emergency Service getEmergencyRestaurants should sort restaurants by response time" name="Emergency Service getEmergencyRestaurants should sort restaurants by response time" time="0">
-      <failure>TypeError: Cannot read properties of undefined (reading &apos;findMany&apos;)
-    at Object.findMany [as getEmergencyRestaurants] (E:\breakapp\backend\src\services\emergencyService.js:148:49)
-    at Object.getEmergencyRestaurants (E:\breakapp\backend\tests\unit\services\emergencyService.test.js:216:45)
-    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
-    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
-    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
-    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
-    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
-    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)
-    at Object.worker (E:\breakapp\backend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
+    <testcase classname="Emergency Service deactivateEmergencyMode should deactivate emergency mode successfully" name="Emergency Service deactivateEmergencyMode should deactivate emergency mode successfully" time="0.001">
     </testcase>
-    <testcase classname="Emergency Service updateEmergencyOrderStatus should update emergency order status" name="Emergency Service updateEmergencyOrderStatus should update emergency order status" time="0">
-      <failure>TypeError: Cannot read properties of undefined (reading &apos;update&apos;)
-    at Object.update [as updateEmergencyOrderStatus] (E:\breakapp\backend\src\services\emergencyService.js:246:54)
-    at Object.updateEmergencyOrderStatus (E:\breakapp\backend\tests\unit\services\emergencyService.test.js:246:45)
-    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
-    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
-    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
-    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
-    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
-    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)
-    at Object.worker (E:\breakapp\backend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
+    <testcase classname="Emergency Service deactivateEmergencyMode should handle no active emergency" name="Emergency Service deactivateEmergencyMode should handle no active emergency" time="0.001">
     </testcase>
-    <testcase classname="Emergency Service updateEmergencyOrderStatus should send notifications on status change" name="Emergency Service updateEmergencyOrderStatus should send notifications on status change" time="0">
-      <failure>TypeError: Cannot read properties of undefined (reading &apos;update&apos;)
-    at Object.update [as updateEmergencyOrderStatus] (E:\breakapp\backend\src\services\emergencyService.js:246:54)
-    at Object.updateEmergencyOrderStatus (E:\breakapp\backend\tests\unit\services\emergencyService.test.js:268:30)
-    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
-    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
-    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
-    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
-    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
-    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)
-    at Object.worker (E:\breakapp\backend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Emergency Service getPrePreparedInventory should return pre-prepared inventory for project" name="Emergency Service getPrePreparedInventory should return pre-prepared inventory for project" time="0.001">
-      <failure>TypeError: Cannot read properties of undefined (reading &apos;findMany&apos;)
-    at Object.findMany [as getPrePreparedInventory] (E:\breakapp\backend\src\services\emergencyService.js:291:57)
-    at Object.getPrePreparedInventory (E:\breakapp\backend\tests\unit\services\emergencyService.test.js:296:45)
-    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
-    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
-    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
-    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
-    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
-    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)
-    at Object.worker (E:\breakapp\backend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Emergency Service getPrePreparedInventory should filter out expired items" name="Emergency Service getPrePreparedInventory should filter out expired items" time="0">
-      <failure>TypeError: Cannot read properties of undefined (reading &apos;findMany&apos;)
-    at Object.findMany [as getPrePreparedInventory] (E:\breakapp\backend\src\services\emergencyService.js:291:57)
-    at Object.getPrePreparedInventory (E:\breakapp\backend\tests\unit\services\emergencyService.test.js:310:30)
-    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
-    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
-    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
-    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
-    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
-    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)
-    at Object.worker (E:\breakapp\backend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Emergency Service deactivateEmergencyMode should deactivate emergency mode successfully" name="Emergency Service deactivateEmergencyMode should deactivate emergency mode successfully" time="0">
-      <failure>TypeError: Cannot read properties of undefined (reading &apos;findFirst&apos;)
-    at Object.findFirst [as deactivateEmergencyMode] (E:\breakapp\backend\src\services\emergencyService.js:352:57)
-    at Object.deactivateEmergencyMode (E:\breakapp\backend\tests\unit\services\emergencyService.test.js:340:45)
-    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
-    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
-    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
-    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
-    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
-    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)
-    at Object.worker (E:\breakapp\backend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Emergency Service deactivateEmergencyMode should handle no active emergency" name="Emergency Service deactivateEmergencyMode should handle no active emergency" time="0.002">
-      <failure>Error: expect(received).rejects.toThrow(expected)
-
-Expected substring: &quot;No active emergency mode found for this project&quot;
-Received message:   &quot;Cannot read properties of undefined (reading &apos;findFirst&apos;)&quot;
-
-      350 |   try {
-      351 |     // العثور على الجلسة النشطة
-    &gt; 352 |     const activeSession = await prisma.emergencySession.findFirst({
-          |                                                         ^
-      353 |       where: {
-      354 |         projectId,
-      355 |         isActive: true
-
-      at Object.findFirst [as deactivateEmergencyMode] (src/services/emergencyService.js:352:57)
-      at Object.deactivateEmergencyMode (tests/unit/services/emergencyService.test.js:356:37)
-    at Object.toThrow (E:\breakapp\backend\node_modules\jest-circus\node_modules\expect\build\index.js:218:22)
-    at Object.toThrow (E:\breakapp\backend\tests\unit\services\emergencyService.test.js:357:18)
-    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
-    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
-    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
-    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
-    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
-    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)
-    at Object.worker (E:\breakapp\backend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Emergency Service getEmergencyHistory should return paginated emergency history" name="Emergency Service getEmergencyHistory should return paginated emergency history" time="0">
-      <failure>TypeError: Cannot read properties of undefined (reading &apos;findMany&apos;)
-    at Object.findMany [as getEmergencyHistory] (E:\breakapp\backend\src\services\emergencyService.js:408:31)
-    at Object.getEmergencyHistory (E:\breakapp\backend\tests\unit\services\emergencyService.test.js:383:45)
-    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
-    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
-    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
-    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
-    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
-    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)
-    at Object.worker (E:\breakapp\backend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
+    <testcase classname="Emergency Service getEmergencyHistory should return paginated emergency history" name="Emergency Service getEmergencyHistory should return paginated emergency history" time="0.001">
     </testcase>
     <testcase classname="Emergency Service notifyScheduleChange should send schedule change notifications" name="Emergency Service notifyScheduleChange should send schedule change notifications" time="0.001">
-      <failure>TypeError: Cannot read properties of undefined (reading &apos;create&apos;)
-    at Object.create [as notifyScheduleChange] (E:\breakapp\backend\src\services\emergencyService.js:453:66)
-    at Object.notifyScheduleChange (E:\breakapp\backend\tests\unit\services\emergencyService.test.js:410:45)
-    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
-    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
-    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
-    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
-    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
-    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)
-    at Object.worker (E:\breakapp\backend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
-    </testcase>
-    <testcase classname="Emergency Service notifyScheduleChange should handle different change types" name="Emergency Service notifyScheduleChange should handle different change types" time="0">
-      <failure>TypeError: Cannot read properties of undefined (reading &apos;create&apos;)
-    at Object.create [as notifyScheduleChange] (E:\breakapp\backend\src\services\emergencyService.js:453:66)
-    at Object.notifyScheduleChange (E:\breakapp\backend\tests\unit\services\emergencyService.test.js:429:32)
-    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
-    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
-    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
-    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
-    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
-    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
-    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)
-    at Object.worker (E:\breakapp\backend\node_modules\jest-runner\build\testWorker.js:106:12)</failure>
     </testcase>
   </testsuite>
-  <testsuite name="Emergency Controller" errors="0" failures="9" skipped="0" timestamp="2025-12-28T10:22:04" time="3" tests="11">
-    <testcase classname="Emergency Controller activateEmergencyMode should activate emergency mode successfully" name="Emergency Controller activateEmergencyMode should activate emergency mode successfully" time="0.009">
-      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
-
-Expected: 200
-Received: 500
-
-Number of calls: 1
-    at Object.toHaveBeenCalledWith (E:\breakapp\backend\tests\unit\controllers\emergencyController.test.js:42:30)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+  <testsuite name="Emergency Controller" errors="0" failures="0" skipped="0" timestamp="2025-12-28T10:29:44" time="1.085" tests="16">
+    <testcase classname="Emergency Controller activateEmergencyMode should activate emergency mode successfully" name="Emergency Controller activateEmergencyMode should activate emergency mode successfully" time="0.011">
+    </testcase>
+    <testcase classname="Emergency Controller activateEmergencyMode should handle missing required fields" name="Emergency Controller activateEmergencyMode should handle missing required fields" time="0.001">
     </testcase>
     <testcase classname="Emergency Controller activateEmergencyMode should handle activation errors" name="Emergency Controller activateEmergencyMode should handle activation errors" time="0.001">
     </testcase>
     <testcase classname="Emergency Controller createEmergencyOrder should create emergency order successfully" name="Emergency Controller createEmergencyOrder should create emergency order successfully" time="0.001">
-      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
-
-Expected: 201
-Received: 400
-
-Number of calls: 1
-    at Object.toHaveBeenCalledWith (E:\breakapp\backend\tests\unit\controllers\emergencyController.test.js:90:30)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
     </testcase>
-    <testcase classname="Emergency Controller createEmergencyOrder should validate urgency level" name="Emergency Controller createEmergencyOrder should validate urgency level" time="0">
-      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
-
-Expected: 500
-Received: 400
-
-Number of calls: 1
-    at Object.toHaveBeenCalledWith (E:\breakapp\backend\tests\unit\controllers\emergencyController.test.js:108:30)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+    <testcase classname="Emergency Controller createEmergencyOrder should handle no active emergency session" name="Emergency Controller createEmergencyOrder should handle no active emergency session" time="0.001">
     </testcase>
-    <testcase classname="Emergency Controller getEmergencyRestaurants should return emergency restaurants" name="Emergency Controller getEmergencyRestaurants should return emergency restaurants" time="0.001">
-      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
-
-Expected: 200
-
-Number of calls: 0
-    at Object.toHaveBeenCalledWith (E:\breakapp\backend\tests\unit\controllers\emergencyController.test.js:133:30)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+    <testcase classname="Emergency Controller createEmergencyOrder should validate urgency level" name="Emergency Controller createEmergencyOrder should validate urgency level" time="0.003">
     </testcase>
-    <testcase classname="Emergency Controller getEmergencyRestaurants should handle location validation errors" name="Emergency Controller getEmergencyRestaurants should handle location validation errors" time="0.001">
+    <testcase classname="Emergency Controller getEmergencyRestaurants should return emergency restaurants" name="Emergency Controller getEmergencyRestaurants should return emergency restaurants" time="0">
     </testcase>
-    <testcase classname="Emergency Controller updateEmergencyOrderStatus should update emergency order status" name="Emergency Controller updateEmergencyOrderStatus should update emergency order status" time="0">
-      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
-
-Expected: 200
-Received: 500
-
-Number of calls: 1
-    at Object.toHaveBeenCalledWith (E:\breakapp\backend\tests\unit\controllers\emergencyController.test.js:172:30)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+    <testcase classname="Emergency Controller getEmergencyRestaurants should handle missing coordinates" name="Emergency Controller getEmergencyRestaurants should handle missing coordinates" time="0.001">
+    </testcase>
+    <testcase classname="Emergency Controller updateEmergencyOrderStatus should update emergency order status" name="Emergency Controller updateEmergencyOrderStatus should update emergency order status" time="0.001">
+    </testcase>
+    <testcase classname="Emergency Controller updateEmergencyOrderStatus should handle missing status" name="Emergency Controller updateEmergencyOrderStatus should handle missing status" time="0.001">
     </testcase>
     <testcase classname="Emergency Controller getPrePreparedInventory should return pre-prepared inventory" name="Emergency Controller getPrePreparedInventory should return pre-prepared inventory" time="0.001">
-      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
-
-Expected: 200
-
-Number of calls: 0
-    at Object.toHaveBeenCalledWith (E:\breakapp\backend\tests\unit\controllers\emergencyController.test.js:198:30)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
     </testcase>
-    <testcase classname="Emergency Controller deactivateEmergencyMode should deactivate emergency mode successfully" name="Emergency Controller deactivateEmergencyMode should deactivate emergency mode successfully" time="0.001">
-      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
-
-Expected: 200
-Received: 500
-
-Number of calls: 1
-    at Object.toHaveBeenCalledWith (E:\breakapp\backend\tests\unit\controllers\emergencyController.test.js:217:30)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+    <testcase classname="Emergency Controller getPrePreparedInventory should handle missing project ID" name="Emergency Controller getPrePreparedInventory should handle missing project ID" time="0">
     </testcase>
-    <testcase classname="Emergency Controller getEmergencyHistory should return emergency history with pagination" name="Emergency Controller getEmergencyHistory should return emergency history with pagination" time="0">
-      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
-
-Expected: 200
-
-Number of calls: 0
-    at Object.toHaveBeenCalledWith (E:\breakapp\backend\tests\unit\controllers\emergencyController.test.js:254:30)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+    <testcase classname="Emergency Controller addToPrePreparedInventory should add item to inventory successfully" name="Emergency Controller addToPrePreparedInventory should add item to inventory successfully" time="0.001">
     </testcase>
-    <testcase classname="Emergency Controller notifyScheduleChange should send schedule change notification" name="Emergency Controller notifyScheduleChange should send schedule change notification" time="0">
-      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
-
-Expected: 200
-Received: 201
-
-Number of calls: 1
-    at Object.toHaveBeenCalledWith (E:\breakapp\backend\tests\unit\controllers\emergencyController.test.js:283:30)
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+    <testcase classname="Emergency Controller deactivateEmergencyMode should deactivate emergency mode successfully" name="Emergency Controller deactivateEmergencyMode should deactivate emergency mode successfully" time="0.002">
+    </testcase>
+    <testcase classname="Emergency Controller getEmergencyHistory should return emergency history with pagination" name="Emergency Controller getEmergencyHistory should return emergency history with pagination" time="0.001">
+    </testcase>
+    <testcase classname="Emergency Controller notifyScheduleChange should send schedule change notification" name="Emergency Controller notifyScheduleChange should send schedule change notification" time="0.001">
     </testcase>
   </testsuite>
 </testsuites>

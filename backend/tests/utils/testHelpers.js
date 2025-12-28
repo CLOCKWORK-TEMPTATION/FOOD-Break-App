@@ -7,7 +7,211 @@ const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const prisma = new PrismaClient();
+// Mock Prisma Client globally for tests
+const mockPrisma = {
+  user: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    count: jest.fn(),
+    upsert: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  restaurant: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    count: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  menuItem: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    count: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  order: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    count: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  orderItem: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  payment: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    count: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  project: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    count: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  // Phase 4 Models
+  emergencySession: {
+    create: jest.fn(),
+    findFirst: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    count: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  emergencyOrder: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  emergencyLog: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  prePreparedInventory: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  scheduleChangeNotification: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  emergencyRestaurantNotification: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  medicalProfile: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    upsert: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  medicalIncident: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    count: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  medicalCheck: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  medicalConsent: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    upsert: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  emergencyAlert: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  emergencyContactNotification: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  medicalDataAccessLog: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  medicalDataDeletion: {
+    create: jest.fn(),
+    findMany: jest.fn()
+  },
+  ingredient: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn()
+  },
+  drugFoodInteraction: {
+    findFirst: jest.fn(),
+    findMany: jest.fn()
+  },
+  voiceSession: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    upsert: jest.fn(),
+    count: jest.fn(),
+    aggregate: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  voicePreferences: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    upsert: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  voiceShortcut: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  personalVoiceModel: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  dietaryProfile: {
+    findUnique: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    upsert: jest.fn()
+  },
+  // Transaction support
+  $transaction: jest.fn((callback) => callback(mockPrisma)),
+  $disconnect: jest.fn()
+};
+
+// Export the mock for use in tests
+global.mockPrisma = mockPrisma;
+
+const prisma = mockPrisma;
 
 /**
  * إنشاء مستخدم تجريبي
@@ -172,8 +376,20 @@ function createMockRequest(overrides = {}) {
     body: {},
     params: {},
     query: {},
+    headers: {},
     user: { id: 'test-user-id', role: 'REGULAR' },
     t: jest.fn((key) => key), // Mock localization function
+    get: jest.fn((header) => {
+      const headers = {
+        'user-agent': 'test-user-agent',
+        'authorization': 'Bearer test-token',
+        'content-type': 'application/json'
+      };
+      return headers[header.toLowerCase()];
+    }),
+    ip: '127.0.0.1',
+    method: 'GET',
+    url: '/test',
     ...overrides
   };
 }
@@ -202,19 +418,24 @@ function createMockNext() {
  * تنظيف قاعدة البيانات التجريبية
  */
 async function cleanupTestData() {
-  // حذف البيانات بترتيب عكسي للعلاقات
-  await prisma.orderItem.deleteMany({});
-  await prisma.order.deleteMany({});
-  await prisma.menuItem.deleteMany({});
-  await prisma.restaurant.deleteMany({});
-  await prisma.user.deleteMany({});
+  // Reset all mocks instead of actual database operations
+  Object.keys(mockPrisma).forEach(model => {
+    if (typeof mockPrisma[model] === 'object' && mockPrisma[model] !== null) {
+      Object.keys(mockPrisma[model]).forEach(method => {
+        if (jest.isMockFunction(mockPrisma[model][method])) {
+          mockPrisma[model][method].mockReset();
+        }
+      });
+    }
+  });
 }
 
 /**
  * إغلاق اتصال Prisma
  */
 async function closePrisma() {
-  await prisma.$disconnect();
+  // Mock disconnect
+  return Promise.resolve();
 }
 
 module.exports = {
