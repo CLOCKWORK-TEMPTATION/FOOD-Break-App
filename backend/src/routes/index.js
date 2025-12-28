@@ -16,8 +16,10 @@ const emotionRoutes = require('./emotion');
 const productionRoutes = require('./productionRoutes');
 const notificationRoutes = require('./notifications');
 const qrRoutes = require('./qr');
+const orderRoutes = require('./orders');
 const projectRoutes = require('./projects');
-// const orderRoutes = require('./orders'); // سيتم إضافته لاحقاً
+const mlRoutes = require('./mlRoutes');
+const reminderRoutes = require('./reminders');
 
 // ربط Routes
 router.use('/auth', authRoutes);
@@ -34,8 +36,10 @@ router.use('/emotion', emotionRoutes);
 router.use('/production', productionRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/qr', qrRoutes);
+router.use('/orders', orderRoutes);
 router.use('/projects', projectRoutes);
-// router.use('/orders', orderRoutes); // سيتم إضافته لاحقاً
+router.use('/ml', mlRoutes);
+router.use('/reminders', reminderRoutes);
 
 // Route رئيسي
 router.get('/', (req, res) => {
@@ -53,10 +57,13 @@ router.get('/', (req, res) => {
       nutrition: '/nutrition',
       dietary: '/dietary',
       emotion: '/emotion',
+      production: '/production',
       notifications: '/notifications',
       qr: '/qr',
-      projects: '/projects'
-      // orders: '/orders' // سيتم إضافته لاحقاً
+      orders: '/orders',
+      projects: '/projects',
+      ml: '/ml',
+      reminders: '/reminders'
     }
   });
 });

@@ -1,81 +1,205 @@
 /**
- * Payment Routes
- * مسارات معالجة المدفوعات
+ * Payment Routes - Updated with Prisma
+ * مسارات معالجة المدفوعات والفواتير
  */
 
 const express = require('express');
-const { protect } = require('../middleware/auth');
+const { body, query, param } = require('express-validator');
+const { authenticate, authorize } = require('../middleware/auth');
+const { validateRequest } = require('../middleware/validation');
 const {
   createPaymentIntent,
   confirmPayment,
-  savePaymentMethod,
-  getPaymentMethods,
-  deletePaymentMethod,
+  getUserPayments,
   createInvoice,
   getUserInvoices,
   processRefund,
   handleStripeWebhook,
-} = require('../controllers/paymentController');
+  getPaymentStatistics
+} = require('../controllers/paymentControllerNew');
 
 const router = express.Router();
-
-// جميع المسارات تحتاج إلى مصادقة
-router.use(protect);
 
 /**
  * @route   POST /api/v1/payments/create-intent
  * @desc    إنشاء نية دفع جديدة
  * @access  Private
  */
-router.post('/create-intent', createPaymentIntent);
+router.post(
+  '/create-intent',
+  authenticate,
+  [
+    body('amount')
+      .isFloat({ min: 0.01 })
+      .withMessage('المبلغ يجب أن يكون أكبر من صفر'),
+    body('currency')
+      .optional()
+      .isString()
+      .withMessage('العملة غير صالحة'),
+    body('orderId')
+      .optional()
+      .isUUID()
+      .withMessage('معرف الطلب غير صالح')
+  ],
+  validateRequest,
+  createPaymentIntent
+);
 
 /**
  * @route   POST /api/v1/payments/confirm
  * @desc    تأكيد الدفع
  * @access  Private
  */
-router.post('/confirm', confirmPayment);
+router.post(
+  '/confirm',
+  authenticate,
+  [
+    body('paymentIntentId')
+      .notEmpty()
+      .withMessage('معرف نية الدفع مطلوب')
+  ],
+  validateRequest,
+  confirmPayment
+);
 
 /**
- * @route   POST /api/v1/payments/save-method
- * @desc    حفظ طريقة دفع
+ * @route   GET /api/v1/payments
+ * @desc    الحصول على مدفوعات المستخدم
  * @access  Private
  */
-router.post('/save-method', savePaymentMethod);
-
-/**
- * @route   GET /api/v1/payments/methods
- * @desc    الحصول على طرق الدفع المحفوظة
- * @access  Private
- */
-router.get('/methods', getPaymentMethods);
-
-/**
- * @route   DELETE /api/v1/payments/methods/:methodId
- * @desc    حذف طريقة دفع
- * @access  Private
- */
-router.delete('/methods/:methodId', deletePaymentMethod);
+router.get(
+  '/',
+  authenticate,
+  [
+    query('page')
+      .optional()
+      .isInt({ min: 1 })
+      .withMessage('رقم الصفحة غير صالح'),
+    query('limit')
+      .optional()
+      .isInt({ min: 1, max: 100 })
+      .withMessage('حد الصفحة غير صالح'),
+    query('status')
+      .optional()
+      .isIn(['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'REFUNDED', 'CANCELLED'])
+      .withMessage('الحالة غير صالحة'),
+    query('provider')
+      .optional()
+      .isIn(['STRIPE', 'PAYPAL', 'APPLE_PAY', 'GOOGLE_PAY', 'CASH', 'BANK_TRANSFER'])
+      .withMessage('المزود غير صالح')
+  ],
+  validateRequest,
+  getUserPayments
+);
 
 /**
  * @route   POST /api/v1/payments/invoices
- * @desc    إنشاء فاتورة
+ * @desc    إنشاء فاتورة جديدة
  * @access  Private
  */
-router.post('/invoices', createInvoice);
+router.post(
+  '/invoices',
+  authenticate,
+  [
+    body('orderId')
+      .optional()
+      .isUUID()
+      .withMessage('معرف الطلب غير صالح'),
+    body('paymentId')
+      .optional()
+      .isUUID()
+      .withMessage('معرف الدفع غير صالح'),
+    body('notes')
+      .optional()
+      .isString()
+      .withMessage('الملاحظات يجب أن تكون نصاً')
+  ],
+  validateRequest,
+  createInvoice
+);
 
 /**
  * @route   GET /api/v1/payments/invoices
  * @desc    الحصول على فواتير المستخدم
  * @access  Private
  */
-router.get('/invoices', getUserInvoices);
+router.get(
+  '/invoices',
+  authenticate,
+  [
+    query('page')
+      .optional()
+      .isInt({ min: 1 })
+      .withMessage('رقم الصفحة غير صالح'),
+    query('limit')
+      .optional()
+      .isInt({ min: 1, max: 100 })
+      .withMessage('حد الصفحة غير صالح'),
+    query('status')
+      .optional()
+      .isIn(['PENDING', 'PAID', 'OVERDUE', 'CANCELLED', 'REFUNDED'])
+      .withMessage('الحالة غير صالحة')
+  ],
+  validateRequest,
+  getUserInvoices
+);
 
 /**
  * @route   POST /api/v1/payments/refund
  * @desc    معالجة استرداد الأموال
  * @access  Private
  */
-router.post('/refund', processRefund);
+router.post(
+  '/refund',
+  authenticate,
+  [
+    body('paymentIntentId')
+      .notEmpty()
+      .withMessage('معرف نية الدفع مطلوب'),
+    body('amount')
+      .optional()
+      .isFloat({ min: 0.01 })
+      .withMessage('المبلغ غير صالح'),
+    body('reason')
+      .optional()
+      .isString()
+      .withMessage('السبب يجب أن يكون نصاً')
+  ],
+  validateRequest,
+  processRefund
+);
+
+/**
+ * @route   GET /api/v1/payments/statistics
+ * @desc    الحصول على إحصائيات المدفوعات
+ * @access  Private (Admin/Producer can view all)
+ */
+router.get(
+  '/statistics',
+  authenticate,
+  [
+    query('userId')
+      .optional()
+      .isUUID()
+      .withMessage('معرف المستخدم غير صالح'),
+    query('startDate')
+      .optional()
+      .isISO8601()
+      .withMessage('تاريخ البداية غير صالح'),
+    query('endDate')
+      .optional()
+      .isISO8601()
+      .withMessage('تاريخ النهاية غير صالح')
+  ],
+  validateRequest,
+  getPaymentStatistics
+);
+
+/**
+ * @route   POST /api/v1/payments/webhook
+ * @desc    معالجة Webhook من Stripe
+ * @access  Public (Stripe webhook)
+ */
+router.post('/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook);
 
 module.exports = router;
