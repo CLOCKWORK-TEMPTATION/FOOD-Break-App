@@ -1,5 +1,6 @@
 const exceptionService = require('../../../src/services/exceptionService');
-const { PrismaClient } = require('@prisma/client');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 
 jest.mock('@prisma/client');
 
@@ -7,7 +8,6 @@ describe('Exception Service', () => {
   let mockPrisma;
 
   beforeEach(() => {
-    mockPrisma = new PrismaClient();
     jest.clearAllMocks();
   });
 

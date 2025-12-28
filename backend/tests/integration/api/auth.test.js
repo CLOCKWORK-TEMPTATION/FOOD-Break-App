@@ -4,15 +4,20 @@
  */
 
 const request = require('supertest');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 const bcrypt = require('bcryptjs');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 const jwt = require('jsonwebtoken');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 
 // Setup test environment
 process.env.NODE_ENV = 'test';
 process.env.JWT_SECRET = 'test-jwt-secret-key';
 
 const { users, requestBodies } = require('../../fixtures/testData');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 const { generateUserToken, generateExpiredToken } = require('../../helpers/testHelpers');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 
 describe('Auth API Integration Tests', () => {
   let app;
@@ -37,8 +42,6 @@ describe('Auth API Integration Tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    const { PrismaClient } = require('@prisma/client');
-    mockPrisma = new PrismaClient();
   });
 
   // ==========================================

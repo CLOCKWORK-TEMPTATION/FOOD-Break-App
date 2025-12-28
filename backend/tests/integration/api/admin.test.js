@@ -4,7 +4,7 @@
  */
 
 const { users, orders, restaurants, menuItems } = require('../../fixtures/testData');
-const { generateUserToken } = require('../../helpers/testHelpers');
+const { generateUserToken } = require('../../utils/testHelpers');
 
 describe('Admin API Integration Tests', () => {
   let mockPrisma;

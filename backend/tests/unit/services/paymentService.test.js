@@ -4,6 +4,7 @@
  */
 
 const { users, orders, payments } = require('../../fixtures/testData');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 
 // Mock Stripe
 jest.mock('stripe', () => {
@@ -31,8 +32,6 @@ describe('Payment Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     
-    const { PrismaClient } = require('@prisma/client');
-    mockPrisma = new PrismaClient();
     
     const Stripe = require('stripe');
     mockStripe = new Stripe('sk_test_placeholder');
