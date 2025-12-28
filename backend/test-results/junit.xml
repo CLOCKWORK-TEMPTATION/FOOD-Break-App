@@ -1,0 +1,579 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="278" failures="0" errors="0" time="1.458">
+  <testsuite name="E2E: Complete User Journey" errors="0" failures="0" skipped="0" timestamp="2025-12-28T07:40:49" time="0.621" tests="33">
+    <testcase classname="E2E: Complete User Journey Scenario 1: New User Registration to First Order Step 1: User registers successfully" name="E2E: Complete User Journey Scenario 1: New User Registration to First Order Step 1: User registers successfully" time="0.077">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 1: New User Registration to First Order Step 2: User browses nearby restaurants" name="E2E: Complete User Journey Scenario 1: New User Registration to First Order Step 2: User browses nearby restaurants" time="0">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 1: New User Registration to First Order Step 3: User selects a restaurant" name="E2E: Complete User Journey Scenario 1: New User Registration to First Order Step 3: User selects a restaurant" time="0">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 1: New User Registration to First Order Step 4: User views menu" name="E2E: Complete User Journey Scenario 1: New User Registration to First Order Step 4: User views menu" time="0">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 1: New User Registration to First Order Step 5: User adds items to cart" name="E2E: Complete User Journey Scenario 1: New User Registration to First Order Step 5: User adds items to cart" time="0.001">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 1: New User Registration to First Order Step 6: User places order" name="E2E: Complete User Journey Scenario 1: New User Registration to First Order Step 6: User places order" time="0">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 1: New User Registration to First Order Step 7: User makes payment" name="E2E: Complete User Journey Scenario 1: New User Registration to First Order Step 7: User makes payment" time="0.001">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 1: New User Registration to First Order Step 8: Order is confirmed" name="E2E: Complete User Journey Scenario 1: New User Registration to First Order Step 8: Order is confirmed" time="0">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 1: New User Registration to First Order Step 9: User tracks order progress" name="E2E: Complete User Journey Scenario 1: New User Registration to First Order Step 9: User tracks order progress" time="0">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 1: New User Registration to First Order Step 10: Order is delivered" name="E2E: Complete User Journey Scenario 1: New User Registration to First Order Step 10: Order is delivered" time="0.001">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 2: QR Code Scan &amp; Project Order Step 1: User scans QR code" name="E2E: Complete User Journey Scenario 2: QR Code Scan &amp; Project Order Step 1: User scans QR code" time="0.001">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 2: QR Code Scan &amp; Project Order Step 2: Token is verified" name="E2E: Complete User Journey Scenario 2: QR Code Scan &amp; Project Order Step 2: Token is verified" time="0.001">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 2: QR Code Scan &amp; Project Order Step 3: Project is validated (active &amp; within date range)" name="E2E: Complete User Journey Scenario 2: QR Code Scan &amp; Project Order Step 3: Project is validated (active &amp; within date range)" time="0">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 2: QR Code Scan &amp; Project Order Step 4: User is associated with project" name="E2E: Complete User Journey Scenario 2: QR Code Scan &amp; Project Order Step 4: User is associated with project" time="0">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 2: QR Code Scan &amp; Project Order Step 5: User views project menu" name="E2E: Complete User Journey Scenario 2: QR Code Scan &amp; Project Order Step 5: User views project menu" time="0">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 2: QR Code Scan &amp; Project Order Step 6: User places project order within time window" name="E2E: Complete User Journey Scenario 2: QR Code Scan &amp; Project Order Step 6: User places project order within time window" time="0.001">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 3: Returning User Quick Reorder Step 1: User logs in" name="E2E: Complete User Journey Scenario 3: Returning User Quick Reorder Step 1: User logs in" time="0.132">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 3: Returning User Quick Reorder Step 2: User views order history" name="E2E: Complete User Journey Scenario 3: Returning User Quick Reorder Step 2: User views order history" time="0.001">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 3: Returning User Quick Reorder Step 3: User selects order to reorder" name="E2E: Complete User Journey Scenario 3: Returning User Quick Reorder Step 3: User selects order to reorder" time="0">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 3: Returning User Quick Reorder Step 4: Items availability is verified" name="E2E: Complete User Journey Scenario 3: Returning User Quick Reorder Step 4: Items availability is verified" time="0.001">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 3: Returning User Quick Reorder Step 5: New order is created from previous" name="E2E: Complete User Journey Scenario 3: Returning User Quick Reorder Step 5: New order is created from previous" time="0">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 4: Order Cancellation Step 1: User views pending order" name="E2E: Complete User Journey Scenario 4: Order Cancellation Step 1: User views pending order" time="0.001">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 4: Order Cancellation Step 2: User requests cancellation" name="E2E: Complete User Journey Scenario 4: Order Cancellation Step 2: User requests cancellation" time="0">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 4: Order Cancellation Step 3: Payment is refunded" name="E2E: Complete User Journey Scenario 4: Order Cancellation Step 3: Payment is refunded" time="0">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 4: Order Cancellation Step 4: User receives cancellation notification" name="E2E: Complete User Journey Scenario 4: Order Cancellation Step 4: User receives cancellation notification" time="0">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 5: User Profile Management Step 1: User views profile" name="E2E: Complete User Journey Scenario 5: User Profile Management Step 1: User views profile" time="0.001">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 5: User Profile Management Step 2: User updates profile" name="E2E: Complete User Journey Scenario 5: User Profile Management Step 2: User updates profile" time="0.001">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 5: User Profile Management Step 3: User changes password" name="E2E: Complete User Journey Scenario 5: User Profile Management Step 3: User changes password" time="0.19">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Scenario 5: User Profile Management Step 4: User sets dietary preferences" name="E2E: Complete User Journey Scenario 5: User Profile Management Step 4: User sets dietary preferences" time="0.001">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Error Handling Scenarios should handle network errors gracefully" name="E2E: Complete User Journey Error Handling Scenarios should handle network errors gracefully" time="0.012">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Error Handling Scenarios should handle authentication errors" name="E2E: Complete User Journey Error Handling Scenarios should handle authentication errors" time="0.002">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Error Handling Scenarios should handle validation errors" name="E2E: Complete User Journey Error Handling Scenarios should handle validation errors" time="0">
+    </testcase>
+    <testcase classname="E2E: Complete User Journey Error Handling Scenarios should handle concurrent order conflicts" name="E2E: Complete User Journey Error Handling Scenarios should handle concurrent order conflicts" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="Auth API Integration Tests" errors="0" failures="0" skipped="0" timestamp="2025-12-28T07:40:49" time="0.453" tests="31">
+    <testcase classname="Auth API Integration Tests POST /api/v1/auth/register should register new user with valid data" name="Auth API Integration Tests POST /api/v1/auth/register should register new user with valid data" time="0.001">
+    </testcase>
+    <testcase classname="Auth API Integration Tests POST /api/v1/auth/register should reject registration with invalid email" name="Auth API Integration Tests POST /api/v1/auth/register should reject registration with invalid email" time="0.001">
+    </testcase>
+    <testcase classname="Auth API Integration Tests POST /api/v1/auth/register should reject weak passwords" name="Auth API Integration Tests POST /api/v1/auth/register should reject weak passwords" time="0.001">
+    </testcase>
+    <testcase classname="Auth API Integration Tests POST /api/v1/auth/register should accept strong passwords" name="Auth API Integration Tests POST /api/v1/auth/register should accept strong passwords" time="0.001">
+    </testcase>
+    <testcase classname="Auth API Integration Tests POST /api/v1/auth/register should hash password before storing" name="Auth API Integration Tests POST /api/v1/auth/register should hash password before storing" time="0.074">
+    </testcase>
+    <testcase classname="Auth API Integration Tests POST /api/v1/auth/register should return JWT token on successful registration" name="Auth API Integration Tests POST /api/v1/auth/register should return JWT token on successful registration" time="0.001">
+    </testcase>
+    <testcase classname="Auth API Integration Tests POST /api/v1/auth/login should login with valid credentials" name="Auth API Integration Tests POST /api/v1/auth/login should login with valid credentials" time="0">
+    </testcase>
+    <testcase classname="Auth API Integration Tests POST /api/v1/auth/login should reject login with wrong password" name="Auth API Integration Tests POST /api/v1/auth/login should reject login with wrong password" time="0">
+    </testcase>
+    <testcase classname="Auth API Integration Tests POST /api/v1/auth/login should reject login for non-existent user" name="Auth API Integration Tests POST /api/v1/auth/login should reject login for non-existent user" time="0.001">
+    </testcase>
+    <testcase classname="Auth API Integration Tests POST /api/v1/auth/login should reject login for inactive user" name="Auth API Integration Tests POST /api/v1/auth/login should reject login for inactive user" time="0">
+    </testcase>
+    <testcase classname="Auth API Integration Tests POST /api/v1/auth/login should return access token and refresh token" name="Auth API Integration Tests POST /api/v1/auth/login should return access token and refresh token" time="0">
+    </testcase>
+    <testcase classname="Auth API Integration Tests POST /api/v1/auth/login should include user info in response" name="Auth API Integration Tests POST /api/v1/auth/login should include user info in response" time="0">
+    </testcase>
+    <testcase classname="Auth API Integration Tests POST /api/v1/auth/refresh should refresh token with valid refresh token" name="Auth API Integration Tests POST /api/v1/auth/refresh should refresh token with valid refresh token" time="0">
+    </testcase>
+    <testcase classname="Auth API Integration Tests POST /api/v1/auth/refresh should reject expired refresh token" name="Auth API Integration Tests POST /api/v1/auth/refresh should reject expired refresh token" time="0">
+    </testcase>
+    <testcase classname="Auth API Integration Tests POST /api/v1/auth/refresh should reject invalid refresh token" name="Auth API Integration Tests POST /api/v1/auth/refresh should reject invalid refresh token" time="0">
+    </testcase>
+    <testcase classname="Auth API Integration Tests POST /api/v1/auth/logout should logout successfully" name="Auth API Integration Tests POST /api/v1/auth/logout should logout successfully" time="0">
+    </testcase>
+    <testcase classname="Auth API Integration Tests POST /api/v1/auth/logout should require authentication" name="Auth API Integration Tests POST /api/v1/auth/logout should require authentication" time="0">
+    </testcase>
+    <testcase classname="Auth API Integration Tests POST /api/v1/auth/forgot-password should send reset email for existing user" name="Auth API Integration Tests POST /api/v1/auth/forgot-password should send reset email for existing user" time="0">
+    </testcase>
+    <testcase classname="Auth API Integration Tests POST /api/v1/auth/forgot-password should not reveal if email exists (security)" name="Auth API Integration Tests POST /api/v1/auth/forgot-password should not reveal if email exists (security)" time="0">
+    </testcase>
+    <testcase classname="Auth API Integration Tests GET /api/v1/auth/profile should return user profile with valid token" name="Auth API Integration Tests GET /api/v1/auth/profile should return user profile with valid token" time="0">
+    </testcase>
+    <testcase classname="Auth API Integration Tests GET /api/v1/auth/profile should reject request without token" name="Auth API Integration Tests GET /api/v1/auth/profile should reject request without token" time="0.001">
+    </testcase>
+    <testcase classname="Auth API Integration Tests GET /api/v1/auth/profile should reject request with expired token" name="Auth API Integration Tests GET /api/v1/auth/profile should reject request with expired token" time="0">
+    </testcase>
+    <testcase classname="Auth API Integration Tests PUT /api/v1/auth/profile should update profile with valid data" name="Auth API Integration Tests PUT /api/v1/auth/profile should update profile with valid data" time="0">
+    </testcase>
+    <testcase classname="Auth API Integration Tests PUT /api/v1/auth/profile should not allow email update through profile" name="Auth API Integration Tests PUT /api/v1/auth/profile should not allow email update through profile" time="0">
+    </testcase>
+    <testcase classname="Auth API Integration Tests PUT /api/v1/auth/change-password should change password with correct current password" name="Auth API Integration Tests PUT /api/v1/auth/change-password should change password with correct current password" time="0.184">
+    </testcase>
+    <testcase classname="Auth API Integration Tests PUT /api/v1/auth/change-password should reject if current password is wrong" name="Auth API Integration Tests PUT /api/v1/auth/change-password should reject if current password is wrong" time="0.123">
+    </testcase>
+    <testcase classname="Auth API Integration Tests PUT /api/v1/auth/change-password should reject if new password is same as current" name="Auth API Integration Tests PUT /api/v1/auth/change-password should reject if new password is same as current" time="0">
+    </testcase>
+    <testcase classname="Auth API Integration Tests Rate Limiting should have rate limit on login endpoint" name="Auth API Integration Tests Rate Limiting should have rate limit on login endpoint" time="0">
+    </testcase>
+    <testcase classname="Auth API Integration Tests Rate Limiting should have rate limit on registration endpoint" name="Auth API Integration Tests Rate Limiting should have rate limit on registration endpoint" time="0">
+    </testcase>
+    <testcase classname="Auth API Integration Tests Security should not expose sensitive error details in production" name="Auth API Integration Tests Security should not expose sensitive error details in production" time="0.001">
+    </testcase>
+    <testcase classname="Auth API Integration Tests Security should sanitize user input" name="Auth API Integration Tests Security should sanitize user input" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="Auth Service" errors="0" failures="0" skipped="0" timestamp="2025-12-28T07:40:50" time="0.059" tests="20">
+    <testcase classname="Auth Service register should register a new user successfully" name="Auth Service register should register a new user successfully" time="0.004">
+    </testcase>
+    <testcase classname="Auth Service register should reject registration with existing email" name="Auth Service register should reject registration with existing email" time="0.001">
+    </testcase>
+    <testcase classname="Auth Service register should hash password before storing" name="Auth Service register should hash password before storing" time="0">
+    </testcase>
+    <testcase classname="Auth Service register should not store plain text password" name="Auth Service register should not store plain text password" time="0">
+    </testcase>
+    <testcase classname="Auth Service login should login successfully with valid credentials" name="Auth Service login should login successfully with valid credentials" time="0">
+    </testcase>
+    <testcase classname="Auth Service login should reject login with invalid password" name="Auth Service login should reject login with invalid password" time="0">
+    </testcase>
+    <testcase classname="Auth Service login should reject login for non-existent user" name="Auth Service login should reject login for non-existent user" time="0">
+    </testcase>
+    <testcase classname="Auth Service login should reject login for inactive user" name="Auth Service login should reject login for inactive user" time="0">
+    </testcase>
+    <testcase classname="Auth Service login should generate JWT token on successful login" name="Auth Service login should generate JWT token on successful login" time="0">
+    </testcase>
+    <testcase classname="Auth Service verifyToken should verify valid token" name="Auth Service verifyToken should verify valid token" time="0">
+    </testcase>
+    <testcase classname="Auth Service verifyToken should reject expired token" name="Auth Service verifyToken should reject expired token" time="0.005">
+    </testcase>
+    <testcase classname="Auth Service verifyToken should reject invalid token" name="Auth Service verifyToken should reject invalid token" time="0.001">
+    </testcase>
+    <testcase classname="Auth Service changePassword should change password with valid current password" name="Auth Service changePassword should change password with valid current password" time="0">
+    </testcase>
+    <testcase classname="Auth Service changePassword should reject password change with wrong current password" name="Auth Service changePassword should reject password change with wrong current password" time="0">
+    </testcase>
+    <testcase classname="Auth Service getUserById should return user by ID" name="Auth Service getUserById should return user by ID" time="0.001">
+    </testcase>
+    <testcase classname="Auth Service getUserById should return null for non-existent ID" name="Auth Service getUserById should return null for non-existent ID" time="0">
+    </testcase>
+    <testcase classname="Auth Service role validation should identify admin user" name="Auth Service role validation should identify admin user" time="0">
+    </testcase>
+    <testcase classname="Auth Service role validation should identify producer user" name="Auth Service role validation should identify producer user" time="0">
+    </testcase>
+    <testcase classname="Auth Service role validation should identify regular user" name="Auth Service role validation should identify regular user" time="0">
+    </testcase>
+    <testcase classname="Auth Service role validation should identify VIP user" name="Auth Service role validation should identify VIP user" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="E2E: Admin Management Journey" errors="0" failures="0" skipped="0" timestamp="2025-12-28T07:40:50" time="0.109" tests="30">
+    <testcase classname="E2E: Admin Management Journey Scenario 1: Daily Admin Dashboard Operations Step 1: Admin logs in" name="E2E: Admin Management Journey Scenario 1: Daily Admin Dashboard Operations Step 1: Admin logs in" time="0.081">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 1: Daily Admin Dashboard Operations Step 2: Admin views dashboard statistics" name="E2E: Admin Management Journey Scenario 1: Daily Admin Dashboard Operations Step 2: Admin views dashboard statistics" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 1: Daily Admin Dashboard Operations Step 3: Admin reviews pending orders" name="E2E: Admin Management Journey Scenario 1: Daily Admin Dashboard Operations Step 3: Admin reviews pending orders" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 1: Daily Admin Dashboard Operations Step 4: Admin confirms pending orders" name="E2E: Admin Management Journey Scenario 1: Daily Admin Dashboard Operations Step 4: Admin confirms pending orders" time="0.001">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 1: Daily Admin Dashboard Operations Step 5: Admin views user list" name="E2E: Admin Management Journey Scenario 1: Daily Admin Dashboard Operations Step 5: Admin views user list" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 1: Daily Admin Dashboard Operations Step 6: Admin sends notification to users" name="E2E: Admin Management Journey Scenario 1: Daily Admin Dashboard Operations Step 6: Admin sends notification to users" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 2: Restaurant Onboarding &amp; Management Step 1: Admin adds new restaurant" name="E2E: Admin Management Journey Scenario 2: Restaurant Onboarding &amp; Management Step 1: Admin adds new restaurant" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 2: Restaurant Onboarding &amp; Management Step 2: Admin adds menu items to restaurant" name="E2E: Admin Management Journey Scenario 2: Restaurant Onboarding &amp; Management Step 2: Admin adds menu items to restaurant" time="0.001">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 2: Restaurant Onboarding &amp; Management Step 3: Admin updates menu item price" name="E2E: Admin Management Journey Scenario 2: Restaurant Onboarding &amp; Management Step 3: Admin updates menu item price" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 2: Restaurant Onboarding &amp; Management Step 4: Admin marks item as unavailable" name="E2E: Admin Management Journey Scenario 2: Restaurant Onboarding &amp; Management Step 4: Admin marks item as unavailable" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 2: Restaurant Onboarding &amp; Management Step 5: Admin deactivates restaurant temporarily" name="E2E: Admin Management Journey Scenario 2: Restaurant Onboarding &amp; Management Step 5: Admin deactivates restaurant temporarily" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 2: Restaurant Onboarding &amp; Management Step 6: Admin reactivates restaurant" name="E2E: Admin Management Journey Scenario 2: Restaurant Onboarding &amp; Management Step 6: Admin reactivates restaurant" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 3: Order Issue Resolution Step 1: Admin receives complaint about delayed order" name="E2E: Admin Management Journey Scenario 3: Order Issue Resolution Step 1: Admin receives complaint about delayed order" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 3: Order Issue Resolution Step 2: Admin views order details" name="E2E: Admin Management Journey Scenario 3: Order Issue Resolution Step 2: Admin views order details" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 3: Order Issue Resolution Step 3: Admin issues partial refund" name="E2E: Admin Management Journey Scenario 3: Order Issue Resolution Step 3: Admin issues partial refund" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 3: Order Issue Resolution Step 4: Admin adds compensation credit" name="E2E: Admin Management Journey Scenario 3: Order Issue Resolution Step 4: Admin adds compensation credit" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 3: Order Issue Resolution Step 5: Admin sends apology notification" name="E2E: Admin Management Journey Scenario 3: Order Issue Resolution Step 5: Admin sends apology notification" time="0.001">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 3: Order Issue Resolution Step 6: Admin marks issue as resolved" name="E2E: Admin Management Journey Scenario 3: Order Issue Resolution Step 6: Admin marks issue as resolved" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 4: Producer Order Management Step 1: Producer logs in" name="E2E: Admin Management Journey Scenario 4: Producer Order Management Step 1: Producer logs in" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 4: Producer Order Management Step 2: Producer views assigned orders" name="E2E: Admin Management Journey Scenario 4: Producer Order Management Step 2: Producer views assigned orders" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 4: Producer Order Management Step 3: Producer starts preparing order" name="E2E: Admin Management Journey Scenario 4: Producer Order Management Step 3: Producer starts preparing order" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 4: Producer Order Management Step 4: Producer marks order as ready" name="E2E: Admin Management Journey Scenario 4: Producer Order Management Step 4: Producer marks order as ready" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 4: Producer Order Management Step 5: Producer assigns order for delivery" name="E2E: Admin Management Journey Scenario 4: Producer Order Management Step 5: Producer assigns order for delivery" time="0.001">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 5: Admin Reports &amp; Analytics Step 1: Admin generates daily report" name="E2E: Admin Management Journey Scenario 5: Admin Reports &amp; Analytics Step 1: Admin generates daily report" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 5: Admin Reports &amp; Analytics Step 2: Admin views top performing restaurants" name="E2E: Admin Management Journey Scenario 5: Admin Reports &amp; Analytics Step 2: Admin views top performing restaurants" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 5: Admin Reports &amp; Analytics Step 3: Admin views popular menu items" name="E2E: Admin Management Journey Scenario 5: Admin Reports &amp; Analytics Step 3: Admin views popular menu items" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Scenario 5: Admin Reports &amp; Analytics Step 4: Admin exports report to CSV" name="E2E: Admin Management Journey Scenario 5: Admin Reports &amp; Analytics Step 4: Admin exports report to CSV" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Authorization Edge Cases should prevent admin from deleting themselves" name="E2E: Admin Management Journey Authorization Edge Cases should prevent admin from deleting themselves" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Authorization Edge Cases should prevent producer from accessing user management" name="E2E: Admin Management Journey Authorization Edge Cases should prevent producer from accessing user management" time="0">
+    </testcase>
+    <testcase classname="E2E: Admin Management Journey Authorization Edge Cases should log all admin actions" name="E2E: Admin Management Journey Authorization Edge Cases should log all admin actions" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="QR Code Service" errors="0" failures="0" skipped="0" timestamp="2025-12-28T07:40:50" time="0.034" tests="26">
+    <testcase classname="QR Code Service generateQRCode should generate QR code for project" name="QR Code Service generateQRCode should generate QR code for project" time="0.001">
+    </testcase>
+    <testcase classname="QR Code Service generateQRCode should include project data in QR payload" name="QR Code Service generateQRCode should include project data in QR payload" time="0.001">
+    </testcase>
+    <testcase classname="QR Code Service generateQRCode should generate unique QR for each project" name="QR Code Service generateQRCode should generate unique QR for each project" time="0">
+    </testcase>
+    <testcase classname="QR Code Service generateQRToken should generate JWT token for QR" name="QR Code Service generateQRToken should generate JWT token for QR" time="0">
+    </testcase>
+    <testcase classname="QR Code Service generateQRToken should include expiration in token" name="QR Code Service generateQRToken should include expiration in token" time="0.001">
+    </testcase>
+    <testcase classname="QR Code Service generateQRToken should use secure secret key" name="QR Code Service generateQRToken should use secure secret key" time="0">
+    </testcase>
+    <testcase classname="QR Code Service verifyQRToken should verify valid QR token" name="QR Code Service verifyQRToken should verify valid QR token" time="0.001">
+    </testcase>
+    <testcase classname="QR Code Service verifyQRToken should reject expired QR token" name="QR Code Service verifyQRToken should reject expired QR token" time="0.007">
+    </testcase>
+    <testcase classname="QR Code Service verifyQRToken should reject token with invalid signature" name="QR Code Service verifyQRToken should reject token with invalid signature" time="0.001">
+    </testcase>
+    <testcase classname="QR Code Service verifyQRToken should reject malformed token" name="QR Code Service verifyQRToken should reject malformed token" time="0">
+    </testcase>
+    <testcase classname="QR Code Service accessProjectByQR should grant access to active project" name="QR Code Service accessProjectByQR should grant access to active project" time="0.001">
+    </testcase>
+    <testcase classname="QR Code Service accessProjectByQR should deny access to inactive project" name="QR Code Service accessProjectByQR should deny access to inactive project" time="0">
+    </testcase>
+    <testcase classname="QR Code Service accessProjectByQR should validate project date range" name="QR Code Service accessProjectByQR should validate project date range" time="0">
+    </testcase>
+    <testcase classname="QR Code Service accessProjectByQR should check order window" name="QR Code Service accessProjectByQR should check order window" time="0">
+    </testcase>
+    <testcase classname="QR Code Service scanQRCode should extract data from scanned QR" name="QR Code Service scanQRCode should extract data from scanned QR" time="0">
+    </testcase>
+    <testcase classname="QR Code Service scanQRCode should handle invalid QR data" name="QR Code Service scanQRCode should handle invalid QR data" time="0.001">
+    </testcase>
+    <testcase classname="QR Code Service associateUserWithProject should associate user with project on scan" name="QR Code Service associateUserWithProject should associate user with project on scan" time="0">
+    </testcase>
+    <testcase classname="QR Code Service associateUserWithProject should prevent duplicate associations" name="QR Code Service associateUserWithProject should prevent duplicate associations" time="0">
+    </testcase>
+    <testcase classname="QR Code Service QR code formats should generate PNG format" name="QR Code Service QR code formats should generate PNG format" time="0">
+    </testcase>
+    <testcase classname="QR Code Service QR code formats should generate SVG format" name="QR Code Service QR code formats should generate SVG format" time="0">
+    </testcase>
+    <testcase classname="QR Code Service QR code formats should support custom size options" name="QR Code Service QR code formats should support custom size options" time="0.001">
+    </testcase>
+    <testcase classname="QR Code Service QR security should use cryptographically secure random for tokens" name="QR Code Service QR security should use cryptographically secure random for tokens" time="0">
+    </testcase>
+    <testcase classname="QR Code Service QR security should hash sensitive data in QR" name="QR Code Service QR security should hash sensitive data in QR" time="0">
+    </testcase>
+    <testcase classname="QR Code Service QR security should rate limit QR scans" name="QR Code Service QR security should rate limit QR scans" time="0">
+    </testcase>
+    <testcase classname="QR Code Service QR analytics should track scan count" name="QR Code Service QR analytics should track scan count" time="0">
+    </testcase>
+    <testcase classname="QR Code Service QR analytics should track scan location" name="QR Code Service QR analytics should track scan location" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="Orders API Integration Tests" errors="0" failures="0" skipped="0" timestamp="2025-12-28T07:40:50" time="0.028" tests="36">
+    <testcase classname="Orders API Integration Tests POST /api/v1/orders should create order with valid data" name="Orders API Integration Tests POST /api/v1/orders should create order with valid data" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests POST /api/v1/orders should validate restaurant exists and is active" name="Orders API Integration Tests POST /api/v1/orders should validate restaurant exists and is active" time="0.001">
+    </testcase>
+    <testcase classname="Orders API Integration Tests POST /api/v1/orders should reject order for inactive restaurant" name="Orders API Integration Tests POST /api/v1/orders should reject order for inactive restaurant" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests POST /api/v1/orders should validate all menu items exist and are available" name="Orders API Integration Tests POST /api/v1/orders should validate all menu items exist and are available" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests POST /api/v1/orders should reject unavailable menu items" name="Orders API Integration Tests POST /api/v1/orders should reject unavailable menu items" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests POST /api/v1/orders should calculate total correctly" name="Orders API Integration Tests POST /api/v1/orders should calculate total correctly" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests POST /api/v1/orders should require authentication" name="Orders API Integration Tests POST /api/v1/orders should require authentication" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests POST /api/v1/orders should set initial status to PENDING" name="Orders API Integration Tests POST /api/v1/orders should set initial status to PENDING" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests GET /api/v1/orders should return user orders" name="Orders API Integration Tests GET /api/v1/orders should return user orders" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests GET /api/v1/orders should support pagination" name="Orders API Integration Tests GET /api/v1/orders should support pagination" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests GET /api/v1/orders should filter by status" name="Orders API Integration Tests GET /api/v1/orders should filter by status" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests GET /api/v1/orders should sort by date descending" name="Orders API Integration Tests GET /api/v1/orders should sort by date descending" time="0.001">
+    </testcase>
+    <testcase classname="Orders API Integration Tests GET /api/v1/orders should only return orders for authenticated user" name="Orders API Integration Tests GET /api/v1/orders should only return orders for authenticated user" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests GET /api/v1/orders/:id should return order with items" name="Orders API Integration Tests GET /api/v1/orders/:id should return order with items" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests GET /api/v1/orders/:id should return 404 for non-existent order" name="Orders API Integration Tests GET /api/v1/orders/:id should return 404 for non-existent order" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests GET /api/v1/orders/:id should not allow access to other users orders" name="Orders API Integration Tests GET /api/v1/orders/:id should not allow access to other users orders" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests GET /api/v1/orders/:id should allow admin to access any order" name="Orders API Integration Tests GET /api/v1/orders/:id should allow admin to access any order" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests PUT /api/v1/orders/:id/status should update status (admin/producer only)" name="Orders API Integration Tests PUT /api/v1/orders/:id/status should update status (admin/producer only)" time="0.001">
+    </testcase>
+    <testcase classname="Orders API Integration Tests PUT /api/v1/orders/:id/status should validate status transition" name="Orders API Integration Tests PUT /api/v1/orders/:id/status should validate status transition" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests PUT /api/v1/orders/:id/status should set timestamps on status change" name="Orders API Integration Tests PUT /api/v1/orders/:id/status should set timestamps on status change" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests POST /api/v1/orders/:id/cancel should cancel PENDING order" name="Orders API Integration Tests POST /api/v1/orders/:id/cancel should cancel PENDING order" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests POST /api/v1/orders/:id/cancel should cancel CONFIRMED order" name="Orders API Integration Tests POST /api/v1/orders/:id/cancel should cancel CONFIRMED order" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests POST /api/v1/orders/:id/cancel should not cancel PREPARING or later orders" name="Orders API Integration Tests POST /api/v1/orders/:id/cancel should not cancel PREPARING or later orders" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests POST /api/v1/orders/:id/cancel should require cancellation reason" name="Orders API Integration Tests POST /api/v1/orders/:id/cancel should require cancellation reason" time="0.001">
+    </testcase>
+    <testcase classname="Orders API Integration Tests POST /api/v1/orders/:id/cancel should only allow order owner to cancel" name="Orders API Integration Tests POST /api/v1/orders/:id/cancel should only allow order owner to cancel" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests POST /api/v1/orders/:id/reorder should create new order from previous order" name="Orders API Integration Tests POST /api/v1/orders/:id/reorder should create new order from previous order" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests POST /api/v1/orders/:id/reorder should check item availability before reorder" name="Orders API Integration Tests POST /api/v1/orders/:id/reorder should check item availability before reorder" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests GET /api/v1/orders/:id/track should return current order status" name="Orders API Integration Tests GET /api/v1/orders/:id/track should return current order status" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests GET /api/v1/orders/:id/track should include status history" name="Orders API Integration Tests GET /api/v1/orders/:id/track should include status history" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests GET /api/v1/orders/:id/track should include estimated delivery time" name="Orders API Integration Tests GET /api/v1/orders/:id/track should include estimated delivery time" time="0.001">
+    </testcase>
+    <testcase classname="Orders API Integration Tests Admin Order Management should allow admin to view all orders" name="Orders API Integration Tests Admin Order Management should allow admin to view all orders" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests Admin Order Management should allow producer to view assigned orders" name="Orders API Integration Tests Admin Order Management should allow producer to view assigned orders" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests Admin Order Management should support bulk status update" name="Orders API Integration Tests Admin Order Management should support bulk status update" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests Order Validation should require at least one item" name="Orders API Integration Tests Order Validation should require at least one item" time="0">
+    </testcase>
+    <testcase classname="Orders API Integration Tests Order Validation should validate item quantities" name="Orders API Integration Tests Order Validation should validate item quantities" time="0.001">
+    </testcase>
+    <testcase classname="Orders API Integration Tests Order Validation should validate delivery coordinates" name="Orders API Integration Tests Order Validation should validate delivery coordinates" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="Order Service" errors="0" failures="0" skipped="0" timestamp="2025-12-28T07:40:50" time="0.027" tests="25">
+    <testcase classname="Order Service createOrder should create order with valid data" name="Order Service createOrder should create order with valid data" time="0.001">
+    </testcase>
+    <testcase classname="Order Service createOrder should reject order for inactive restaurant" name="Order Service createOrder should reject order for inactive restaurant" time="0">
+    </testcase>
+    <testcase classname="Order Service createOrder should reject order with unavailable menu items" name="Order Service createOrder should reject order with unavailable menu items" time="0">
+    </testcase>
+    <testcase classname="Order Service createOrder should calculate total amount correctly" name="Order Service createOrder should calculate total amount correctly" time="0">
+    </testcase>
+    <testcase classname="Order Service createOrder should set initial status to PENDING" name="Order Service createOrder should set initial status to PENDING" time="0">
+    </testcase>
+    <testcase classname="Order Service getOrderById should return order with details" name="Order Service getOrderById should return order with details" time="0">
+    </testcase>
+    <testcase classname="Order Service getOrderById should return null for non-existent order" name="Order Service getOrderById should return null for non-existent order" time="0">
+    </testcase>
+    <testcase classname="Order Service getUserOrders should return all orders for user" name="Order Service getUserOrders should return all orders for user" time="0.001">
+    </testcase>
+    <testcase classname="Order Service getUserOrders should return empty array for user with no orders" name="Order Service getUserOrders should return empty array for user with no orders" time="0">
+    </testcase>
+    <testcase classname="Order Service getUserOrders should support pagination" name="Order Service getUserOrders should support pagination" time="0">
+    </testcase>
+    <testcase classname="Order Service getUserOrders should filter by status" name="Order Service getUserOrders should filter by status" time="0">
+    </testcase>
+    <testcase classname="Order Service updateOrderStatus should update status from PENDING to CONFIRMED" name="Order Service updateOrderStatus should update status from PENDING to CONFIRMED" time="0">
+    </testcase>
+    <testcase classname="Order Service updateOrderStatus should update status from CONFIRMED to PREPARING" name="Order Service updateOrderStatus should update status from CONFIRMED to PREPARING" time="0">
+    </testcase>
+    <testcase classname="Order Service updateOrderStatus should update status to DELIVERED and set deliveredAt" name="Order Service updateOrderStatus should update status to DELIVERED and set deliveredAt" time="0">
+    </testcase>
+    <testcase classname="Order Service updateOrderStatus should not allow invalid status transitions" name="Order Service updateOrderStatus should not allow invalid status transitions" time="0">
+    </testcase>
+    <testcase classname="Order Service cancelOrder should cancel PENDING order" name="Order Service cancelOrder should cancel PENDING order" time="0">
+    </testcase>
+    <testcase classname="Order Service cancelOrder should not cancel DELIVERED order" name="Order Service cancelOrder should not cancel DELIVERED order" time="0">
+    </testcase>
+    <testcase classname="Order Service cancelOrder should store cancellation reason" name="Order Service cancelOrder should store cancellation reason" time="0">
+    </testcase>
+    <testcase classname="Order Service calculateOrderTotal should calculate subtotal correctly" name="Order Service calculateOrderTotal should calculate subtotal correctly" time="0.001">
+    </testcase>
+    <testcase classname="Order Service calculateOrderTotal should apply delivery fee" name="Order Service calculateOrderTotal should apply delivery fee" time="0">
+    </testcase>
+    <testcase classname="Order Service calculateOrderTotal should apply discount correctly" name="Order Service calculateOrderTotal should apply discount correctly" time="0">
+    </testcase>
+    <testcase classname="Order Service calculateOrderTotal should apply VAT correctly" name="Order Service calculateOrderTotal should apply VAT correctly" time="0">
+    </testcase>
+    <testcase classname="Order Service validateOrder should require at least one item" name="Order Service validateOrder should require at least one item" time="0">
+    </testcase>
+    <testcase classname="Order Service validateOrder should require valid quantity" name="Order Service validateOrder should require valid quantity" time="0.001">
+    </testcase>
+    <testcase classname="Order Service validateOrder should require delivery address" name="Order Service validateOrder should require delivery address" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="Admin API Integration Tests" errors="0" failures="0" skipped="0" timestamp="2025-12-28T07:40:50" time="0.025" tests="33">
+    <testcase classname="Admin API Integration Tests GET /api/v1/admin/stats should return dashboard statistics for admin" name="Admin API Integration Tests GET /api/v1/admin/stats should return dashboard statistics for admin" time="0.001">
+    </testcase>
+    <testcase classname="Admin API Integration Tests GET /api/v1/admin/stats should return revenue statistics" name="Admin API Integration Tests GET /api/v1/admin/stats should return revenue statistics" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests GET /api/v1/admin/stats should return order status breakdown" name="Admin API Integration Tests GET /api/v1/admin/stats should return order status breakdown" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests GET /api/v1/admin/stats should deny access to regular users" name="Admin API Integration Tests GET /api/v1/admin/stats should deny access to regular users" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests GET /api/v1/admin/stats should allow access to producer" name="Admin API Integration Tests GET /api/v1/admin/stats should allow access to producer" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests GET /api/v1/admin/orders should return all orders for admin" name="Admin API Integration Tests GET /api/v1/admin/orders should return all orders for admin" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests GET /api/v1/admin/orders should support filtering by status" name="Admin API Integration Tests GET /api/v1/admin/orders should support filtering by status" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests GET /api/v1/admin/orders should support filtering by date range" name="Admin API Integration Tests GET /api/v1/admin/orders should support filtering by date range" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests GET /api/v1/admin/orders should support filtering by restaurant" name="Admin API Integration Tests GET /api/v1/admin/orders should support filtering by restaurant" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests GET /api/v1/admin/orders should include pagination" name="Admin API Integration Tests GET /api/v1/admin/orders should include pagination" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests PUT /api/v1/admin/orders/:id/status should update order status" name="Admin API Integration Tests PUT /api/v1/admin/orders/:id/status should update order status" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests PUT /api/v1/admin/orders/:id/status should validate status transition" name="Admin API Integration Tests PUT /api/v1/admin/orders/:id/status should validate status transition" time="0.001">
+    </testcase>
+    <testcase classname="Admin API Integration Tests PUT /api/v1/admin/orders/:id/status should record status change timestamp" name="Admin API Integration Tests PUT /api/v1/admin/orders/:id/status should record status change timestamp" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests GET /api/v1/admin/restaurants should return all restaurants" name="Admin API Integration Tests GET /api/v1/admin/restaurants should return all restaurants" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests GET /api/v1/admin/restaurants should include restaurant statistics" name="Admin API Integration Tests GET /api/v1/admin/restaurants should include restaurant statistics" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests PUT /api/v1/admin/restaurants/:id/toggle should toggle restaurant active status" name="Admin API Integration Tests PUT /api/v1/admin/restaurants/:id/toggle should toggle restaurant active status" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests PUT /api/v1/admin/restaurants/:id/toggle should activate inactive restaurant" name="Admin API Integration Tests PUT /api/v1/admin/restaurants/:id/toggle should activate inactive restaurant" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests GET /api/v1/admin/restaurants/:id/menu should return restaurant menu items" name="Admin API Integration Tests GET /api/v1/admin/restaurants/:id/menu should return restaurant menu items" time="0.001">
+    </testcase>
+    <testcase classname="Admin API Integration Tests PUT /api/v1/admin/menu/:id should update menu item details" name="Admin API Integration Tests PUT /api/v1/admin/menu/:id should update menu item details" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests PUT /api/v1/admin/menu/:id should validate price is positive" name="Admin API Integration Tests PUT /api/v1/admin/menu/:id should validate price is positive" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests PUT /api/v1/admin/menu/:id/toggle should toggle menu item availability" name="Admin API Integration Tests PUT /api/v1/admin/menu/:id/toggle should toggle menu item availability" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests GET /api/v1/admin/users should return all users for admin" name="Admin API Integration Tests GET /api/v1/admin/users should return all users for admin" time="0.001">
+    </testcase>
+    <testcase classname="Admin API Integration Tests GET /api/v1/admin/users should support filtering by role" name="Admin API Integration Tests GET /api/v1/admin/users should support filtering by role" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests GET /api/v1/admin/users should not expose password hashes" name="Admin API Integration Tests GET /api/v1/admin/users should not expose password hashes" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests PUT /api/v1/admin/users/:id/toggle should toggle user active status" name="Admin API Integration Tests PUT /api/v1/admin/users/:id/toggle should toggle user active status" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests PUT /api/v1/admin/users/:id/toggle should not allow admin to deactivate themselves" name="Admin API Integration Tests PUT /api/v1/admin/users/:id/toggle should not allow admin to deactivate themselves" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests POST /api/v1/admin/notifications/send should send notification to user" name="Admin API Integration Tests POST /api/v1/admin/notifications/send should send notification to user" time="0.001">
+    </testcase>
+    <testcase classname="Admin API Integration Tests POST /api/v1/admin/notifications/send should send bulk notification to all users" name="Admin API Integration Tests POST /api/v1/admin/notifications/send should send bulk notification to all users" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests Authorization should require ADMIN or PRODUCER role" name="Admin API Integration Tests Authorization should require ADMIN or PRODUCER role" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests Authorization should reject requests without token" name="Admin API Integration Tests Authorization should reject requests without token" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests Authorization should reject requests with invalid token" name="Admin API Integration Tests Authorization should reject requests with invalid token" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests Authorization should reject requests from regular users" name="Admin API Integration Tests Authorization should reject requests from regular users" time="0">
+    </testcase>
+    <testcase classname="Admin API Integration Tests Audit Logging should log admin actions" name="Admin API Integration Tests Audit Logging should log admin actions" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="Menu Service" errors="0" failures="0" skipped="0" timestamp="2025-12-28T07:40:50" time="0.023" tests="21">
+    <testcase classname="Menu Service getMenuItems should return all available menu items for restaurant" name="Menu Service getMenuItems should return all available menu items for restaurant" time="0.001">
+    </testcase>
+    <testcase classname="Menu Service getMenuItems should filter by category" name="Menu Service getMenuItems should filter by category" time="0">
+    </testcase>
+    <testcase classname="Menu Service getMenuItems should support search by name" name="Menu Service getMenuItems should support search by name" time="0">
+    </testcase>
+    <testcase classname="Menu Service getMenuItems should return empty array for restaurant with no items" name="Menu Service getMenuItems should return empty array for restaurant with no items" time="0">
+    </testcase>
+    <testcase classname="Menu Service getMenuItemById should return menu item with restaurant info" name="Menu Service getMenuItemById should return menu item with restaurant info" time="0">
+    </testcase>
+    <testcase classname="Menu Service getMenuItemById should return null for non-existent item" name="Menu Service getMenuItemById should return null for non-existent item" time="0">
+    </testcase>
+    <testcase classname="Menu Service getCoreMenu should return CORE menu items from partner restaurants" name="Menu Service getCoreMenu should return CORE menu items from partner restaurants" time="0">
+    </testcase>
+    <testcase classname="Menu Service getCoreMenu should sort by quality score" name="Menu Service getCoreMenu should sort by quality score" time="0">
+    </testcase>
+    <testcase classname="Menu Service getCategories should return unique categories" name="Menu Service getCategories should return unique categories" time="0.001">
+    </testcase>
+    <testcase classname="Menu Service createMenuItem should create menu item with valid data" name="Menu Service createMenuItem should create menu item with valid data" time="0">
+    </testcase>
+    <testcase classname="Menu Service createMenuItem should require restaurant ID" name="Menu Service createMenuItem should require restaurant ID" time="0">
+    </testcase>
+    <testcase classname="Menu Service createMenuItem should require positive price" name="Menu Service createMenuItem should require positive price" time="0">
+    </testcase>
+    <testcase classname="Menu Service updateMenuItem should update menu item price" name="Menu Service updateMenuItem should update menu item price" time="0">
+    </testcase>
+    <testcase classname="Menu Service updateMenuItem should update availability status" name="Menu Service updateMenuItem should update availability status" time="0">
+    </testcase>
+    <testcase classname="Menu Service deleteMenuItem should delete menu item" name="Menu Service deleteMenuItem should delete menu item" time="0">
+    </testcase>
+    <testcase classname="Menu Service deleteMenuItem should handle deletion of non-existent item" name="Menu Service deleteMenuItem should handle deletion of non-existent item" time="0.005">
+    </testcase>
+    <testcase classname="Menu Service dietary information should filter vegetarian items" name="Menu Service dietary information should filter vegetarian items" time="0">
+    </testcase>
+    <testcase classname="Menu Service dietary information should filter gluten-free items" name="Menu Service dietary information should filter gluten-free items" time="0">
+    </testcase>
+    <testcase classname="Menu Service dietary information should filter by allergens" name="Menu Service dietary information should filter by allergens" time="0">
+    </testcase>
+    <testcase classname="Menu Service pricing should calculate price with modifiers" name="Menu Service pricing should calculate price with modifiers" time="0">
+    </testcase>
+    <testcase classname="Menu Service pricing should handle discount pricing" name="Menu Service pricing should handle discount pricing" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="Payment Service" errors="0" failures="0" skipped="0" timestamp="2025-12-28T07:40:50" time="0.019" tests="23">
+    <testcase classname="Payment Service createPaymentIntent should create payment intent with valid amount" name="Payment Service createPaymentIntent should create payment intent with valid amount" time="0.001">
+    </testcase>
+    <testcase classname="Payment Service createPaymentIntent should handle minimum amount validation" name="Payment Service createPaymentIntent should handle minimum amount validation" time="0">
+    </testcase>
+    <testcase classname="Payment Service createPaymentIntent should attach customer metadata" name="Payment Service createPaymentIntent should attach customer metadata" time="0.001">
+    </testcase>
+    <testcase classname="Payment Service processPayment should process successful payment" name="Payment Service processPayment should process successful payment" time="0">
+    </testcase>
+    <testcase classname="Payment Service processPayment should handle payment failure" name="Payment Service processPayment should handle payment failure" time="0">
+    </testcase>
+    <testcase classname="Payment Service processPayment should store payment record on success" name="Payment Service processPayment should store payment record on success" time="0">
+    </testcase>
+    <testcase classname="Payment Service refundPayment should process full refund" name="Payment Service refundPayment should process full refund" time="0.001">
+    </testcase>
+    <testcase classname="Payment Service refundPayment should process partial refund" name="Payment Service refundPayment should process partial refund" time="0">
+    </testcase>
+    <testcase classname="Payment Service refundPayment should update payment status after refund" name="Payment Service refundPayment should update payment status after refund" time="0">
+    </testcase>
+    <testcase classname="Payment Service getPaymentStatus should return payment status" name="Payment Service getPaymentStatus should return payment status" time="0">
+    </testcase>
+    <testcase classname="Payment Service getPaymentStatus should return pending status for incomplete payment" name="Payment Service getPaymentStatus should return pending status for incomplete payment" time="0">
+    </testcase>
+    <testcase classname="Payment Service validatePayment should validate payment amount matches order total" name="Payment Service validatePayment should validate payment amount matches order total" time="0.001">
+    </testcase>
+    <testcase classname="Payment Service validatePayment should reject payment amount mismatch" name="Payment Service validatePayment should reject payment amount mismatch" time="0">
+    </testcase>
+    <testcase classname="Payment Service validatePayment should validate currency" name="Payment Service validatePayment should validate currency" time="0">
+    </testcase>
+    <testcase classname="Payment Service getUserPayments should return user payment history" name="Payment Service getUserPayments should return user payment history" time="0">
+    </testcase>
+    <testcase classname="Payment Service getUserPayments should include order details" name="Payment Service getUserPayments should include order details" time="0.001">
+    </testcase>
+    <testcase classname="Payment Service payment security should not expose full card number" name="Payment Service payment security should not expose full card number" time="0">
+    </testcase>
+    <testcase classname="Payment Service payment security should use secure payment intent" name="Payment Service payment security should use secure payment intent" time="0">
+    </testcase>
+    <testcase classname="Payment Service payment security should validate webhook signature" name="Payment Service payment security should validate webhook signature" time="0">
+    </testcase>
+    <testcase classname="Payment Service currency handling should convert to smallest currency unit" name="Payment Service currency handling should convert to smallest currency unit" time="0.001">
+    </testcase>
+    <testcase classname="Payment Service currency handling should handle decimal precision" name="Payment Service currency handling should handle decimal precision" time="0">
+    </testcase>
+    <testcase classname="Payment Service payment providers should support Stripe provider" name="Payment Service payment providers should support Stripe provider" time="0">
+    </testcase>
+    <testcase classname="Payment Service payment providers should store provider information" name="Payment Service payment providers should store provider information" time="0">
+    </testcase>
+  </testsuite>
+</testsuites>
