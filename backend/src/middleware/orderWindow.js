@@ -19,7 +19,7 @@ const checkOrderWindow = async (req, res, next) => {
         success: false,
         error: {
           code: 'MISSING_PROJECT_ID',
-          message: 'E91A 'DE41H9 E7DH('
+          message: 'Project ID is required'
         }
       });
     }
@@ -34,7 +34,7 @@ const checkOrderWindow = async (req, res, next) => {
         success: false,
         error: {
           code: 'PROJECT_NOT_FOUND',
-          message: ''DE41H9 :J1 EH,H/'
+          message: 'Project not found'
         }
       });
     }
@@ -44,7 +44,7 @@ const checkOrderWindow = async (req, res, next) => {
         success: false,
         error: {
           code: 'PROJECT_INACTIVE',
-          message: ''DE41H9 :J1 F47'
+          message: 'Project is inactive'
         }
       });
     }
@@ -60,19 +60,19 @@ const checkOrderWindow = async (req, res, next) => {
       const timeUntilStart = projectStart - now;
       const timeAfterEnd = now - orderWindowEnd;
 
-      let message = 'F'A0) 'D7D( E:DB)';
+      let message = 'Order window closed';
       let details = {};
 
       if (timeUntilStart > 0) {
-        // 'DE41H9 DE J(/# (9/
-        message = 'F'A0) 'D7D( DE *OA*- (9/';
+        // Project has not started yet
+        message = 'Order window has not started yet';
         details = {
           startsIn: Math.ceil(timeUntilStart / (60 * 1000)), // ('D/B'&B
           startsAt: projectStart
         };
       } else if (timeAfterEnd > 0) {
-        // 'DE41H9 'F*GI
-        message = ''F*G* F'A0) 'D7D(';
+        // Project ended
+        message = 'Order window has ended';
         details = {
           endedAt: orderWindowEnd,
           minutesAgo: Math.ceil(timeAfterEnd / (60 * 1000))
@@ -114,7 +114,7 @@ const checkOrderWindow = async (req, res, next) => {
       success: false,
       error: {
         code: 'ORDER_WINDOW_CHECK_FAILED',
-        message: '.7# AJ 'D*-BB EF F'A0) 'D7D('
+        message: 'Error checking order window'
       }
     });
   }
@@ -151,7 +151,7 @@ const checkDuplicateOrder = async (req, res, next) => {
         success: false,
         error: {
           code: 'DUPLICATE_ORDER',
-          message: 'DB/ B/E* 7D('K ('DA9D DG0' 'DE41H9 'DJHE',
+          message: 'Duplicate order for this project today',
           existingOrder: {
             id: existingOrder.id,
             status: existingOrder.status,
@@ -168,7 +168,7 @@ const checkDuplicateOrder = async (req, res, next) => {
       success: false,
       error: {
         code: 'DUPLICATE_CHECK_FAILED',
-        message: '.7# AJ 'D*-BB EF 'D7D('* 'DEC11)'
+        message: 'Error checking duplicate orders'
       }
     });
   }
@@ -185,7 +185,7 @@ const sendOrderReminders = async (projectId) => {
     });
 
     if (!project) {
-      throw new Error(''DE41H9 :J1 EH,H/');
+      throw new Error('Project not found');
     }
 
     // ,D( ,EJ9 'DE3*./EJF 'DF47JF

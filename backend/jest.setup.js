@@ -12,6 +12,14 @@ process.env.QR_SECRET_KEY = 'test-qr-secret-key';
 process.env.STRIPE_SECRET_KEY = 'sk_test_placeholder';
 process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test_db';
 
+// Mock Logger to prevent console noise during tests
+jest.mock('./src/utils/logger', () => ({
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  debug: jest.fn(),
+}));
+
 // Mock console methods to reduce noise in test output
 global.console = {
   ...console,
@@ -40,6 +48,7 @@ jest.mock('@prisma/client', () => {
       update: jest.fn(),
       delete: jest.fn(),
       count: jest.fn(),
+      groupBy: jest.fn(),
     },
     menuItem: {
       findUnique: jest.fn(),
@@ -96,15 +105,32 @@ jest.mock('@prisma/client', () => {
     $disconnect: jest.fn(),
     $transaction: jest.fn((callback) => callback(mockPrismaClient)),
   };
-  
+
   return {
     PrismaClient: jest.fn(() => mockPrismaClient),
   };
 });
 
+// Mock Payment Controller to avoid Stripe/PayPal init issues
+jest.mock('./src/controllers/paymentControllerNew', () => ({
+  createPaymentIntent: jest.fn((req, res) => res.status(200).send('mock')),
+  confirmPayment: jest.fn((req, res) => res.status(200).send('mock')),
+  getUserPayments: jest.fn((req, res) => res.status(200).send('mock')),
+  createInvoice: jest.fn((req, res) => res.status(200).send('mock')),
+  getUserInvoices: jest.fn((req, res) => res.status(200).send('mock')),
+  processRefund: jest.fn((req, res) => res.status(200).send('mock')),
+  handleStripeWebhook: jest.fn((req, res) => res.status(200).send('mock')),
+  getPaymentStatistics: jest.fn((req, res) => res.status(200).send('mock')),
+}));
+
 // Reset mocks before each test
 beforeEach(() => {
   jest.clearAllMocks();
+});
+
+// Global teardown
+afterAll(async () => {
+  // Add any global cleanup here
 });
 
 // Global test timeout
