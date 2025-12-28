@@ -525,15 +525,23 @@ enum AlertSeverity {
 
 // Project/QR Code Models
 model Project {
-  id          String   @id @default(uuid())
-  name        String
-  qrCode      String   @unique
-  location    String?
-  startDate   DateTime
-  endDate     DateTime?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(uuid())
+  name            String
+  qrCode          String   @unique
+  qrToken         String?  // JWT token for QR verification
+  location        String?
+  latitude        Float?
+  longitude       Float?
+  startDate       DateTime
+  endDate         DateTime?
+  isActive        Boolean  @default(true)
+  lastAccessedAt  DateTime? // آخر وقت وصول للمشروع
+  orderWindow     Int      @default(60) // نافذة الطلب بالدقائق (افتراضي: ساعة واحدة)
+  createdBy       String?  // معرف المنشئ
+  projectManager  String?  // معرف مدير المشروع
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@map("projects")
 }
