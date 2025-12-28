@@ -1,33 +1,28 @@
-const rateLimit = require('express-rate-limit');
-const helmet = require('helmet');
-const { body, validationResult } = require('express-validator');
-
 /**
- * Security Middleware
- * تأمين متقدم للتطبيق
+ * Security Middleware - حماية متقدمة
+ * HTTPS/SSL, DDoS Protection, Security Headers
  */
 
-// Rate Limiting متقدم
-const createRateLimiter = (windowMs = 15 * 60 * 1000, max = 100) => {
-  return rateLimit({
-    windowMs,
-    max,
-    message: { success: false, error: { message: 'Too many requests, please try again later' } },
-    standardHeaders: true,
-    legacyHeaders: false
-  });
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const logger = require('../utils/logger');
+
+/**
+ * HTTPS Redirect Middleware
+ * إعادة توجيه HTTP إلى HTTPS في الإنتاج
+ */
+const httpsRedirect = (req, res, next) => {
+  if (process.env.NODE_ENV === 'production' && !req.secure && req.get('x-forwarded-proto') !== 'https') {
+    return res.redirect(301, `https://${req.hostname}${req.url}`);
+  }
+  next();
 };
 
-// Rate limiters مختلفة
-const rateLimiters = {
-  general: createRateLimiter(15 * 60 * 1000, 100), // 100 requests per 15 minutes
-  auth: createRateLimiter(15 * 60 * 1000, 5), // 5 login attempts per 15 minutes
-  api: createRateLimiter(60 * 1000, 60), // 60 requests per minute
-  strict: createRateLimiter(60 * 1000, 10) // 10 requests per minute
-};
-
-// Helmet configuration
-const helmetConfig = helmet({
+/**
+ * Advanced Helmet Configuration
+ * إعدادات أمان متقدمة
+ */
+const advancedHelmet = helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
@@ -38,125 +33,133 @@ const helmetConfig = helmet({
       fontSrc: ["'self'"],
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
-      frameSrc: ["'none'"]
-    }
+      frameSrc: ["'none'"],
+    },
   },
   hsts: {
     maxAge: 31536000,
     includeSubDomains: true,
     preload: true
+  },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  noSniff: true,
+  xssFilter: true,
+  hidePoweredBy: true
+});
+
+/**
+ * DDoS Protection - حماية من هجمات DDoS
+ * Rate limiting عدواني للطلبات المشبوهة
+ */
+const ddosProtection = rateLimit({
+  windowMs: 1 * 60 * 1000, // دقيقة واحدة
+  max: 200, // 200 طلب كحد أقصى
+  message: {
+    success: false,
+    error: {
+      code: 'DDOS_PROTECTION',
+      message: 'تم اكتشاف نشاط مشبوه. تم حظر الوصول مؤقتاً.'
+    }
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    logger.error(`DDoS Protection triggered for IP: ${req.ip} on ${req.path}`);
+    res.status(429).json({
+      success: false,
+      error: {
+        code: 'DDOS_PROTECTION',
+        message: 'تم اكتشاف نشاط مشبوه. تم حظر الوصول مؤقتاً.'
+      }
+    });
+  },
+  skip: (req) => {
+    return req.path === '/health';
   }
 });
 
-// Input Sanitization
-const sanitizeInput = (req, res, next) => {
-  const sanitize = (obj) => {
-    if (typeof obj === 'string') {
-      return obj.replace(/[<>]/g, '');
-    }
-    if (typeof obj === 'object' && obj !== null) {
-      Object.keys(obj).forEach(key => {
-        obj[key] = sanitize(obj[key]);
-      });
-    }
-    return obj;
-  };
+/**
+ * IP Blacklist Middleware
+ * حظر عناوين IP المشبوهة
+ */
+const ipBlacklist = new Set();
 
-  req.body = sanitize(req.body);
-  req.query = sanitize(req.query);
-  req.params = sanitize(req.params);
-  next();
-};
-
-// CSRF Protection
-const csrfProtection = (req, res, next) => {
-  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
-    const token = req.headers['x-csrf-token'];
-    if (!token) {
-      return res.status(403).json({
-        success: false,
-        error: { message: 'CSRF token missing' }
-      });
-    }
-    // Verify token logic here
-  }
-  next();
-};
-
-// SQL Injection Prevention (Prisma handles this, but extra check)
-const preventSQLInjection = (req, res, next) => {
-  const sqlPattern = /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)\b)/gi;
+const ipBlacklistMiddleware = (req, res, next) => {
+  const clientIp = req.ip || req.connection.remoteAddress;
   
-  const checkValue = (value) => {
-    if (typeof value === 'string' && sqlPattern.test(value)) {
-      return true;
-    }
-    return false;
-  };
-
-  const checkObject = (obj) => {
-    for (const key in obj) {
-      if (checkValue(obj[key])) return true;
-      if (typeof obj[key] === 'object') {
-        if (checkObject(obj[key])) return true;
-      }
-    }
-    return false;
-  };
-
-  if (checkObject(req.body) || checkObject(req.query) || checkObject(req.params)) {
-    return res.status(400).json({
+  if (ipBlacklist.has(clientIp)) {
+    logger.warn(`Blocked request from blacklisted IP: ${clientIp}`);
+    return res.status(403).json({
       success: false,
-      error: { message: 'Invalid input detected' }
+      error: {
+        code: 'IP_BLOCKED',
+        message: 'تم حظر الوصول من هذا العنوان.'
+      }
     });
   }
-
+  
   next();
 };
 
-// XSS Protection
-const xssProtection = (req, res, next) => {
-  res.setHeader('X-XSS-Protection', '1; mode=block');
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  next();
+/**
+ * Add IP to blacklist
+ */
+const addToBlacklist = (ip) => {
+  ipBlacklist.add(ip);
+  logger.warn(`IP added to blacklist: ${ip}`);
 };
 
-// Secure Headers
-const secureHeaders = (req, res, next) => {
-  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-  res.setHeader('X-Permitted-Cross-Domain-Policies', 'none');
-  res.setHeader('Referrer-Policy', 'no-referrer');
-  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
-  next();
+/**
+ * Remove IP from blacklist
+ */
+const removeFromBlacklist = (ip) => {
+  ipBlacklist.delete(ip);
+  logger.info(`IP removed from blacklist: ${ip}`);
 };
 
-// Audit Log
-const auditLog = (req, res, next) => {
-  const log = {
-    timestamp: new Date().toISOString(),
-    method: req.method,
-    path: req.path,
-    ip: req.ip,
-    userId: req.user?.id,
-    userAgent: req.headers['user-agent']
-  };
-
-  // Log sensitive operations
-  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
-    console.log('[AUDIT]', JSON.stringify(log));
+/**
+ * Request Size Limiter
+ * تحديد حجم الطلبات لمنع هجمات Payload
+ */
+const requestSizeLimiter = (req, res, next) => {
+  const maxSize = process.env.MAX_REQUEST_SIZE || '10mb';
+  
+  if (req.headers['content-length'] && parseInt(req.headers['content-length']) > 10 * 1024 * 1024) {
+    logger.warn(`Request size exceeded for IP: ${req.ip}`);
+    return res.status(413).json({
+      success: false,
+      error: {
+        code: 'PAYLOAD_TOO_LARGE',
+        message: 'حجم الطلب كبير جداً.'
+      }
+    });
   }
+  
+  next();
+};
 
+/**
+ * Security Audit Logger
+ * تسجيل الأحداث الأمنية
+ */
+const securityAuditLogger = (req, res, next) => {
+  const securityEvents = ['login', 'logout', 'password-change', 'admin-action'];
+  const path = req.path.toLowerCase();
+  
+  if (securityEvents.some(event => path.includes(event))) {
+    logger.info(`Security Event: ${req.method} ${req.path} from IP: ${req.ip}`);
+  }
+  
   next();
 };
 
 module.exports = {
-  rateLimiters,
-  helmetConfig,
-  sanitizeInput,
-  csrfProtection,
-  preventSQLInjection,
-  xssProtection,
-  secureHeaders,
-  auditLog
+  httpsRedirect,
+  advancedHelmet,
+  ddosProtection,
+  ipBlacklistMiddleware,
+  addToBlacklist,
+  removeFromBlacklist,
+  requestSizeLimiter,
+  securityAuditLogger
 };

@@ -3,7 +3,12 @@
     "allow": [
       "Bash(dir:*)",
       "Bash(tree:*)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run test:coverage:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(node:*)"
     ]
   }
 }

@@ -18,8 +18,49 @@ const API_VERSION = process.env.API_VERSION || 'v1';
 // Monitoring (Sentry) - اختياري عبر env
 initMonitoring();
 
+// Security Middleware - الأمان المتقدم
+const { 
+  httpsRedirect, 
+  advancedHelmet, 
+  ddosProtection, 
+  ipBlacklistMiddleware,
+  requestSizeLimiter,
+  securityAuditLogger 
+} = require('./middleware/security');
+
+const { 
+  cdnMiddleware, 
+  loadBalancerHealthCheck,
+  stickySessionMiddleware,
+  requestDistributionLogger 
+} = require('./config/cdn');
+
+// HTTPS Redirect (Production only)
+app.use(httpsRedirect);
+
+// Advanced Security Headers
+app.use(advancedHelmet);
+
+// DDoS Protection
+app.use(ddosProtection);
+
+// IP Blacklist
+app.use(ipBlacklistMiddleware);
+
+// Request Size Limiter
+app.use(requestSizeLimiter);
+
+// Security Audit Logger
+app.use(securityAuditLogger);
+
+// CDN Middleware
+app.use(cdnMiddleware);
+
+// Load Balancer Support
+app.use(stickySessionMiddleware);
+app.use(requestDistributionLogger);
+
 // Middleware
-app.use(helmet());
 app.use(compression());
 app.use(cors({
   origin: [
@@ -48,6 +89,9 @@ app.get('/health', (req, res) => {
     uptime: process.uptime()
   });
 });
+
+// Load Balancer Health Check
+app.get('/lb-health', loadBalancerHealthCheck);
 
 // Swagger API Documentation
 // توثيق API باستخدام Swagger

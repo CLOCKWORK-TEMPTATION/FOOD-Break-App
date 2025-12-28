@@ -1,6 +1,6 @@
 /**
- * Admin Controller - لوحة التحكم الإدارية
- * يوفر endpoints للـ Dashboard الأمامي
+ * Admin Controller - لوحة التحكم الإدارية العربية
+ * يوفر endpoints للـ Dashboard الأمامي مع دعم التعريب الكامل
  */
 
 const { PrismaClient } = require('@prisma/client');
@@ -9,7 +9,7 @@ const logger = require('../utils/logger');
 const prisma = new PrismaClient();
 
 /**
- * جلب إحصائيات لوحة التحكم
+ * جلب إحصائيات لوحة التحكم العربية
  * GET /admin/stats
  */
 const getDashboardStats = async (req, res) => {
@@ -72,13 +72,17 @@ const getDashboardStats = async (req, res) => {
         avgDeliveryTime,
         todayOrders,
         todayRevenue
-      }
+      },
+      message: req.t('admin.statsFetchSuccess')
     });
   } catch (error) {
     logger.error('خطأ في جلب الإحصائيات:', error);
     res.status(500).json({
       success: false,
-      error: { code: 'STATS_FETCH_FAILED', message: req.__('admin.statsFetchFailed') }
+      error: { 
+        code: 'STATS_FETCH_FAILED', 
+        message: req.t('admin.statsFetchFailed') 
+      }
     });
   }
 };
@@ -161,7 +165,7 @@ const getAdminOrders = async (req, res) => {
     logger.error('خطأ في جلب الطلبات:', error);
     res.status(500).json({
       success: false,
-      error: { code: 'ORDERS_FETCH_FAILED', message: req.__('orders.ordersFetchFailed') }
+      error: { code: 'ORDERS_FETCH_FAILED', message: req.t('orders.ordersFetchFailed') }
     });
   }
 };
@@ -188,7 +192,7 @@ const getOrderById = async (req, res) => {
     if (!order) {
       return res.status(404).json({
         success: false,
-        error: { code: 'ORDER_NOT_FOUND', message: req.__('orders.orderNotFound') }
+        error: { code: 'ORDER_NOT_FOUND', message: req.t('orders.orderNotFound') }
       });
     }
 
@@ -197,7 +201,7 @@ const getOrderById = async (req, res) => {
     logger.error('خطأ في جلب الطلب:', error);
     res.status(500).json({
       success: false,
-      error: { code: 'ORDER_FETCH_FAILED', message: req.__('orders.ordersFetchFailed') }
+      error: { code: 'ORDER_FETCH_FAILED', message: req.t('orders.ordersFetchFailed') }
     });
   }
 };
@@ -222,12 +226,16 @@ const updateOrderStatus = async (req, res) => {
 
     logger.info(`تم تحديث حالة الطلب ${orderId} إلى ${status}`);
 
-    res.json({ success: true, data: order });
+    res.json({ 
+      success: true, 
+      data: order,
+      message: req.t('orders.orderStatusUpdated', { status })
+    });
   } catch (error) {
     logger.error('خطأ في تحديث حالة الطلب:', error);
     res.status(500).json({
       success: false,
-      error: { code: 'STATUS_UPDATE_FAILED', message: req.__('orders.orderStatusUpdateFailed') }
+      error: { code: 'STATUS_UPDATE_FAILED', message: req.t('orders.orderStatusUpdateFailed') }
     });
   }
 };
@@ -253,7 +261,7 @@ const getPendingOrders = async (req, res) => {
     logger.error('خطأ في جلب الطلبات المعلقة:', error);
     res.status(500).json({
       success: false,
-      error: { code: 'PENDING_ORDERS_FETCH_FAILED', message: req.__('admin.pendingOrdersFetchFailed') }
+      error: { code: 'PENDING_ORDERS_FETCH_FAILED', message: req.t('admin.pendingOrdersFetchFailed') }
     });
   }
 };
@@ -325,7 +333,7 @@ const getRestaurants = async (req, res) => {
     logger.error('خطأ في جلب المطاعم:', error);
     res.status(500).json({
       success: false,
-      error: { code: 'RESTAURANTS_FETCH_FAILED', message: req.__('admin.restaurantsFetchFailed') }
+      error: { code: 'RESTAURANTS_FETCH_FAILED', message: req.t('admin.restaurantsFetchFailed') }
     });
   }
 };
@@ -345,7 +353,7 @@ const toggleRestaurantStatus = async (req, res) => {
     if (!restaurant) {
       return res.status(404).json({
         success: false,
-        error: { code: 'RESTAURANT_NOT_FOUND', message: req.__('admin.restaurantNotFound') }
+        error: { code: 'RESTAURANT_NOT_FOUND', message: req.t('admin.restaurantNotFound') }
       });
     }
 
@@ -359,7 +367,7 @@ const toggleRestaurantStatus = async (req, res) => {
     logger.error('خطأ في تبديل حالة المطعم:', error);
     res.status(500).json({
       success: false,
-      error: { code: 'TOGGLE_FAILED', message: req.__('admin.toggleFailed') }
+      error: { code: 'TOGGLE_FAILED', message: req.t('admin.toggleFailed') }
     });
   }
 };
@@ -382,7 +390,7 @@ const getRestaurantMenu = async (req, res) => {
     logger.error('خطأ في جلب قائمة المطعم:', error);
     res.status(500).json({
       success: false,
-      error: { code: 'MENU_FETCH_FAILED', message: req.__('admin.menuFetchFailed') }
+      error: { code: 'MENU_FETCH_FAILED', message: req.t('admin.menuFetchFailed') }
     });
   }
 };
@@ -406,7 +414,7 @@ const updateMenuItem = async (req, res) => {
     logger.error('خطأ في تحديث عنصر القائمة:', error);
     res.status(500).json({
       success: false,
-      error: { code: 'MENU_UPDATE_FAILED', message: req.__('admin.menuUpdateFailed') }
+      error: { code: 'MENU_UPDATE_FAILED', message: req.t('admin.menuUpdateFailed') }
     });
   }
 };
@@ -426,7 +434,7 @@ const toggleMenuItemAvailability = async (req, res) => {
     if (!item) {
       return res.status(404).json({
         success: false,
-        error: { code: 'ITEM_NOT_FOUND', message: req.__('admin.itemNotFound') }
+        error: { code: 'ITEM_NOT_FOUND', message: req.t('admin.itemNotFound') }
       });
     }
 
@@ -440,7 +448,7 @@ const toggleMenuItemAvailability = async (req, res) => {
     logger.error('خطأ في تبديل توفر العنصر:', error);
     res.status(500).json({
       success: false,
-      error: { code: 'TOGGLE_FAILED', message: req.__('admin.toggleFailed') }
+      error: { code: 'TOGGLE_FAILED', message: req.t('admin.toggleFailed') }
     });
   }
 };
@@ -487,13 +495,13 @@ const sendNotification = async (req, res) => {
     res.json({
       success: true,
       data: { sent: targetUsers.length },
-      message: req.__('admin.notificationsSent', { count: targetUsers.length })
+      message: req.t('admin.notificationsSent', { count: targetUsers.length })
     });
   } catch (error) {
     logger.error('خطأ في إرسال الإشعارات:', error);
     res.status(500).json({
       success: false,
-      error: { code: 'NOTIFICATION_SEND_FAILED', message: req.__('admin.notificationSendFailed') }
+      error: { code: 'NOTIFICATION_SEND_FAILED', message: req.t('admin.notificationSendFailed') }
     });
   }
 };

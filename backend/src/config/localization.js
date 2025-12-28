@@ -295,20 +295,6 @@ const messages = {
     // رسائل المشاريع
     projects: {
       projectCreated: 'تم إنشاء المشروع بنجاح',
-      projectUpdated: 'تم تحديث المشروع',
-      projectDeleted: 'تم حذف المشروع',
-      projectNotFound: 'المشروع غير موجود',
-      qrCodeGenerated: 'تم إنشاء رمز QR',
-      qrCodeInvalid: 'رمز QR غير صحيح',
-      accessGranted: 'تم منح الوصول',
-      accessDenied: 'تم رفض الوصول',
-      orderWindowActive: 'نافذة الطلبات مفتوحة',
-      orderWindowClosed: 'نافذة الطلبات مغلقة'
-    },
-
-    // رسائل المشاريع
-    projects: {
-      projectCreated: 'تم إنشاء المشروع بنجاح',
       projectUpdated: 'تم تحديث المشروع بنجاح',
       projectDeleted: 'تم حذف المشروع',
       projectNotFound: 'المشروع غير موجود',
@@ -324,6 +310,63 @@ const messages = {
       projectAccessSuccess: 'تم الوصول للمشروع بنجاح',
       projectDeactivated: 'تم إلغاء تفعيل المشروع بنجاح',
       qrCodeRegenerated: 'تم توليد QR Code جديد بنجاح'
+    },
+
+    // رسائل الإشعارات
+    notifications: {
+      fetchSuccess: 'تم جلب الإشعارات بنجاح',
+      fetchFailed: 'فشل في جلب الإشعارات',
+      markedAsRead: 'تم تحديد الإشعار كمقروء',
+      markReadFailed: 'فشل في تحديد الإشعار كمقروء',
+      allMarkedAsRead: 'تم تحديد جميع الإشعارات كمقروءة',
+      markAllReadFailed: 'فشل في تحديد جميع الإشعارات كمقروءة',
+      deleted: 'تم حذف الإشعار بنجاح',
+      deleteFailed: 'فشل في حذف الإشعار',
+      reminderSent: 'تم إرسال التذكير بنجاح',
+      reminderSendFailed: 'فشل في إرسال التذكير',
+      broadcastSent: 'تم إرسال الإشعار العام بنجاح',
+      broadcastSendFailed: 'فشل في إرسال الإشعار العام'
+    },
+
+    // رسائل التنبؤ
+    predictive: {
+      noDataForAnalysis: 'لا توجد بيانات كافية للتحليل',
+      analysisSuccess: 'تم تحليل السلوك بنجاح',
+      analysisFailed: 'فشل في تحليل السلوك',
+      patternDiscovered: 'تم اكتشاف الأنماط بنجاح',
+      patternDiscoveryFailed: 'فشل في اكتشاف الأنماط',
+      suggestionGenerated: 'تم إنشاء الاقتراح بنجاح',
+      suggestionGenerationFailed: 'فشل في إنشاء الاقتراح',
+      suggestionAccepted: 'تم قبول الاقتراح وإنشاء الطلب',
+      suggestionRejected: 'تم رفض الاقتراح',
+      suggestionModified: 'تم تعديل الاقتراح بنجاح'
+    },
+
+    // رسائل التذكيرات
+    reminders: {
+      settingsRetrieved: 'تم جلب إعدادات التذكير بنجاح',
+      settingsFetchFailed: 'فشل في جلب إعدادات التذكير',
+      settingsUpdated: 'تم تحديث إعدادات التذكير بنجاح',
+      settingsUpdateFailed: 'فشل في تحديث إعدادات التذكير',
+      preferencesRetrieved: 'تم جلب تفضيلات التذكير بنجاح',
+      preferencesUpdated: 'تم تحديث تفضيلات التذكير بنجاح',
+      reminderMarkedAsRead: 'تم تحديد التذكير كمقروء',
+      actionRecorded: 'تم تسجيل الإجراء بنجاح',
+      immediateSent: 'تم إرسال التذكيرات الفورية بنجاح',
+      systemStatusRetrieved: 'تم جلب حالة النظام بنجاح',
+      statsRetrieved: 'تم جلب إحصائيات التذكيرات بنجاح'
+    },
+
+    // رسائل سير العمل
+    workflow: {
+      qrValidated: 'تم التحقق من رمز QR بنجاح',
+      orderSubmitted: 'تم تقديم الطلب بنجاح',
+      orderConfirmed: 'تم تأكيد الطلب',
+      orderCancelled: 'تم إلغاء الطلب',
+      statusUpdated: 'تم تحديث حالة الطلب',
+      remindersSent: 'تم إرسال التذكيرات',
+      locationUpdated: 'تم تحديث الموقع',
+      orderDelivered: 'تم تسليم الطلب بنجاح'
     },
 
     // رسائل الميزانية

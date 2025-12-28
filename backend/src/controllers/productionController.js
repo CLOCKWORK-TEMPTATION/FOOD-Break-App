@@ -1,8 +1,8 @@
 const productionService = require('../services/productionService');
 
 /**
- * Production Controller
- * Handles routes for Producer Dashboard
+ * Production Controller - متحكم الإنتاج العربي
+ * Handles routes for Producer Dashboard with Arabic localization
  */
 class ProductionController {
 
@@ -11,10 +11,20 @@ class ProductionController {
         try {
             const { projectId } = req.params;
             const schedule = await productionService.getSchedule(projectId);
-            res.json({ success: true, data: schedule });
+            res.json({ 
+                success: true, 
+                data: schedule,
+                message: req.t('production.scheduleRetrieved')
+            });
         } catch (error) {
             console.error(error);
-            res.status(500).json({ success: false, message: 'Failed to fetch schedule' });
+            res.status(500).json({ 
+                success: false, 
+                error: {
+                    code: 'SCHEDULE_FETCH_FAILED',
+                    message: req.t('production.scheduleFetchFailed')
+                }
+            });
         }
     }
 
@@ -24,10 +34,20 @@ class ProductionController {
             const { projectId } = req.params;
             const scheduleData = req.body;
             const schedule = await productionService.syncSchedule(projectId, scheduleData);
-            res.json({ success: true, data: schedule });
+            res.json({ 
+                success: true, 
+                data: schedule,
+                message: req.t('production.scheduleSynced')
+            });
         } catch (error) {
             console.error(error);
-            res.status(500).json({ success: false, message: 'Failed to sync schedule' });
+            res.status(500).json({ 
+                success: false, 
+                error: {
+                    code: 'SCHEDULE_SYNC_FAILED',
+                    message: req.t('production.scheduleSyncFailed')
+                }
+            });
         }
     }
 
@@ -36,10 +56,20 @@ class ProductionController {
         try {
             const { dayId } = req.params;
             const attendance = await productionService.getDayAttendance(dayId);
-            res.json({ success: true, data: attendance });
+            res.json({ 
+                success: true, 
+                data: attendance,
+                message: req.t('production.attendanceRetrieved')
+            });
         } catch (error) {
             console.error(error);
-            res.status(500).json({ success: false, message: 'Failed to fetch attendance' });
+            res.status(500).json({ 
+                success: false, 
+                error: {
+                    code: 'ATTENDANCE_FETCH_FAILED',
+                    message: req.t('production.attendanceFetchFailed')
+                }
+            });
         }
     }
 
@@ -48,10 +78,20 @@ class ProductionController {
         try {
             const { shootingDayId, userId, status, location } = req.body;
             const record = await productionService.updateAttendance(shootingDayId, userId, status, location);
-            res.json({ success: true, data: record, message: 'Attendance updated' });
+            res.json({ 
+                success: true, 
+                data: record, 
+                message: req.t('production.attendanceUpdated')
+            });
         } catch (error) {
             console.error(error);
-            res.status(500).json({ success: false, message: 'Failed to update attendance' });
+            res.status(500).json({ 
+                success: false, 
+                error: {
+                    code: 'ATTENDANCE_UPDATE_FAILED',
+                    message: req.t('production.attendanceUpdateFailed')
+                }
+            });
         }
     }
 
@@ -60,10 +100,20 @@ class ProductionController {
         try {
             const { projectId } = req.params;
             const stats = await productionService.getBudgetStats(projectId);
-            res.json({ success: true, data: stats });
+            res.json({ 
+                success: true, 
+                data: stats,
+                message: req.t('production.budgetStatsRetrieved')
+            });
         } catch (error) {
             console.error(error);
-            res.status(500).json({ success: false, message: 'Failed to fetch budget stats' });
+            res.status(500).json({ 
+                success: false, 
+                error: {
+                    code: 'BUDGET_STATS_FAILED',
+                    message: req.t('production.budgetStatsFailed')
+                }
+            });
         }
     }
 }

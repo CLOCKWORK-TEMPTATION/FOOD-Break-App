@@ -15,7 +15,7 @@ class EmotionController {
       res.json({ 
         success: true, 
         data: log,
-        message: req.__('emotion.moodLogSuccess')
+        message: req.t('emotion.moodLogSuccess')
       });
     } catch (error) {
       logger.error('خطأ في تسجيل الحالة المزاجية:', error.message);
@@ -23,7 +23,7 @@ class EmotionController {
         success: false, 
         error: {
           code: 'MOOD_LOG_FAILED',
-          message: req.__('emotion.moodLogFailed')
+          message: req.t('emotion.moodLogFailed')
         }
       });
     }
@@ -41,7 +41,7 @@ class EmotionController {
           success: false,
           error: {
             code: 'MOOD_REQUIRED',
-            message: req.__('emotion.moodRequired')
+            message: req.t('emotion.moodRequired')
           }
         });
       }
@@ -54,7 +54,7 @@ class EmotionController {
         success: false, 
         error: {
           code: 'RECOMMENDATIONS_FAILED',
-          message: req.__('emotion.recommendationsFailed')
+          message: req.t('emotion.recommendationsFailed')
         }
       });
     }
@@ -77,7 +77,7 @@ class EmotionController {
       res.json({ 
         success: true, 
         data: record,
-        message: req.__('emotion.consentUpdated')
+        message: req.t('emotion.consentUpdated')
       });
     } catch (error) {
       logger.error('خطأ في تحديث الموافقة:', error.message);
@@ -85,7 +85,7 @@ class EmotionController {
         success: false, 
         error: {
           code: 'CONSENT_UPDATE_FAILED',
-          message: req.__('emotion.consentUpdateFailed')
+          message: req.t('emotion.consentUpdateFailed')
         }
       });
     }

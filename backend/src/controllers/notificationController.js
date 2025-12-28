@@ -2,8 +2,8 @@ const notificationService = require('../services/notificationService');
 const logger = require('../utils/logger');
 
 /**
- * Notification Controller
- * معالجات الإشعارات
+ * Notification Controller - متحكم الإشعارات العربي
+ * معالجات الإشعارات مع دعم التعريب الكامل
  */
 
 // الحصول على إشعارات المستخدم
@@ -26,7 +26,10 @@ exports.getUserNotifications = async (req, res) => {
     logger.error('Error getting notifications:', error);
     res.status(500).json({
       success: false,
-      error: { message: error.message }
+      error: { 
+        code: 'NOTIFICATIONS_FETCH_FAILED',
+        message: req.t('notifications.fetchFailed') 
+      }
     });
   }
 };
@@ -41,13 +44,17 @@ exports.markAsRead = async (req, res) => {
 
     res.json({
       success: true,
-      data: notification
+      data: notification,
+      message: req.t('notifications.markedAsRead')
     });
   } catch (error) {
     logger.error('Error marking notification as read:', error);
     res.status(500).json({
       success: false,
-      error: { message: error.message }
+      error: { 
+        code: 'MARK_READ_FAILED',
+        message: req.t('notifications.markReadFailed') 
+      }
     });
   }
 };
@@ -61,13 +68,17 @@ exports.markAllAsRead = async (req, res) => {
 
     res.json({
       success: true,
-      data: { count: result.count }
+      data: { count: result.count },
+      message: req.t('notifications.allMarkedAsRead')
     });
   } catch (error) {
     logger.error('Error marking all notifications as read:', error);
     res.status(500).json({
       success: false,
-      error: { message: error.message }
+      error: { 
+        code: 'MARK_ALL_READ_FAILED',
+        message: req.t('notifications.markAllReadFailed') 
+      }
     });
   }
 };
@@ -82,13 +93,16 @@ exports.deleteNotification = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'تم حذف الإشعار بنجاح'
+      message: req.t('notifications.deleted')
     });
   } catch (error) {
     logger.error('Error deleting notification:', error);
     res.status(500).json({
       success: false,
-      error: { message: error.message }
+      error: { 
+        code: 'DELETE_FAILED',
+        message: req.t('notifications.deleteFailed') 
+      }
     });
   }
 };
@@ -108,7 +122,10 @@ exports.sendManualReminder = async (req, res) => {
     logger.error('Error sending manual reminder:', error);
     res.status(500).json({
       success: false,
-      error: { message: error.message }
+      error: { 
+        code: 'REMINDER_SEND_FAILED',
+        message: req.t('notifications.reminderSendFailed') 
+      }
     });
   }
 };
@@ -130,13 +147,16 @@ exports.sendBroadcast = async (req, res) => {
     res.json({
       success: true,
       data: result,
-      message: 'تم إرسال الإشعار بنجاح'
+      message: req.t('notifications.broadcastSent')
     });
   } catch (error) {
     logger.error('Error sending broadcast notification:', error);
     res.status(500).json({
       success: false,
-      error: { message: error.message }
+      error: { 
+        code: 'BROADCAST_SEND_FAILED',
+        message: req.t('notifications.broadcastSendFailed') 
+      }
     });
   }
 };

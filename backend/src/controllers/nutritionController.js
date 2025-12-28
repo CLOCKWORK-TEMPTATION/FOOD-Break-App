@@ -1,6 +1,6 @@
 /**
- * Nutrition Controller
- * معالج طلبات API الخاصة بالتغذية
+ * Nutrition Controller - متحكم التغذية العربي
+ * معالج طلبات API الخاصة بالتغذية مع دعم التعريب الكامل
  */
 
 const nutritionService = require('../services/nutritionService');
@@ -32,7 +32,7 @@ async function logNutrition(req, res) {
     res.status(200).json({
       success: true,
       data: log,
-      message: req.__('nutrition.nutritionLogAdded'),
+      message: req.t('nutrition.nutritionLogAdded'),
     });
   } catch (error) {
     logger.error('Error logging nutrition:', error);
@@ -40,7 +40,7 @@ async function logNutrition(req, res) {
       success: false,
       error: {
         code: 'NUTRITION_LOG_ERROR',
-        message: error.message || req.__('nutrition.nutritionLogFailed'),
+        message: error.message || req.t('nutrition.nutritionLogFailed'),
       },
     });
   }
@@ -69,7 +69,7 @@ async function getTodayNutrition(req, res) {
       success: false,
       error: {
         code: 'GET_NUTRITION_ERROR',
-        message: error.message || req.__('nutrition.nutritionFetchFailed'),
+        message: error.message || req.t('nutrition.nutritionFetchFailed'),
       },
     });
   }
@@ -89,7 +89,7 @@ async function getNutritionLogs(req, res) {
         success: false,
         error: {
           code: 'INVALID_PARAMS',
-          message: req.__('validation.dateRangeRequired'),
+          message: req.t('validation.dateRangeRequired'),
         },
       });
     }
@@ -110,7 +110,7 @@ async function getNutritionLogs(req, res) {
       success: false,
       error: {
         code: 'GET_LOGS_ERROR',
-        message: error.message || req.__('nutrition.nutritionLogsFetchFailed'),
+        message: error.message || req.t('nutrition.nutritionLogsFetchFailed'),
       },
     });
   }

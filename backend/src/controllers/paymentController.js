@@ -1,275 +1,420 @@
-/**
- * Payment Controller
- * معالجة المدفوعات والفواتير
- */
-
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const { PrismaClient } = require('@prisma/client');
+const paymentService = require('../services/paymentService');
+const invoiceService = require('../services/invoiceService');
+const { validatePaymentData, validateInvoiceData } = require('../utils/validation');
+const { formatArabicResponse } = require('../utils/arabicFormatters');
 const logger = require('../utils/logger');
 
-const prisma = new PrismaClient();
-
 /**
- * إنشاء نية دفع Stripe
+ * معالج طرق الدفع
  */
-const createPaymentIntent = async (req, res, next) => {
-  try {
-    const { amount, currency = 'egp' } = req.body;
-    const userId = req.user.id;
+class PaymentController {
+  /**
+   * الحصول على طرق الدفع المحفوظة للمستخدم
+   */
+  async getPaymentMethods(req, res) {
+    try {
+      const userId = req.user.id;
+      const methods = await paymentService.getUserPaymentMethods(userId);
+      
+      const arabicMethods = methods.map(method => ({
+        ...method,
+        name: this.translatePaymentMethodName(method.type, req.language),
+        details: this.formatPaymentMethodDetails(method, req.language)
+      }));
 
-    if (!amount || amount <= 0) {
-      return res.status(400).json({
-        success: false,
-        error: req.__('payments.invalidAmount')
-      });
+      res.json(formatArabicResponse(true, arabicMethods, {
+        message: 'تم جلب طرق الدفع بنجاح'
+      }));
+    } catch (error) {
+      logger.error('خطأ في جلب طرق الدفع:', error);
+      res.status(500).json(formatArabicResponse(false, null, {
+        code: 'PAYMENT_METHODS_ERROR',
+        message: 'حدث خطأ في جلب طرق الدفع'
+      }));
     }
+  }
 
-    // إنشاء نية الدفع
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount,
-      currency: currency.toLowerCase(),
-      metadata: {
-        userId: userId.toString(),
-      },
-    });
+  /**
+   * إضافة طريقة دفع جديدة
+   */
+  async addPaymentMethod(req, res) {
+    try {
+      const userId = req.user.id;
+      const { type, cardNumber, expiryDate, holderName, isDefault } = req.body;
 
-    // حفظ معلومات الدفع في قاعدة البيانات
-    const payment = await prisma.payment.create({
-      data: {
+      // التحقق من صحة البيانات
+      const validation = validatePaymentData({
+        type,
+        cardNumber,
+        expiryDate,
+        holderName
+      });
+
+      if (!validation.isValid) {
+        return res.status(400).json(formatArabicResponse(false, null, {
+          code: 'VALIDATION_ERROR',
+          message: 'بيانات طريقة الدفع غير صحيحة',
+          details: validation.errors
+        }));
+      }
+
+      const method = await paymentService.addPaymentMethod(userId, {
+        type,
+        cardNumber: this.maskCardNumber(cardNumber),
+        expiryDate,
+        holderName,
+        isDefault: isDefault || false
+      });
+
+      res.status(201).json(formatArabicResponse(true, method, {
+        message: 'تم إضافة طريقة الدفع بنجاح'
+      }));
+    } catch (error) {
+      logger.error('خطأ في إضافة طريقة الدفع:', error);
+      res.status(500).json(formatArabicResponse(false, null, {
+        code: 'ADD_PAYMENT_METHOD_ERROR',
+        message: 'حدث خطأ في إضافة طريقة الدفع'
+      }));
+    }
+  }
+
+  /**
+   * معالجة دفعة جديدة
+   */
+  async processPayment(req, res) {
+    try {
+      const userId = req.user.id;
+      const { amount, paymentMethodId, description, orderId } = req.body;
+
+      // التحقق من صحة البيانات
+      if (!amount || amount <= 0) {
+        return res.status(400).json(formatArabicResponse(false, null, {
+          code: 'INVALID_AMOUNT',
+          message: 'مبلغ الدفع غير صحيح'
+        }));
+      }
+
+      if (!paymentMethodId) {
+        return res.status(400).json(formatArabicResponse(false, null, {
+          code: 'PAYMENT_METHOD_REQUIRED',
+          message: 'يجب اختيار طريقة الدفع'
+        }));
+      }
+
+      // التحقق من وجود طريقة الدفع
+      const paymentMethod = await paymentService.getPaymentMethod(paymentMethodId, userId);
+      if (!paymentMethod) {
+        return res.status(404).json(formatArabicResponse(false, null, {
+          code: 'PAYMENT_METHOD_NOT_FOUND',
+          message: 'طريقة الدفع غير موجودة'
+        }));
+      }
+
+      // معالجة الدفع
+      const paymentResult = await paymentService.processPayment({
         userId,
-        paymentIntentId: paymentIntent.id,
-        amount: amount / 100, // Convert back from cents
-        currency: currency.toUpperCase(),
-        status: 'PENDING',
-        provider: 'STRIPE',
-      }
-    });
-
-    logger.info(`Payment intent created: ${paymentIntent.id} for user: ${userId}`);
-
-    res.status(201).json({
-      success: true,
-      data: {
-        id: paymentIntent.id,
-        clientSecret: paymentIntent.client_secret,
-        amount: paymentIntent.amount,
-        currency: paymentIntent.currency,
-        status: paymentIntent.status,
-      },
-    });
-  } catch (error) {
-    logger.error('Error creating payment intent:', error);
-    res.status(500).json({
-      success: false,
-      error: req.__('payments.paymentIntentCreateFailed')
-    });
-  }
-};
-
-/**
- * تأكيد الدفع
- */
-const confirmPayment = async (req, res, next) => {
-  try {
-    const { paymentMethodId, paymentIntentId } = req.body;
-    const userId = req.user.id;
-
-    if (!paymentMethodId || !paymentIntentId) {
-      return res.status(400).json({
-        success: false,
-        error: req.__('payments.paymentInfoIncomplete')
-      });
-    }
-
-    // تأكيد نية الدفع
-    const paymentIntent = await stripe.paymentIntents.confirm(paymentIntentId, {
-      payment_method: paymentMethodId,
-    });
-
-    // تحديث حالة الدفع في قاعدة البيانات
-    const payment = await prisma.payment.updateMany({
-      where: { paymentIntentId },
-      data: {
-        status: paymentIntent.status === 'succeeded' ? 'COMPLETED' : 'FAILED',
+        amount,
         paymentMethodId,
+        description,
+        orderId
+      });
+
+      if (paymentResult.success) {
+        // إنشاء فاتورة
+        const invoice = await invoiceService.createInvoice({
+          userId,
+          orderId: orderId || paymentResult.transactionId,
+          amount: amount,
+          tax: amount * 0.15, // ضريبة القيمة المضافة 15%
+          total: amount * 1.15,
+          paymentId: paymentResult.transactionId,
+          status: 'paid'
+        });
+
+        res.json(formatArabicResponse(true, {
+          payment: paymentResult,
+          invoice: invoice
+        }, {
+          message: 'تم الدفع بنجاح'
+        }));
+      } else {
+        res.status(400).json(formatArabicResponse(false, null, {
+          code: 'PAYMENT_FAILED',
+          message: paymentResult.error || 'فشل في معالجة الدفع'
+        }));
       }
-    });
-
-    if (payment.count === 0) {
-      return res.status(404).json({
-        success: false,
-        error: req.__('payments.paymentInfoNotFound')
-      });
+    } catch (error) {
+      logger.error('خطأ في معالجة الدفع:', error);
+      res.status(500).json(formatArabicResponse(false, null, {
+        code: 'PAYMENT_PROCESSING_ERROR',
+        message: 'حدث خطأ في معالجة الدفع'
+      }));
     }
-
-    logger.info(`Payment confirmed: ${paymentIntentId} for user: ${userId}`);
-
-    res.json({
-      success: true,
-      data: {
-        paymentIntentId: paymentIntent.id,
-        status: paymentIntent.status,
-        requiresAction: paymentIntent.status === 'requires_action',
-        clientSecret: paymentIntent.client_secret,
-      },
-    });
-  } catch (error) {
-    logger.error('Error confirming payment:', error);
-    
-    // تحديث حالة الدفع إلى فشل
-    if (req.body.paymentIntentId) {
-      await prisma.payment.updateMany({
-        where: { paymentIntentId: req.body.paymentIntentId },
-        data: { 
-          status: 'FAILED', 
-          errorMessage: error.message 
-        }
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      error: req.__('payments.paymentConfirmFailed')
-    });
   }
-};
 
-/**
- * الحصول على فواتير المستخدم
- */
-const getUserInvoices = async (req, res, next) => {
-  try {
-    const userId = req.user.id;
-    const { page = 1, limit = 10, status } = req.query;
+  /**
+   * الحصول على سجل الفواتير
+   */
+  async getInvoices(req, res) {
+    try {
+      const userId = req.user.id;
+      const { page = 1, limit = 10, status } = req.query;
 
-    const where = { userId };
-    if (status) {
-      where.status = status;
-    }
-
-    const invoices = await prisma.invoice.findMany({
-      where,
-      include: {
-        order: {
-          select: { id: true, status: true }
-        }
-      },
-      orderBy: { createdAt: 'desc' },
-      skip: (page - 1) * limit,
-      take: parseInt(limit)
-    });
-
-    const total = await prisma.invoice.count({ where });
-
-    res.json({
-      success: true,
-      data: {
-        invoices: invoices.map(invoice => ({
-          id: invoice.id,
-          orderId: invoice.orderId,
-          amount: invoice.amount,
-          currency: invoice.currency,
-          status: invoice.status,
-          createdAt: invoice.createdAt,
-          pdfUrl: invoice.pdfUrl,
-        })),
-        pagination: {
-          total,
-          page: parseInt(page),
-          pages: Math.ceil(total / limit),
-        },
-      },
-    });
-  } catch (error) {
-    logger.error('Error getting user invoices:', error);
-    res.status(500).json({
-      success: false,
-      error: req.__('payments.invoicesFetchFailed')
-    });
-  }
-};
-
-/**
- * معالجة استرداد الأموال
- */
-const processRefund = async (req, res, next) => {
-  try {
-    const { paymentIntentId, amount } = req.body;
-    const userId = req.user.id;
-
-    if (!paymentIntentId) {
-      return res.status(400).json({
-        success: false,
-        error: req.__('payments.paymentIntentIdRequired')
+      const invoices = await invoiceService.getUserInvoices(userId, {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        status
       });
-    }
 
-    // التحقق من وجود عملية الدفع
-    const payment = await prisma.payment.findFirst({
-      where: { 
-        paymentIntentId, 
-        userId 
+      // تنسيق الفواتير للعرض العربي
+      const arabicInvoices = invoices.data.map(invoice => ({
+        ...invoice,
+        statusText: this.translateInvoiceStatus(invoice.status, req.language),
+        formattedAmount: this.formatCurrency(invoice.amount),
+        formattedTax: this.formatCurrency(invoice.tax),
+        formattedTotal: this.formatCurrency(invoice.total),
+        arabicDate: this.formatArabicDate(invoice.createdAt),
+        arabicPaidDate: invoice.paidAt ? this.formatArabicDate(invoice.paidAt) : null
+      }));
+
+      res.json(formatArabicResponse(true, arabicInvoices, {
+        message: 'تم جلب الفواتير بنجاح',
+        pagination: invoices.pagination
+      }));
+    } catch (error) {
+      logger.error('خطأ في جلب الفواتير:', error);
+      res.status(500).json(formatArabicResponse(false, null, {
+        code: 'INVOICES_ERROR',
+        message: 'حدث خطأ في جلب الفواتير'
+      }));
+    }
+  }
+
+  /**
+   * الحصول على تفاصيل فاتورة محددة
+   */
+  async getInvoiceDetails(req, res) {
+    try {
+      const userId = req.user.id;
+      const { invoiceId } = req.params;
+
+      const invoice = await invoiceService.getInvoiceDetails(invoiceId, userId);
+      if (!invoice) {
+        return res.status(404).json(formatArabicResponse(false, null, {
+          code: 'INVOICE_NOT_FOUND',
+          message: 'الفاتورة غير موجودة'
+        }));
       }
-    });
 
-    if (!payment) {
-      return res.status(404).json({
-        success: false,
-        error: req.__('payments.paymentNotFound')
-      });
+      // تنسيق الفاتورة للعرض العربي
+      const arabicInvoice = {
+        ...invoice,
+        statusText: this.translateInvoiceStatus(invoice.status, req.language),
+        formattedAmount: this.formatCurrency(invoice.amount),
+        formattedTax: this.formatCurrency(invoice.tax),
+        formattedTotal: this.formatCurrency(invoice.total),
+        arabicDate: this.formatArabicDate(invoice.createdAt),
+        arabicPaidDate: invoice.paidAt ? this.formatArabicDate(invoice.paidAt) : null,
+        items: invoice.items.map(item => ({
+          ...item,
+          formattedPrice: this.formatCurrency(item.price),
+          formattedTotal: this.formatCurrency(item.total)
+        }))
+      };
+
+      res.json(formatArabicResponse(true, arabicInvoice, {
+        message: 'تم جلب تفاصيل الفاتورة بنجاح'
+      }));
+    } catch (error) {
+      logger.error('خطأ في جلب تفاصيل الفاتورة:', error);
+      res.status(500).json(formatArabicResponse(false, null, {
+        code: 'INVOICE_DETAILS_ERROR',
+        message: 'حدث خطأ في جلب تفاصيل الفاتورة'
+      }));
     }
-
-    if (payment.status !== 'COMPLETED') {
-      return res.status(400).json({
-        success: false,
-        error: req.__('payments.cannotRefundIncompletePayment')
-      });
-    }
-
-    // حساب مبلغ الاسترداد
-    const refundAmount = amount || payment.amount * 100; // Convert to cents
-
-    // إنشاء استرداد في Stripe
-    const refund = await stripe.refunds.create({
-      payment_intent: paymentIntentId,
-      amount: refundAmount,
-      reason: 'requested_by_customer',
-    });
-
-    // تحديث حالة الدفع
-    await prisma.payment.update({
-      where: { id: payment.id },
-      data: {
-        status: 'REFUNDED',
-        refundId: refund.id,
-        refundAmount: refundAmount / 100,
-        refundedAt: new Date()
-      }
-    });
-
-    logger.info(`Refund processed: ${refund.id} for payment: ${paymentIntentId}`);
-
-    res.json({
-      success: true,
-      data: {
-        refundId: refund.id,
-        amount: refund.amount / 100,
-        currency: refund.currency,
-        status: refund.status,
-      },
-    });
-  } catch (error) {
-    logger.error('Error processing refund:', error);
-    res.status(500).json({
-      success: false,
-      error: req.__('payments.refundProcessFailed')
-    });
   }
-};
 
-module.exports = {
-  createPaymentIntent,
-  confirmPayment,
-  getUserInvoices,
-  processRefund,
-};
+  /**
+   * تحميل فاتورة بصيغة PDF
+   */
+  async downloadInvoice(req, res) {
+    try {
+      const userId = req.user.id;
+      const { invoiceId } = req.params;
+
+      const invoice = await invoiceService.getInvoiceDetails(invoiceId, userId);
+      if (!invoice) {
+        return res.status(404).json(formatArabicResponse(false, null, {
+          code: 'INVOICE_NOT_FOUND',
+          message: 'الفاتورة غير موجودة'
+        }));
+      }
+
+      // إنشاء PDF للفاتورة
+      const pdfBuffer = await invoiceService.generateInvoicePDF(invoice, req.language);
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="فاتورة-${invoice.orderNumber}.pdf"`);
+      res.send(pdfBuffer);
+    } catch (error) {
+      logger.error('خطأ في تحميل الفاتورة:', error);
+      res.status(500).json(formatArabicResponse(false, null, {
+        code: 'INVOICE_DOWNLOAD_ERROR',
+        message: 'حدث خطأ في تحميل الفاتورة'
+      }));
+    }
+  }
+
+  /**
+   * استرداد دفعة
+   */
+  async refundPayment(req, res) {
+    try {
+      const userId = req.user.id;
+      const { paymentId } = req.params;
+      const { reason, amount } = req.body;
+
+      const refundResult = await paymentService.refundPayment({
+        paymentId,
+        userId,
+        reason,
+        amount
+      });
+
+      if (refundResult.success) {
+        // تحديث حالة الفاتورة
+        await invoiceService.updateInvoiceStatus(refundResult.invoiceId, 'refunded');
+
+        res.json(formatArabicResponse(true, refundResult, {
+          message: 'تم استرداد المبلغ بنجاح'
+        }));
+      } else {
+        res.status(400).json(formatArabicResponse(false, null, {
+          code: 'REFUND_FAILED',
+          message: refundResult.error || 'فشل في استرداد المبلغ'
+        }));
+      }
+    } catch (error) {
+      logger.error('خطأ في استرداد المبلغ:', error);
+      res.status(500).json(formatArabicResponse(false, null, {
+        code: 'REFUND_ERROR',
+        message: 'حدث خطأ في استرداد المبلغ'
+      }));
+    }
+  }
+
+  /**
+   * الحصول على إحصائيات الدفع
+   */
+  async getPaymentStats(req, res) {
+    try {
+      const userId = req.user.id;
+      const { period = 'month' } = req.query;
+
+      const stats = await paymentService.getPaymentStats(userId, period);
+
+      const arabicStats = {
+        ...stats,
+        formattedTotalAmount: this.formatCurrency(stats.totalAmount),
+        formattedAverageAmount: this.formatCurrency(stats.averageAmount),
+        periodText: this.translatePeriod(period, req.language)
+      };
+
+      res.json(formatArabicResponse(true, arabicStats, {
+        message: 'تم جلب إحصائيات الدفع بنجاح'
+      }));
+    } catch (error) {
+      logger.error('خطأ في جلب إحصائيات الدفع:', error);
+      res.status(500).json(formatArabicResponse(false, null, {
+        code: 'PAYMENT_STATS_ERROR',
+        message: 'حدث خطأ في جلب إحصائيات الدفع'
+      }));
+    }
+  }
+
+  // دوال مساعدة
+
+  /**
+   * ترجمة اسم طريقة الدفع
+   */
+  translatePaymentMethodName(type, language = 'ar') {
+    const translations = {
+      credit_card: 'بطاقة ائتمان',
+      debit_card: 'بطاقة خصم',
+      wallet: 'محفظة إلكترونية',
+      bank_transfer: 'تحويل بنكي'
+    };
+    return translations[type] || type;
+  }
+
+  /**
+   * تنسيق تفاصيل طريقة الدفع
+   */
+  formatPaymentMethodDetails(method, language = 'ar') {
+    if (method.type === 'credit_card' || method.type === 'debit_card') {
+      return `**** **** **** ${method.lastFourDigits}`;
+    }
+    return method.details || '';
+  }
+
+  /**
+   * إخفاء رقم البطاقة
+   */
+  maskCardNumber(cardNumber) {
+    if (!cardNumber) return '';
+    const cleaned = cardNumber.replace(/\s/g, '');
+    return cleaned.slice(-4);
+  }
+
+  /**
+   * ترجمة حالة الفاتورة
+   */
+  translateInvoiceStatus(status, language = 'ar') {
+    const translations = {
+      pending: 'في الانتظار',
+      paid: 'مدفوعة',
+      failed: 'فشلت',
+      refunded: 'مستردة',
+      cancelled: 'ملغية'
+    };
+    return translations[status] || status;
+  }
+
+  /**
+   * تنسيق العملة
+   */
+  formatCurrency(amount) {
+    return new Intl.NumberFormat('ar-SA', {
+      style: 'currency',
+      currency: 'SAR'
+    }).format(amount);
+  }
+
+  /**
+   * تنسيق التاريخ العربي
+   */
+  formatArabicDate(date) {
+    return new Intl.DateTimeFormat('ar-SA', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(new Date(date));
+  }
+
+  /**
+   * ترجمة فترة الإحصائيات
+   */
+  translatePeriod(period, language = 'ar') {
+    const translations = {
+      day: 'يوم',
+      week: 'أسبوع',
+      month: 'شهر',
+      year: 'سنة'
+    };
+    return translations[period] || period;
+  }
+}
+
+module.exports = new PaymentController();

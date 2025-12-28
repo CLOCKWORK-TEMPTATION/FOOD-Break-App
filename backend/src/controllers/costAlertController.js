@@ -2,7 +2,7 @@ const costAlertService = require('../services/costAlertService');
 const logger = require('../utils/logger');
 
 /**
- * متحكم إدارة التنبيهات المالية - إنشاء ميزانية جديدة
+ * متحكم إدارة التنبيهات المالية العربية - إنشاء ميزانية جديدة
  */
 const createBudget = async (req, res) => {
   try {
@@ -15,14 +15,14 @@ const createBudget = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: req.__('budget.budgetCreated'),
+      message: req.t('budget.budgetCreated'),
       data: budget
     });
   } catch (error) {
     logger.error(`خطأ في إنشاء الميزانية: ${error.message}`);
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: req.t('budget.budgetCreateFailed'),
       error: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
@@ -45,7 +45,7 @@ const getBudgets = async (req, res) => {
 
     res.json({
       success: true,
-      message: req.__('budget.budgetsFetchSuccess'),
+      message: req.t('budget.budgetsFetchSuccess'),
       data: result.budgets,
       stats: result.stats,
       pagination: result.pagination
@@ -54,7 +54,7 @@ const getBudgets = async (req, res) => {
     logger.error(`خطأ في جلب الميزانيات: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: req.__('budget.budgetsFetchFailed'),
+      message: req.t('budget.budgetsFetchFailed'),
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
@@ -71,14 +71,14 @@ const getBudgetById = async (req, res) => {
 
     res.json({
       success: true,
-      message: req.__('budget.budgetFetchSuccess'),
+      message: req.t('budget.budgetFetchSuccess'),
       data: budget
     });
   } catch (error) {
     logger.error(`خطأ في جلب الميزانية: ${error.message}`);
     res.status(404).json({
       success: false,
-      message: error.message,
+      message: req.t('budget.budgetFetchFailed'),
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
@@ -99,14 +99,14 @@ const updateBudget = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'تم تحديث الميزانية بنجاح',
+      message: req.t('budget.budgetUpdated'),
       data: budget
     });
   } catch (error) {
     logger.error(`خطأ في تحديث الميزانية: ${error.message}`);
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: req.t('budget.budgetUpdateFailed'),
       error: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
@@ -134,7 +134,7 @@ const checkBudget = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'تم فحص الميزانية بنجاح',
+      message: req.t('budget.budgetCheckSuccess'),
       data: {
         budget: result.budget,
         alert: result.alert,
@@ -147,7 +147,7 @@ const checkBudget = async (req, res) => {
     logger.error(`خطأ في فحص الميزانية: ${error.message}`);
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: req.t('budget.budgetCheckFailed'),
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
@@ -171,7 +171,7 @@ const getBudgetAlerts = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'تم جلب تنبيهات الميزانية بنجاح',
+      message: req.t('budget.alertsFetchSuccess'),
       data: result.alerts,
       pagination: result.pagination
     });
@@ -179,7 +179,7 @@ const getBudgetAlerts = async (req, res) => {
     logger.error(`خطأ في جلب تنبيهات الميزانية: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: 'حدث خطأ في جلب تنبيهات الميزانية',
+      message: req.t('budget.alertsFetchFailed'),
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
@@ -199,14 +199,14 @@ const resolveAlert = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'تم حل التنبيه بنجاح',
+      message: req.t('budget.alertResolved'),
       data: alert
     });
   } catch (error) {
     logger.error(`خطأ في حل التنبيه: ${error.message}`);
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: req.t('budget.alertResolveFailed'),
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
@@ -223,7 +223,7 @@ const createDefaultBudget = async (req, res) => {
     if (!userId || !userRole) {
       return res.status(400).json({
         success: false,
-        message: 'معرف المستخدم ودوره مطلوبان'
+        message: req.t('budget.userIdAndRoleRequired')
       });
     }
 
@@ -233,14 +233,14 @@ const createDefaultBudget = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'تم إنشاء الميزانية الافتراضية بنجاح',
+      message: req.t('budget.defaultBudgetCreated'),
       data: budget
     });
   } catch (error) {
     logger.error(`خطأ في إنشاء الميزانية الافتراضية: ${error.message}`);
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: req.t('budget.defaultBudgetCreateFailed'),
       error: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
@@ -260,7 +260,7 @@ const resetBudget = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'تم إعادة تعيين الميزانية بنجاح',
+      message: req.t('budget.budgetReset'),
       data: {
         budget: result.budget,
         alert: result.alert
@@ -270,7 +270,7 @@ const resetBudget = async (req, res) => {
     logger.error(`خطأ في إعادة تعيين الميزانية: ${error.message}`);
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: req.t('budget.budgetResetFailed'),
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
@@ -288,14 +288,14 @@ const generateBudgetReport = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'تم إنشاء تقرير الميزانية بنجاح',
+      message: req.t('budget.reportGenerated'),
       data: report
     });
   } catch (error) {
     logger.error(`خطأ في إنشاء تقرير الميزانية: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: 'حدث خطأ في إنشاء تقرير الميزانية',
+      message: req.t('budget.reportGenerateFailed'),
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
@@ -315,14 +315,14 @@ const getBudgetAnalytics = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'تم جلب الإحصائيات بنجاح',
+      message: req.t('budget.analyticsFetched'),
       data: analytics
     });
   } catch (error) {
     logger.error(`خطأ في جلب إحصائيات الميزانية: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: 'حدث خطأ في جلب إحصائيات الميزانية',
+      message: req.t('budget.analyticsFetchFailed'),
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }

@@ -1,133 +1,177 @@
-# دليل الاختبارات - BreakApp Backend
+# اختبارات الجاهزية للإنتاج
+# Production Readiness Tests
 
 ## نظرة عامة
 
-هذا الدليل يشرح هيكل الاختبارات وكيفية تشغيلها.
+تم تنفيذ جميع متطلبات الإنتاج:
 
-## هيكل الاختبارات
+### ✅ الأمان (Security)
+- **HTTPS/SSL**: Middleware للتحويل التلقائي من HTTP إلى HTTPS
+- **Rate Limiting**: حماية شاملة لجميع endpoints
+- **DDoS Protection**: حماية من 200 طلب/دقيقة
+- **Security Audit**: تسجيل جميع الأحداث الأمنية
+- **IP Blacklist**: نظام حظر عناوين IP المشبوهة
+- **Security Headers**: Helmet.js مع إعدادات متقدمة
 
-```
-tests/
-├── unit/              # Unit Tests - اختبارات الوحدات
-│   └── services/      # اختبارات الخدمات
-├── integration/       # Integration Tests - اختبارات التكامل
-│   └── api/          # اختبارات API endpoints
-├── e2e/              # E2E Tests - اختبارات السيناريوهات الكاملة
-└── utils/             # أدوات مساعدة للاختبارات
-    ├── testHelpers.js
-    └── testDatabase.js
-```
+### ✅ CDN & Load Balancing
+- **CDN Support**: دعم Cloudflare, CloudFront, Fastly
+- **Cache Control**: Headers تلقائية للملفات الثابتة
+- **Load Balancer**: Health checks و sticky sessions
+- **Request Distribution**: توزيع الطلبات بين الخوادم
 
-## أنواع الاختبارات
-
-### 1. Unit Tests (اختبارات الوحدات)
-- **الهدف**: اختبار الوظائف والخدمات بشكل منفصل
-- **الموقع**: `tests/unit/`
-- **مثال**: اختبار منطق hash password، توليد JWT token
-
-### 2. Integration Tests (اختبارات التكامل)
-- **الهدف**: اختبار API endpoints بشكل متكامل
-- **الموقع**: `tests/integration/`
-- **مثال**: اختبار مسار تسجيل الدخول، إنشاء طلب
-
-### 3. E2E Tests (اختبارات السيناريوهات الكاملة)
-- **الهدف**: اختبار السيناريوهات الكاملة من البداية للنهاية
-- **الموقع**: `tests/e2e/`
-- **مثال**: التسجيل → تسجيل الدخول → تصفح القائمة → إنشاء طلب → الدفع
+### ✅ الاختبارات (Testing)
+- **Security Tests**: اختبارات أمان شاملة
+- **System Tests**: اختبار النظام الكامل
+- **Load Tests**: اختبار الأداء تحت الضغط
 
 ## تشغيل الاختبارات
 
+### اختبار الأمان
+```bash
+npm run test:security
+```
+
+يختبر:
+- Rate limiting
+- SQL injection protection
+- Security headers
+- Authentication
+- Input validation
+
+### اختبار النظام الكامل
+```bash
+npm run test:system
+```
+
+يختبر:
+- User registration & login
+- Order workflow
+- Menu retrieval
+- Error handling
+
+### اختبار الأداء
+```bash
+# تثبيت Artillery أولاً
+npm install -g artillery
+
+# تشغيل الاختبار
+npm run test:load
+```
+
+المراحل:
+1. Warm-up: 5 req/sec × 60s
+2. Ramp-up: 5→50 req/sec × 120s
+3. Sustained: 50 req/sec × 300s
+4. Spike: 100 req/sec × 60s
+
 ### تشغيل جميع الاختبارات
 ```bash
-npm test
+npm run test:all
 ```
 
-### تشغيل Unit Tests فقط
+## الملفات المضافة
+
+### Middleware
+- `src/middleware/security.js` - أمان متقدم
+- `src/config/cdn.js` - CDN و Load Balancing
+
+### Tests
+- `tests/security/security.test.js` - اختبارات الأمان
+- `tests/integration/system.test.js` - اختبارات النظام
+- `tests/load/artillery.config.js` - اختبارات الأداء
+
+### Documentation
+- `docs/PRODUCTION_GUIDE.md` - دليل الإنتاج الشامل
+- `docs/DEPLOYMENT_CHECKLIST.md` - قائمة التحقق
+
+## التكوين
+
+### متغيرات البيئة الجديدة
+
 ```bash
-npm run test:unit
+# HTTPS/SSL
+SSL_ENABLED=true
+SSL_CERT_PATH=/path/to/cert.pem
+SSL_KEY_PATH=/path/to/key.pem
+
+# CDN
+CDN_ENABLED=true
+CDN_PROVIDER=cloudflare
+CDN_BASE_URL=https://cdn.breakapp.com
+
+# Load Balancer
+LOAD_BALANCER_ENABLED=true
+STICKY_SESSIONS=true
+SERVER_ID=server-1
+
+# Security
+MAX_REQUEST_SIZE=10mb
+IP_BLACKLIST_ENABLED=true
+SECURITY_AUDIT_LOG=true
 ```
 
-### تشغيل Integration Tests فقط
-```bash
-npm run test:integration
-```
+## الاستخدام في الإنتاج
 
-### تشغيل E2E Tests فقط
-```bash
-npm run test:e2e
-```
+### 1. تفعيل الأمان
+تم تطبيق جميع middleware الأمان تلقائياً في `server.js`:
+- HTTPS redirect
+- Advanced Helmet
+- DDoS protection
+- IP blacklist
+- Security audit logging
 
-### تشغيل الاختبارات مع Coverage
-```bash
-npm run test:coverage
-```
-
-### تشغيل الاختبارات في وضع Watch
-```bash
-npm run test:watch
-```
-
-## إعداد قاعدة البيانات للاختبارات
-
-1. إنشاء قاعدة بيانات منفصلة للاختبارات:
-```bash
-createdb breakapp_test
-```
-
-2. إضافة متغير البيئة:
-```env
-TEST_DATABASE_URL="postgresql://user:password@localhost:5432/breakapp_test"
-```
-
-3. تشغيل Migrations:
-```bash
-DATABASE_URL=$TEST_DATABASE_URL npm run db:migrate
-```
-
-## كتابة اختبارات جديدة
-
-### مثال: Unit Test
+### 2. تفعيل CDN
 ```javascript
-describe('Service Name - Unit Tests', () => {
-  test('should do something', () => {
-    // Test implementation
-  });
-});
+// في .env
+CDN_ENABLED=true
+CDN_BASE_URL=https://cdn.breakapp.com
+
+// استخدام في الكود
+const { getCdnUrl } = require('./config/cdn');
+const imageUrl = getCdnUrl('/images/logo.png');
 ```
 
-### مثال: Integration Test
-```javascript
-describe('API Endpoint - Integration Tests', () => {
-  test('should return 200', async () => {
-    const response = await request(app)
-      .get('/api/v1/endpoint')
-      .expect(200);
-  });
-});
+### 3. Load Balancer Health Check
+```bash
+# فحص صحة الخادم
+curl https://api.breakapp.com/lb-health
+
+# الاستجابة
+{
+  "status": "healthy",
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "uptime": 3600,
+  "memory": { "used": 150, "total": 512 },
+  "cpu": { "user": 1000, "system": 500 }
+}
 ```
 
-## Best Practices
+## المراقبة
 
-1. **استخدام Test Helpers**: استخدم `testHelpers.js` لتقليل التكرار
-2. **تنظيف البيانات**: استخدم `cleanupTestData()` بعد كل اختبار
-3. **Mocking**: استخدم Mocks للخدمات الخارجية (Stripe, PayPal)
-4. **Isolation**: كل اختبار يجب أن يكون مستقلاً
-5. **Naming**: استخدم أسماء واضحة ووصفية للاختبارات
+### Security Audit Logs
+جميع الأحداث الأمنية يتم تسجيلها:
+- محاولات تسجيل الدخول
+- تجاوز Rate limits
+- IP blacklist hits
+- DDoS attempts
 
-## Coverage Goals
+### Performance Metrics
+- Response times
+- Request distribution
+- Server health
+- Memory/CPU usage
 
-- **Branches**: 70%
-- **Functions**: 70%
-- **Lines**: 70%
-- **Statements**: 70%
+## الخطوات التالية
 
-## Troubleshooting
+1. ✅ تكوين SSL certificates
+2. ✅ إعداد CDN provider
+3. ✅ تكوين Load Balancer
+4. ✅ تشغيل اختبارات الأداء
+5. ✅ مراجعة Security logs
+6. ✅ النشر التدريجي
 
-### مشكلة: Database connection failed
-**الحل**: تأكد من وجود `TEST_DATABASE_URL` في `.env`
+## الدعم
 
-### مشكلة: Tests timeout
-**الحل**: زيادة `testTimeout` في `jest.config.js`
-
-### مشكلة: Prisma Client not found
-**الحل**: تشغيل `npm run db:generate`
+للمزيد من المعلومات، راجع:
+- [دليل الإنتاج](./docs/PRODUCTION_GUIDE.md)
+- [قائمة التحقق](./docs/DEPLOYMENT_CHECKLIST.md)

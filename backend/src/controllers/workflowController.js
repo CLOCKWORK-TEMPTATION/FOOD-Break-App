@@ -1,6 +1,6 @@
 /**
- * Workflow Controller
- * يتحكم في آلية عمل التطبيق من الطلب إلى التوصيل
+ * Workflow Controller - متحكم سير العمل العربي
+ * يتحكم في آلية عمل التطبيق من الطلب إلى التوصيل مع دعم التعريب الكامل
  */
 
 const { PrismaClient } = require('@prisma/client');
@@ -23,7 +23,7 @@ const validateProjectQR = async (req, res, next) => {
     if (!qrCode) {
       return res.status(400).json({
         success: false,
-        error: { code: 'INVALID_QR', message: 'رمز QR مفقود' }
+        error: { code: 'INVALID_QR', message: req.t('projects.qrTokenRequired') }
       });
     }
 
@@ -33,7 +33,7 @@ const validateProjectQR = async (req, res, next) => {
     if (!validation.valid) {
       return res.status(401).json({
         success: false,
-        error: { code: 'INVALID_QR', message: 'رمز QR غير صحيح' }
+        error: { code: 'INVALID_QR', message: req.t('projects.qrCodeInvalidOrExpired') }
       });
     }
 
@@ -57,7 +57,8 @@ const validateProjectQR = async (req, res, next) => {
         projectId: validation.projectId,
         projectName: validation.projectName,
         expiresAt: validation.expiresAt
-      }
+      },
+      message: req.t('projects.projectAccessSuccess')
     });
   } catch (error) {
     next(error);

@@ -11,6 +11,7 @@ const workflowRoutes = require('./workflow');
 const recommendationRoutes = require('./recommendations');
 const predictiveRoutes = require('./predictive');
 const paymentRoutes = require('./payments');
+const paymentSystemRoutes = require('./payment');
 const nutritionRoutes = require('./nutrition');
 const dietaryRoutes = require('./dietary');
 const emotionRoutes = require('./emotion');
@@ -23,6 +24,7 @@ const mlRoutes = require('./mlRoutes');
 const reminderRoutes = require('./reminders');
 const analyticsRoutes = require('./analytics');
 const productionIntegrationRoutes = require('./production');
+const arabicReportsRoutes = require('./arabicReports');
 
 // Phase 4 Innovation Routes - مسارات المرحلة الرابعة المتقدمة
 const emergencyRoutes = require('./emergency');
@@ -39,6 +41,7 @@ router.use('/workflow', workflowRoutes);
 router.use('/recommendations', recommendationRoutes);
 router.use('/predictive', predictiveRoutes);
 router.use('/payments', paymentRoutes);
+router.use('/payment', paymentSystemRoutes);
 router.use('/nutrition', nutritionRoutes);
 router.use('/dietary', dietaryRoutes);
 router.use('/emotion', emotionRoutes);
@@ -51,6 +54,7 @@ router.use('/ml', mlRoutes);
 router.use('/reminders', reminderRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/production-integration', productionIntegrationRoutes);
+router.use('/arabic-reports', arabicReportsRoutes);
 
 // Phase 4 Innovation Routes - مسارات المرحلة الرابعة المتقدمة
 router.use('/emergency', emergencyRoutes);
@@ -83,6 +87,7 @@ router.get('/', (req, res) => {
       reminders: '/reminders',
       analytics: '/analytics',
       productionIntegration: '/production-integration',
+      arabicReports: '/arabic-reports',
       // Phase 4 Innovation Features - المميزات المتقدمة للمرحلة الرابعة
       emergency: '/emergency',
       medical: '/medical',

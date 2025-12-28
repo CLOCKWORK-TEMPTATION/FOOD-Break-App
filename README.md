@@ -1,139 +1,333 @@
-# BreakApp 🍽️
+# BreakApp - نظام طلب الطعام العربي المتكامل
 
-**BreakApp** - Food ordering and delivery management system for production teams
+## نظرة عامة
 
-BreakApp helps production teams manage their meal orders, track deliveries, handle exceptions, and optimize food costs through intelligent features.
+BreakApp هو نظام طلب طعام متكامل باللغة العربية مع دعم كامل لـ RTL وتجربة مستخدم عربية أصيلة. النظام مبني بتقنيات حديثة ويوفر واجهة سهلة الاستخدام لإدارة الطلبات والمطاعم والمستخدمين.
 
-## 📋 Project Structure
+## المميزات الرئيسية
 
-```
-breakapp/
-├── backend/          # Node.js/Express backend API
-├── mobile/           # React Native mobile application
-├── docs/             # Documentation
-└── TODO.md          # Development roadmap
-```
+### 🌟 التعريب الكامل
+- واجهة مستخدم باللغة العربية مع دعم RTL
+- تحويل الأرقام للعربية تلقائياً
+- تنسيق التواريخ والأوقات بالعربية والهجرية
+- رسائل النظام والأخطاء بالعربية
 
-## 🛠️ Technology Stack
+### 🍽️ إدارة الطلبات
+- نظام طلبات متقدم مع تتبع الحالة
+- إدارة قوائم المطاعم والأصناف
+- نظام دفع متكامل مع طرق دفع متعددة
+- إشعارات فورية للطلبات
 
-### Backend
-- **Runtime**: Node.js 18+
-- **Framework**: Express.js
-- **Database**: PostgreSQL
-- **ORM**: Prisma / Sequelize
-- **Authentication**: JWT
-- **API**: RESTful API
+### 📊 لوحة التحكم الإدارية
+- إحصائيات شاملة ومفصلة
+- تقارير PDF عربية مع دعم RTL
+- إدارة المستخدمين والأدوار
+- نظام إشعارات متقدم
 
-### Mobile
-- **Framework**: React Native
-- **Language**: TypeScript
-- **State Management**: Redux Toolkit / Zustand
-- **Navigation**: React Navigation
+### 🏥 الصحة والتغذية
+- تتبع المعلومات الغذائية
+- تنبيهات الحساسية الغذائية
+- توصيات ذكية مناسبة للثقافة العربية
+- نظام طوارئ طبي
 
-### Infrastructure (To be configured)
-- **Cloud**: AWS / GCP / Azure
-- **CI/CD**: GitHub Actions / GitLab CI
-- **Monitoring**: Sentry
-- **Maps**: Google Maps API
+### 📱 دعم الأجهزة المحمولة
+- تصميم متجاوب بالكامل
+- دعم اللمس والإيماءات العربية
+- إشعارات محمولة باللغة العربية
+- تحسين الأداء للأجهزة المحمولة
 
-## 🚀 Quick Start
+## التقنيات المستخدمة
 
-### Prerequisites
-- Node.js 18+ and npm 9+
-- PostgreSQL 14+
-- React Native development environment (for mobile)
+### الواجهة الأمامية (Frontend)
+- **React 18** - مكتبة واجهة المستخدم
+- **TypeScript** - لغة البرمجة المكتوبة
+- **Tailwind CSS** - إطار عمل CSS
+- **Vite** - أداة البناء السريعة
+- **React Query** - إدارة حالة الخادم
+- **React Router** - التنقل بين الصفحات
+- **Heroicons** - مكتبة الأيقونات
 
-### Installation
+### الواجهة الخلفية (Backend)
+- **Node.js** - بيئة تشغيل JavaScript
+- **Express.js** - إطار عمل الخادم
+- **MongoDB** - قاعدة البيانات
+- **Mongoose** - ODM لـ MongoDB
+- **JWT** - المصادقة والتفويض
+- **PDFKit** - إنشاء ملفات PDF العربية
+- **Socket.io** - الاتصال الفوري
 
-1. Clone the repository
+## متطلبات النظام
+
+- **Node.js** 18.0.0 أو أحدث
+- **npm** 8.0.0 أو أحدث
+- **MongoDB** 6.0 أو أحدث
+- **Redis** 6.0 أو أحدث (اختياري للتخزين المؤقت)
+
+## التثبيت والإعداد
+
+### 1. استنساخ المشروع
+
 ```bash
-git clone <repository-url>
-cd breakapp
+git clone https://github.com/your-username/breakapp-arabic.git
+cd breakapp-arabic
 ```
 
-2. Install dependencies
+### 2. تثبيت التبعيات
+
 ```bash
+# تثبيت التبعيات الرئيسية
 npm run install:all
 ```
 
-3. Set up environment variables
-```bash
-cp backend/.env.example backend/.env
-# Edit backend/.env with your configuration
-```
+### 3. إعداد متغيرات البيئة
 
-4. Set up database
+#### Backend (.env)
 ```bash
 cd backend
-npm run db:migrate
+cp .env.example .env
+```
+
+```env
+# قاعدة البيانات
+MONGODB_URI=mongodb://localhost:27017/breakapp
+REDIS_URL=redis://localhost:6379
+
+# الأمان
+JWT_SECRET=your-super-secret-jwt-key
+JWT_EXPIRES_IN=7d
+BCRYPT_ROUNDS=12
+
+# الخادم
+PORT=3001
+NODE_ENV=development
+
+# البريد الإلكتروني
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+
+# الدفع (Stripe)
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+# التخزين السحابي
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+```
+
+#### Frontend (.env)
+```bash
+cd frontend
+cp .env.example .env
+```
+
+```env
+VITE_API_URL=http://localhost:3001/api
+VITE_SOCKET_URL=http://localhost:3001
+VITE_STRIPE_PUBLIC_KEY=pk_test_...
+```
+
+### 4. إعداد قاعدة البيانات
+
+```bash
+# تشغيل MongoDB
+mongod
+
+# إنشاء قاعدة البيانات وإدراج البيانات الأولية
+cd backend
 npm run db:seed
 ```
 
-5. Start development servers
-```bash
-# Terminal 1: Backend
-npm run dev:backend
+### 5. تشغيل التطبيق
 
-# Terminal 2: Mobile
-npm run dev:mobile
+#### التطوير
+```bash
+# تشغيل الواجهة الخلفية والأمامية معاً
+npm run dev
+
+# أو تشغيل كل واحدة منفصلة
+npm run dev:backend  # المنفذ 3001
+npm run dev:frontend # المنفذ 5173
 ```
 
-## 📁 Project Phases
+#### الإنتاج
+```bash
+# بناء التطبيق
+npm run build
 
-See [TODO.md](./TODO.md) for the complete development roadmap.
+# تشغيل الإنتاج
+npm start
+```
 
-### Phase 1: Foundation (MVP) - Current Focus
-- Core Infrastructure
-- Basic Menu System
-- Exception and Special Orders System
-- Order Workflow
-- Basic UI/UX
+## هيكل المشروع
 
-### Phase 2: Intelligence (AI/ML)
-- Smart Recommendations
-- Predictive Ordering
-- Smart Restaurant Discovery
+```
+breakapp-arabic/
+├── backend/                 # الواجهة الخلفية
+│   ├── src/
+│   │   ├── controllers/     # تحكم API
+│   │   ├── models/          # نماذج قاعدة البيانات
+│   │   ├── routes/          # مسارات API
+│   │   ├── middleware/      # الوسطاء
+│   │   ├── services/        # خدمات العمل
+│   │   ├── utils/           # أدوات مساعدة
+│   │   └── config/          # إعدادات النظام
+│   ├── tests/               # اختبارات الواجهة الخلفية
+│   └── package.json
+├── frontend/                # الواجهة الأمامية
+│   ├── src/
+│   │   ├── components/      # مكونات React
+│   │   ├── pages/           # صفحات التطبيق
+│   │   ├── services/        # خدمات API
+│   │   ├── utils/           # أدوات مساعدة
+│   │   ├── hooks/           # React Hooks مخصصة
+│   │   └── config/          # إعدادات التطبيق
+│   ├── public/              # ملفات ثابتة
+│   ├── tests/               # اختبارات الواجهة الأمامية
+│   └── package.json
+├── docs/                    # التوثيق
+├── .github/                 # إعدادات GitHub
+└── package.json             # إعدادات المشروع الرئيسية
+```
 
-### Phase 3: Engagement (Social)
-- Points & Rewards System
-- Collaborative Reviews
-- Group Order Deals
+## الاختبار
 
-### Phase 4: Innovation (Advanced Tech)
-- Health & Wellness Features
-- Sustainability Features
-- Advanced Tech Features
+### تشغيل جميع الاختبارات
+```bash
+npm test
+```
 
-### Phase 5: Ecosystem (Platform)
-- Analytics & Financial Intelligence
-- Production Integration
-- Marketplace
+### اختبارات الواجهة الخلفية
+```bash
+cd backend
+npm test
+```
 
-## 🔐 Security
+### اختبارات الواجهة الأمامية
+```bash
+cd frontend
+npm test
+```
 
-- Data encryption (at rest and in transit)
-- GDPR compliance
-- Secure payment processing (PCI DSS)
-- Role-based access control (RBAC)
+### اختبارات التغطية
+```bash
+npm run test:coverage
+```
 
-## 📝 Documentation
+### اختبارات المكونات العربية
+```bash
+npm run test:arabic
+```
 
-- [Architecture Overview](./docs/architecture.md)
-- [Database Schema](./docs/database.md)
-- [API Documentation](./docs/api.md) (Coming soon)
-- [Mobile App Guide](./docs/mobile.md) (Coming soon)
+## API Documentation
 
-### Feature-Specific Documentation
-- [✅ **Emotion-Based AI System**](./docs/EMOTION_AI_FEATURE.md) - Complete emotion tracking, sentiment analysis, and AI-powered food recommendations
-  - [Quick Activation Guide](./docs/EMOTION_AI_ACTIVATION.md)
-  - [Database Schema](./docs/EMOTION_AI_SCHEMA.md)
+### المصادقة
+```http
+POST /api/auth/login
+POST /api/auth/register
+POST /api/auth/logout
+GET  /api/auth/me
+```
 
-## 🤝 Contributing
+### الطلبات
+```http
+GET    /api/orders
+POST   /api/orders
+GET    /api/orders/:id
+PATCH  /api/orders/:id/status
+DELETE /api/orders/:id
+```
 
-Contributions are welcome! Please read the contributing guidelines before submitting PRs.
+### المطاعم
+```http
+GET    /api/restaurants
+POST   /api/restaurants
+GET    /api/restaurants/:id
+PUT    /api/restaurants/:id
+DELETE /api/restaurants/:id
+```
 
-## 📄 License
+### القوائم
+```http
+GET    /api/menu/items
+POST   /api/menu/items
+GET    /api/menu/items/:id
+PUT    /api/menu/items/:id
+DELETE /api/menu/items/:id
+```
 
-MIT License
+### التقارير
+```http
+GET /api/reports/daily-orders
+GET /api/reports/monthly-orders
+GET /api/reports/restaurants
+GET /api/reports/invoice/:orderId
+```
 
+## النشر
 
+### Docker
+```bash
+# بناء الصور
+docker-compose build
+
+# تشغيل التطبيق
+docker-compose up -d
+```
+
+### خادم Linux
+```bash
+# تثبيت PM2
+npm install -g pm2
+
+# بناء التطبيق
+npm run build
+
+# تشغيل بـ PM2
+pm2 start ecosystem.config.js
+```
+
+## المساهمة
+
+نرحب بمساهماتكم! يرجى اتباع الخطوات التالية:
+
+1. Fork المشروع
+2. إنشاء فرع للميزة الجديدة (`git checkout -b feature/amazing-feature`)
+3. Commit التغييرات (`git commit -m 'Add amazing feature'`)
+4. Push للفرع (`git push origin feature/amazing-feature`)
+5. فتح Pull Request
+
+### إرشادات المساهمة
+
+- اكتب الكود بالإنجليزية والتعليقات بالعربية
+- اتبع معايير ESLint المحددة
+- أضف اختبارات للميزات الجديدة
+- حدث التوثيق عند الحاجة
+
+## الترخيص
+
+هذا المشروع مرخص تحت رخصة MIT - راجع ملف [LICENSE](LICENSE) للتفاصيل.
+
+## الدعم
+
+للحصول على الدعم:
+
+- 📧 البريد الإلكتروني: support@breakapp.com
+- 💬 Discord: [رابط الخادم](https://discord.gg/breakapp)
+- 📖 التوثيق: [docs.breakapp.com](https://docs.breakapp.com)
+- 🐛 تقرير الأخطاء: [GitHub Issues](https://github.com/your-username/breakapp-arabic/issues)
+
+## الشكر والتقدير
+
+- فريق React لمكتبة React الرائعة
+- فريق Tailwind CSS لإطار العمل المميز
+- مجتمع المطورين العرب للإلهام والدعم
+- جميع المساهمين في هذا المشروع
+
+---
+
+**BreakApp** - نظام طلب الطعام العربي المتكامل 🍽️
+
+صُنع بـ ❤️ للمجتمع العربي

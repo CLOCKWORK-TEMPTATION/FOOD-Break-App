@@ -1,6 +1,6 @@
 /**
- * متحكم الحمية الغذائية
- * Dietary Controller - Handles all dietary-related API endpoints
+ * متحكم الحمية الغذائية العربي
+ * Dietary Controller - Handles all dietary-related API endpoints with Arabic localization
  */
 
 const dietaryProfileService = require('../services/dietary/dietaryProfileService');
@@ -29,7 +29,7 @@ const getDietaryProfile = async (req, res) => {
         success: false,
         error: {
           code: 'PROFILE_NOT_FOUND',
-          message: req.__('dietary.profileNotFound'),
+          message: req.t('dietary.profileNotFound'),
         },
       });
     }
@@ -44,7 +44,7 @@ const getDietaryProfile = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.__('general.serverError'),
+        message: req.t('general.serverError'),
       },
     });
   }
@@ -67,7 +67,7 @@ const updateDietaryProfile = async (req, res) => {
     res.json({
       success: true,
       data: profile,
-      message: req.__('dietary.profileUpdated'),
+      message: req.t('dietary.profileUpdated'),
     });
   } catch (error) {
     console.error('Error updating dietary profile:', error);
@@ -75,7 +75,7 @@ const updateDietaryProfile = async (req, res) => {
       success: false,
       error: {
         code: 'SERVER_ERROR',
-        message: req.__('general.serverError'),
+        message: req.t('general.serverError'),
       },
     });
   }
@@ -141,7 +141,7 @@ const deleteDietaryProfile = async (req, res) => {
 
     res.json({
       success: true,
-      message: req.__('dietary.profileDeleted'),
+      message: req.t('dietary.profileDeleted'),
     });
   } catch (error) {
     console.error('Error deleting dietary profile:', error);
@@ -175,7 +175,7 @@ const getAllergyProfile = async (req, res) => {
         success: false,
         error: {
           code: 'ALLERGY_PROFILE_NOT_FOUND',
-          message: req.__('dietary.allergyProfileNotFound'),
+          message: req.t('dietary.allergyProfileNotFound'),
         },
       });
     }
@@ -213,7 +213,7 @@ const updateAllergyProfile = async (req, res) => {
     res.json({
       success: true,
       data: profile,
-      message: req.__('dietary.allergyProfileUpdated'),
+      message: req.t('dietary.allergyProfileUpdated'),
     });
   } catch (error) {
     console.error('Error updating allergy profile:', error);
@@ -323,7 +323,7 @@ const filterMenuItems = async (req, res) => {
         success: false,
         error: {
           code: 'INVALID_INPUT',
-          message: req.__('dietary.invalidInput'),
+          message: req.t('dietary.invalidInput'),
         },
       });
     }

@@ -4,8 +4,8 @@ const reminderScheduler = require('../services/reminderSchedulerService');
 const notificationService = require('../services/notificationService');
 
 /**
- * Reminder Controller
- * للتحكم في نظام التذكيرات النصف ساعية
+ * Reminder Controller - متحكم التذكيرات العربي
+ * للتحكم في نظام التذكيرات النصف ساعية مع دعم التعريب الكامل
  */
 
 // ============================================
@@ -40,7 +40,8 @@ exports.getProjectReminderSettings = async (req, res) => {
 
     res.json({
       success: true,
-      data: settings
+      data: settings,
+      message: req.t('reminders.settingsRetrieved')
     });
   } catch (error) {
     console.error('خطأ في جلب إعدادات التذكير:', error);
@@ -48,7 +49,7 @@ exports.getProjectReminderSettings = async (req, res) => {
       success: false,
       error: {
         code: 'FETCH_SETTINGS_ERROR',
-        message: 'فشل في جلب إعدادات التذكير',
+        message: req.t('reminders.settingsFetchFailed'),
         details: error.message
       }
     });
@@ -75,7 +76,7 @@ exports.updateProjectReminderSettings = async (req, res) => {
     res.json({
       success: true,
       data: settings,
-      message: 'تم تحديث إعدادات التذكير بنجاح'
+      message: req.t('reminders.settingsUpdated')
     });
   } catch (error) {
     console.error('خطأ في تحديث إعدادات التذكير:', error);
@@ -83,7 +84,7 @@ exports.updateProjectReminderSettings = async (req, res) => {
       success: false,
       error: {
         code: 'UPDATE_SETTINGS_ERROR',
-        message: 'فشل في تحديث إعدادات التذكير',
+        message: req.t('reminders.settingsUpdateFailed'),
         details: error.message
       }
     });

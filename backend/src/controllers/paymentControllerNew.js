@@ -1,6 +1,6 @@
 /**
- * Payment Controller - Updated with Prisma
- * معالجة المدفوعات والفواتير باستخدام Prisma
+ * Payment Controller - Updated with Prisma - متحكم المدفوعات العربي
+ * معالجة المدفوعات والفواتير باستخدام Prisma مع دعم التعريب الكامل
  */
 
 // If testing, export mocks to prevent initialization issues
@@ -43,7 +43,7 @@ if (process.env.NODE_ENV === 'test') {
       if (!amount || amount <= 0) {
         return res.status(400).json({
           success: false,
-          message: 'المبلغ غير صالح'
+          message: req.t('payments.invalidAmount')
         });
       }
   
@@ -73,7 +73,7 @@ if (process.env.NODE_ENV === 'test') {
           };
         } catch (err) {
           logger.error('PayPal create order error:', err);
-          throw new Error('فشل إنشاء طلب PayPal');
+          throw new Error(req.t('payments.paymentIntentCreateFailed'));
         }
   
       } else {
@@ -119,7 +119,7 @@ if (process.env.NODE_ENV === 'test') {
   
       res.status(201).json({
         success: true,
-        message: 'تم إنشاء نية الدفع بنجاح',
+        message: req.t('payments.paymentSuccess'),
         data: {
           paymentId: payment.id,
           clientSecret: paymentIntentData.client_secret,
@@ -133,7 +133,7 @@ if (process.env.NODE_ENV === 'test') {
       logger.error('Error creating payment intent:', error);
       res.status(500).json({
         success: false,
-        message: 'فشل إنشاء نية الدفع',
+        message: req.t('payments.paymentIntentCreateFailed'),
         error: process.env.NODE_ENV === 'development' ? error.message : undefined
       });
     }

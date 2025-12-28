@@ -1,6 +1,6 @@
 /**
- * ML Controller - نقطة تحكم للتعلم الآلي
- * Handles all ML-related endpoints
+ * ML Controller - نقطة تحكم للتعلم الآلي العربية
+ * Handles all ML-related endpoints with Arabic localization
  *
  * Endpoints for:
  * - Training data collection
@@ -43,7 +43,7 @@ const collectTrainingData = async (req, res) => {
         metadata: dataset.metadata,
         stats: dataset.metadata.stats
       },
-      message: req.__('ml.trainingDataCollected')
+      message: req.t('ml.trainingDataCollected')
     });
   } catch (error) {
     logger.error(`خطأ في جمع بيانات التدريب: ${error.message}`);
@@ -51,7 +51,7 @@ const collectTrainingData = async (req, res) => {
       success: false,
       error: {
         code: 'TRAINING_DATA_COLLECTION_ERROR',
-        message: req.__('ml.trainingDataCollectionError'),
+        message: req.t('ml.trainingDataCollectionError'),
         details: error.message
       }
     });
@@ -79,7 +79,7 @@ const trainRecommendationModel = async (req, res) => {
         success: false,
         error: {
           code: 'INSUFFICIENT_DATA',
-          message: req.__('ml.insufficientData')
+          message: req.t('ml.insufficientData')
         }
       });
     }
@@ -87,7 +87,7 @@ const trainRecommendationModel = async (req, res) => {
     res.json({
       success: true,
       data: result,
-      message: req.__('ml.modelTrainingSuccess')
+      message: req.t('ml.modelTrainingSuccess')
     });
   } catch (error) {
     logger.error(`خطأ في تدريب نموذج التوصيات: ${error.message}`);
@@ -95,7 +95,7 @@ const trainRecommendationModel = async (req, res) => {
       success: false,
       error: {
         code: 'MODEL_TRAINING_ERROR',
-        message: req.__('ml.modelTrainingError'),
+        message: req.t('ml.modelTrainingError'),
         details: error.message
       }
     });
@@ -122,7 +122,7 @@ const trainPredictiveModel = async (req, res) => {
         success: false,
         error: {
           code: 'INSUFFICIENT_DATA',
-          message: req.__('ml.insufficientData')
+          message: req.t('ml.insufficientData')
         }
       });
     }
@@ -130,7 +130,7 @@ const trainPredictiveModel = async (req, res) => {
     res.json({
       success: true,
       data: result,
-      message: req.__('ml.modelTrainingSuccess')
+      message: req.t('ml.modelTrainingSuccess')
     });
   } catch (error) {
     logger.error(`خطأ في تدريب نموذج التنبؤ: ${error.message}`);
@@ -138,7 +138,7 @@ const trainPredictiveModel = async (req, res) => {
       success: false,
       error: {
         code: 'MODEL_TRAINING_ERROR',
-        message: req.__('ml.modelTrainingError'),
+        message: req.t('ml.modelTrainingError'),
         details: error.message
       }
     });
@@ -165,7 +165,7 @@ const trainQualityModel = async (req, res) => {
         success: false,
         error: {
           code: 'INSUFFICIENT_DATA',
-          message: req.__('ml.insufficientData')
+          message: req.t('ml.insufficientData')
         }
       });
     }
@@ -173,7 +173,7 @@ const trainQualityModel = async (req, res) => {
     res.json({
       success: true,
       data: result,
-      message: req.__('ml.modelTrainingSuccess')
+      message: req.t('ml.modelTrainingSuccess')
     });
   } catch (error) {
     logger.error(`خطأ في تدريب نموذج الجودة: ${error.message}`);
@@ -181,7 +181,7 @@ const trainQualityModel = async (req, res) => {
       success: false,
       error: {
         code: 'MODEL_TRAINING_ERROR',
-        message: req.__('ml.modelTrainingError'),
+        message: req.t('ml.modelTrainingError'),
         details: error.message
       }
     });
@@ -209,8 +209,8 @@ const trainAllModels = async (req, res) => {
       success: !hasErrors,
       data: results,
       message: hasErrors
-        ? req.__('ml.allModelsTrainingPartial')
-        : req.__('ml.allModelsTrainingSuccess')
+        ? req.t('ml.allModelsTrainingPartial')
+        : req.t('ml.allModelsTrainingSuccess')
     });
   } catch (error) {
     logger.error(`خطأ في تدريب جميع النماذج: ${error.message}`);
@@ -218,7 +218,7 @@ const trainAllModels = async (req, res) => {
       success: false,
       error: {
         code: 'MODELS_TRAINING_ERROR',
-        message: req.__('ml.allModelsTrainingError'),
+        message: req.t('ml.allModelsTrainingError'),
         details: error.message
       }
     });
@@ -238,7 +238,7 @@ const searchNewRestaurants = async (req, res) => {
         success: false,
         error: {
           code: 'INVALID_PARAMETERS',
-          message: req.__('ml.coordinatesRequired')
+          message: req.t('ml.coordinatesRequired')
         }
       });
     }
@@ -268,7 +268,7 @@ const searchNewRestaurants = async (req, res) => {
       success: false,
       error: {
         code: 'RESTAURANT_SEARCH_ERROR',
-        message: req.__('ml.restaurantSearchError'),
+        message: req.t('ml.restaurantSearchError'),
         details: error.message
       }
     });
@@ -297,7 +297,7 @@ const analyzeRestaurantQuality = async (req, res) => {
       success: false,
       error: {
         code: 'QUALITY_ANALYSIS_ERROR',
-        message: req.__('ml.qualityAnalysisError'),
+        message: req.t('ml.qualityAnalysisError'),
         details: error.message
       }
     });
@@ -324,7 +324,7 @@ const suggestNewRestaurants = async (req, res) => {
         success: false,
         error: {
           code: 'INVALID_PARAMETERS',
-          message: req.__('ml.coordinatesRequired')
+          message: req.t('ml.coordinatesRequired')
         }
       });
     }
@@ -360,7 +360,7 @@ const suggestNewRestaurants = async (req, res) => {
       success: false,
       error: {
         code: 'RESTAURANT_SUGGESTION_ERROR',
-        message: req.__('ml.restaurantSuggestionError'),
+        message: req.t('ml.restaurantSuggestionError'),
         details: error.message
       }
     });
@@ -382,7 +382,7 @@ const createRestaurantTrial = async (req, res) => {
     res.status(201).json({
       success: true,
       data: trial,
-      message: req.__('ml.trialCreated')
+      message: req.t('ml.trialCreated')
     });
   } catch (error) {
     logger.error(`خطأ في إنشاء سير عمل التجريب: ${error.message}`);
@@ -390,7 +390,7 @@ const createRestaurantTrial = async (req, res) => {
       success: false,
       error: {
         code: 'TRIAL_CREATION_ERROR',
-        message: req.__('ml.trialCreationError'),
+        message: req.t('ml.trialCreationError'),
         details: error.message
       }
     });
@@ -413,8 +413,8 @@ const evaluateTrialResults = async (req, res) => {
       success: true,
       data: evaluation,
       message: evaluation.passed
-        ? req.__('ml.trialPassed')
-        : req.__('ml.trialFailed')
+        ? req.t('ml.trialPassed')
+        : req.t('ml.trialFailed')
     });
   } catch (error) {
     logger.error(`خطأ في تقييم التجربة: ${error.message}`);
@@ -422,7 +422,7 @@ const evaluateTrialResults = async (req, res) => {
       success: false,
       error: {
         code: 'TRIAL_EVALUATION_ERROR',
-        message: req.__('ml.trialEvaluationError'),
+        message: req.t('ml.trialEvaluationError'),
         details: error.message
       }
     });
@@ -442,7 +442,7 @@ const aggregateRatings = async (req, res) => {
         success: false,
         error: {
           code: 'INVALID_PARAMETERS',
-          message: req.__('ml.restaurantNameAndCoordinatesRequired')
+          message: req.t('ml.restaurantNameAndCoordinatesRequired')
         }
       });
     }
@@ -467,7 +467,7 @@ const aggregateRatings = async (req, res) => {
       success: false,
       error: {
         code: 'RATING_AGGREGATION_ERROR',
-        message: req.__('ml.ratingAggregationError'),
+        message: req.t('ml.ratingAggregationError'),
         details: error.message
       }
     });

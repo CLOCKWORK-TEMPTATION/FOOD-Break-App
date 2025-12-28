@@ -1,6 +1,6 @@
 /**
- * متحكم التنبؤ بالطلبات
- * Predictive Ordering Controller
+ * متحكم التنبؤ بالطلبات العربي
+ * Predictive Ordering Controller with Arabic localization
  */
 
 const {
@@ -28,19 +28,20 @@ const analyzeMyBehavior = async (req, res) => {
       return res.status(200).json({
         success: true,
         data: null,
-        message: 'لا توجد بيانات كافية للتحليل'
+        message: req.t('predictive.noDataForAnalysis')
       });
     }
 
     res.json({
       success: true,
-      data: analysis
+      data: analysis,
+      message: req.t('predictive.analysisSuccess')
     });
   } catch (error) {
     console.error('Error analyzing behavior:', error);
     res.status(500).json({
       success: false,
-      error: { code: 'ANALYSIS_ERROR', message: 'فشل في تحليل السلوك' }
+      error: { code: 'ANALYSIS_ERROR', message: req.t('predictive.analysisFailed') }
     });
   }
 };
