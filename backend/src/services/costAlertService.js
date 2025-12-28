@@ -197,7 +197,7 @@ const checkBudgetAndCreateAlert = async (budgetId, amount) => {
       shouldCreateAlert = true;
       alert = await createCostAlert({
         budgetId,
-        userId: budget.userId,
+        userId: budget.targetUserId || budget.user?.id,
         alertType: 'EXCEEDED',
         severity: 'CRITICAL',
         title: 'تجاوز الحد الأقصى للميزانية',
@@ -211,7 +211,7 @@ const checkBudgetAndCreateAlert = async (budgetId, amount) => {
       shouldCreateAlert = true;
       alert = await createCostAlert({
         budgetId,
-        userId: budget.userId,
+        userId: budget.targetUserId || budget.user?.id,
         alertType: 'WARNING',
         severity: percentage >= 0.9 ? 'HIGH' : 'MEDIUM',
         title: 'تحذير: اقتراب من الحد الأقصى للميزانية',
@@ -633,4 +633,182 @@ const resetBudget = async (budgetId, resetBy) => {
       throw new Error('الميزانية غير موجودة');
     }
 
-    // إنشاء تنبيه إعادة تعيين
+    if (!budget.isActive) {
+      throw new Error('لا يمكن إعادة تعيين ميزانية غير نشطة');
+    }
+
+    const updatedBudget = await prisma.costBudget.update({
+      where: { id: budgetId },
+      data: {
+        usedAmount: 0,
+        updatedAt: new Date()
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            role: true
+          }
+        },
+        alerts: {
+          orderBy: { createdAt: 'desc' }
+        }
+      }
+    });
+
+    const alertUserId = budget.targetUserId || resetBy;
+    await createCostAlert({
+      budgetId,
+      userId: alertUserId,
+      alertType: 'RESET',
+      severity: 'LOW',
+      title: 'تم إعادة تعيين الميزانية',
+      message: `تم إعادة تعيين الميزانية "${budget.name}" بواسطة المستخدم ${resetBy}.`,
+      currentAmount: 0,
+      budgetLimit: budget.maxLimit,
+      percentage: 0
+    });
+
+    logger.info(`تم إعادة تعيين الميزانية: ${budgetId} بواسطة ${resetBy}`);
+
+    return updatedBudget;
+  } catch (error) {
+    logger.error(`خطأ في إعادة تعيين الميزانية: ${error.message}`);
+    throw error;
+  }
+};
+
+/**
+ * إنشاء تقرير ميزانية للفترة المحددة
+ * @param {string} budgetId
+ * @param {string|Date} startDate
+ * @param {string|Date} endDate
+ * @returns {Promise<Object>}
+ */
+const generateBudgetReport = async (budgetId, startDate, endDate) => {
+  try {
+    const budget = await prisma.costBudget.findUnique({
+      where: { id: budgetId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            role: true
+          }
+        }
+      }
+    });
+
+    if (!budget) {
+      throw new Error('الميزانية غير موجودة');
+    }
+
+    const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const end = endDate ? new Date(endDate) : new Date();
+
+    const alerts = await prisma.costAlert.findMany({
+      where: {
+        budgetId,
+        createdAt: {
+          gte: start,
+          lte: end
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const percentage = budget.maxLimit > 0 ? (budget.usedAmount / budget.maxLimit) : 0;
+    const alertCountsByType = alerts.reduce((acc, a) => {
+      acc[a.alertType] = (acc[a.alertType] || 0) + 1;
+      return acc;
+    }, {});
+
+    return {
+      budget,
+      period: { start, end },
+      summary: {
+        maxLimit: budget.maxLimit,
+        usedAmount: budget.usedAmount,
+        remaining: Math.max(0, budget.maxLimit - budget.usedAmount),
+        percentage,
+        alertsCount: alerts.length,
+        alertCountsByType
+      },
+      alerts
+    };
+  } catch (error) {
+    logger.error(`خطأ في إنشاء تقرير الميزانية: ${error.message}`);
+    throw error;
+  }
+};
+
+/**
+ * تحليلات عامة للميزانيات (مستوى لوحة تحكم)
+ * @param {Object} filters
+ * @returns {Promise<Object>}
+ */
+const getBudgetAnalytics = async (filters = {}) => {
+  try {
+    const { type, isActive, startDate, endDate } = filters;
+
+    const where = {
+      ...(type && { type }),
+      ...(isActive !== undefined && { isActive }),
+      ...(startDate || endDate ? {
+        createdAt: {
+          ...(startDate && { gte: new Date(startDate) }),
+          ...(endDate && { lte: new Date(endDate) })
+        }
+      } : {})
+    };
+
+    const budgets = await prisma.costBudget.findMany({ where });
+    const totals = budgets.reduce((acc, b) => {
+      acc.totalLimit += b.maxLimit || 0;
+      acc.totalUsed += b.usedAmount || 0;
+      acc.active += b.isActive ? 1 : 0;
+      acc.byType[b.type] = (acc.byType[b.type] || 0) + 1;
+      return acc;
+    }, { totalLimit: 0, totalUsed: 0, active: 0, byType: {} });
+
+    const unresolvedAlerts = await prisma.costAlert.count({
+      where: { isResolved: false }
+    });
+
+    return {
+      totals: {
+        budgets: budgets.length,
+        activeBudgets: totals.active,
+        inactiveBudgets: budgets.length - totals.active,
+        totalLimit: totals.totalLimit,
+        totalUsed: totals.totalUsed,
+        overallPercentage: totals.totalLimit > 0 ? totals.totalUsed / totals.totalLimit : 0,
+        byType: totals.byType
+      },
+      unresolvedAlerts
+    };
+  } catch (error) {
+    logger.error(`خطأ في تحليلات الميزانية: ${error.message}`);
+    throw error;
+  }
+};
+
+module.exports = {
+  createCostBudget,
+  updateCostBudget,
+  checkBudgetAndCreateAlert,
+  getCostBudget,
+  getAllCostBudgets,
+  getBudgetAlerts,
+  resolveAlert,
+  createDefaultBudgetForUser,
+  resetBudget,
+  generateBudgetReport,
+  getBudgetAnalytics
+};
