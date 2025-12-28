@@ -8,9 +8,10 @@ process.env.API_VERSION = 'v1';
 process.env.JWT_SECRET = 'test-jwt-secret-key-for-testing-only';
 process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key';
 process.env.JWT_EXPIRES_IN = '1h';
-process.env.QR_SECRET_KEY = 'test-qr-secret-key';
-process.env.STRIPE_SECRET_KEY = 'sk_test_placeholder';
-process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test_db';
+process.env.QR_SECRET_KEY = 'test-qr-secret-key-for-testing-only';
+process.env.DATABASE_URL = process.env.TEST_DATABASE_URL || 'postgresql://test:test@localhost:5432/test_db';
+process.env.STRIPE_SECRET_KEY = 'sk_test_mock_key';
+process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test_mock_secret';
 
 // Mock Logger to prevent console noise during tests
 jest.mock('./src/utils/logger', () => ({
@@ -20,15 +21,18 @@ jest.mock('./src/utils/logger', () => ({
   debug: jest.fn(),
 }));
 
-// Mock console methods to reduce noise in test output
-global.console = {
-  ...console,
-  log: jest.fn(),
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-};
+// Mock console methods to reduce noise in test output (only in unit tests)
+if (process.env.JEST_WORKER_ID) {
+  const originalConsole = global.console;
+  global.console = {
+    ...originalConsole,
+    log: jest.fn(),
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
+}
 
 // Mock Prisma Client for unit tests
 jest.mock('@prisma/client', () => {
@@ -130,7 +134,10 @@ beforeEach(() => {
 
 // Global teardown
 afterAll(async () => {
-  // Add any global cleanup here
+  // Close any open connections
+  const { PrismaClient } = require('@prisma/client');
+  const prisma = new PrismaClient();
+  await prisma.$disconnect();
 });
 
 // Global test timeout
