@@ -9,7 +9,18 @@ describe('Auth Controller', () => {
   let req, res, next;
 
   beforeEach(() => {
-    req = { body: {}, user: { id: 'user-123' } };
+    req = {
+      body: {},
+      user: { id: 'user-123' },
+      t: jest.fn((key) => {
+        const translations = {
+          'auth.registerSuccess': 'تم التسجيل بنجاح',
+          'auth.loginSuccess': 'تم تسجيل الدخول بنجاح',
+          'validation.required': 'حقل مطلوب'
+        };
+        return translations[key] || key;
+      })
+    };
     res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn().mockReturnThis()
@@ -44,6 +55,7 @@ describe('Auth Controller', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
+        message: 'حقل مطلوب',
         errors: [{ msg: 'Invalid email' }]
       });
     });
