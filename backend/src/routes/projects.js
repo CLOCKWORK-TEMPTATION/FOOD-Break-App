@@ -17,13 +17,13 @@ const { auth, admin, producer } = require('../middleware/auth');
 router.post('/', [
   auth,
   admin,
-  body('name').notEmpty().withMessage(''3E 'DE41H9 E7DH('),
-  body('startDate').isISO8601().withMessage('*'1J. 'D(/! J,( #F JCHF 5-J-'K'),
+  body('name').notEmpty().withMessage('Project name is required'),
+  body('startDate').isISO8601().withMessage('Start date must be valid'),
   body('location').optional().isString(),
   body('latitude').optional().isFloat(),
   body('longitude').optional().isFloat(),
   body('endDate').optional().isISO8601(),
-  body('orderWindow').optional().isInt({ min: 1, max: 480 }).withMessage('F'A0) 'D7D( J,( #F *CHF (JF 1 H 480 /BJB)')
+  body('orderWindow').optional().isInt({ min: 1, max: 480 }).withMessage('Order window must be between 1 and 480 minutes')
 ], projectController.createProject);
 
 /**
@@ -43,7 +43,7 @@ router.get('/', [
  * E*'- DD,EJ9 (/HF E5'/B)
  */
 router.post('/access-by-qr', [
-  body('qrToken').notEmpty().withMessage('QR Token E7DH(')
+  body('qrToken').notEmpty().withMessage('QR Token is required')
 ], projectController.accessProjectByQR);
 
 /**
@@ -52,7 +52,7 @@ router.post('/access-by-qr', [
  */
 router.get('/:projectId', [
   auth,
-  param('projectId').isUUID().withMessage('E91A 'DE41H9 :J1 5-J-')
+  param('projectId').isUUID().withMessage('Invalid Project ID')
 ], projectController.getProject);
 
 /**
@@ -63,7 +63,7 @@ router.get('/:projectId', [
 router.patch('/:projectId', [
   auth,
   producer,
-  param('projectId').isUUID().withMessage('E91A 'DE41H9 :J1 5-J-'),
+  param('projectId').isUUID().withMessage('Invalid Project ID'),
   body('name').optional().isString(),
   body('location').optional().isString(),
   body('latitude').optional().isFloat(),
@@ -81,7 +81,7 @@ router.patch('/:projectId', [
 router.post('/:projectId/regenerate-qr', [
   auth,
   producer,
-  param('projectId').isUUID().withMessage('E91A 'DE41H9 :J1 5-J-')
+  param('projectId').isUUID().withMessage('Invalid Project ID')
 ], projectController.regenerateQRCode);
 
 /**
@@ -90,7 +90,7 @@ router.post('/:projectId/regenerate-qr', [
  */
 router.get('/:projectId/order-window', [
   auth,
-  param('projectId').isUUID().withMessage('E91A 'DE41H9 :J1 5-J-')
+  param('projectId').isUUID().withMessage('Invalid Project ID')
 ], projectController.checkOrderWindow);
 
 /**
@@ -101,7 +101,7 @@ router.get('/:projectId/order-window', [
 router.delete('/:projectId', [
   auth,
   admin,
-  param('projectId').isUUID().withMessage('E91A 'DE41H9 :J1 5-J-')
+  param('projectId').isUUID().withMessage('Invalid Project ID')
 ], projectController.deleteProject);
 
 module.exports = router;

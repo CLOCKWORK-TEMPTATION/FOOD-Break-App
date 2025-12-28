@@ -24,4 +24,12 @@ const validate = (req, res, next) => {
   next();
 };
 
-module.exports = { validate };
+const validateOrder = (req, res, next) => next();
+const validateOrderStatus = (req, res, next) => next();
+
+module.exports = { 
+  validate,
+  validateRequest: validate,
+  validateOrder,
+  validateOrderStatus
+};

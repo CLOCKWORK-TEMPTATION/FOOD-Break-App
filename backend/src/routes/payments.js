@@ -25,42 +25,46 @@ const router = express.Router();
  * @desc    إنشاء نية دفع جديدة
  * @access  Private
  */
-router.post(
-  '/create-intent',
-  authenticateToken,
-  [
-    body('amount')
-      .isFloat({ min: 0.01 })
-      .withMessage('المبلغ يجب أن يكون أكبر من صفر'),
-    body('currency')
-      .optional()
-      .isString()
-      .withMessage('العملة غير صالحة'),
-    body('orderId')
-      .optional()
-      .isUUID()
-      .withMessage('معرف الطلب غير صالح')
-  ],
-  validateRequest,
-  createPaymentIntent
-);
+if (createPaymentIntent) {
+  router.post(
+    '/create-intent',
+    authenticateToken,
+    [
+      body('amount')
+        .isFloat({ min: 0.01 })
+        .withMessage('المبلغ يجب أن يكون أكبر من صفر'),
+      body('currency')
+        .optional()
+        .isString()
+        .withMessage('العملة غير صالحة'),
+      body('orderId')
+        .optional()
+        .isUUID()
+        .withMessage('معرف الطلب غير صالح')
+    ],
+    validateRequest,
+    createPaymentIntent
+  );
+}
 
 /**
  * @route   POST /api/v1/payments/confirm
  * @desc    تأكيد الدفع
  * @access  Private
  */
-router.post(
-  '/confirm',
-  authenticateToken,
-  [
-    body('paymentIntentId')
-      .notEmpty()
-      .withMessage('معرف نية الدفع مطلوب')
-  ],
-  validateRequest,
-  confirmPayment
-);
+if (confirmPayment) {
+  router.post(
+    '/confirm',
+    authenticateToken,
+    [
+      body('paymentIntentId')
+        .notEmpty()
+        .withMessage('معرف نية الدفع مطلوب')
+    ],
+    validateRequest,
+    confirmPayment
+  );
+}
 
 /**
  * @route   GET /api/v1/payments

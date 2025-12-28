@@ -95,7 +95,7 @@ const updateCostBudget = async (budgetId, updateData) => {
       name, 
       maxLimit, 
       warningThreshold, 
-      isActive,
+      isActive, 
       expiresAt 
     } = updateData;
 
@@ -634,3 +634,48 @@ const resetBudget = async (budgetId, resetBy) => {
     }
 
     // إنشاء تنبيه إعادة تعيين
+    await createCostAlert({
+      budgetId,
+      userId: resetBy,
+      alertType: 'RESET',
+      severity: 'LOW',
+      title: 'إعادة تعيين الميزانية',
+      message: `تم إعادة تعيين الميزانية "${budget.name}" يدوياً بواسطة المسؤول`,
+      currentAmount: 0,
+      budgetLimit: budget.maxLimit,
+      percentage: 0
+    });
+
+    // تحديث الميزانية
+    const updatedBudget = await prisma.costBudget.update({
+      where: { id: budgetId },
+      data: {
+        usedAmount: 0,
+        updatedAt: new Date()
+      },
+      include: {
+        user: true
+      }
+    });
+
+    logger.info(`تم إعادة تعيين الميزانية: ${budgetId}`);
+
+    return updatedBudget;
+  } catch (error) {
+    logger.error(`خطأ في إعادة تعيين الميزانية: ${error.message}`);
+    throw error;
+  }
+};
+
+module.exports = {
+  createCostBudget,
+  updateCostBudget,
+  checkBudgetAndCreateAlert,
+  createCostAlert,
+  getCostBudget,
+  getAllCostBudgets,
+  getBudgetAlerts,
+  resolveAlert,
+  createDefaultBudgetForUser,
+  resetBudget
+};
