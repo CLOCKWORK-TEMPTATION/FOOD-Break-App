@@ -1,20 +1,58 @@
+/**
+ * Jest Configuration
+ * تكوين اختبارات Jest للمشروع
+ */
+
 module.exports = {
+  // بيئة الاختبار
   testEnvironment: 'node',
-  coveragePathIgnorePatterns: ['/node_modules/'],
-  testMatch: ['**/__tests__/**/*.test.js', '**/?(*.)+(spec|test).js'],
+
+  // مسارات البحث عن الاختبارات
+  testMatch: [
+    '**/__tests__/**/*.test.js',
+    '**/*.test.js',
+    '**/*.spec.js'
+  ],
+
+  // استبعاد المجلدات التالية
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/dist/',
+    '/build/'
+  ],
+
+  // ملفات الإعداد
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
+
+  // تغطية الكود
   collectCoverageFrom: [
     'src/**/*.js',
+    '!src/server.js',
     '!src/**/__tests__/**',
-    '!src/**/__mocks__/**',
+    '!src/**/node_modules/**'
   ],
+
+  // حدود التغطية المطلوبة
   coverageThreshold: {
     global: {
       branches: 70,
       functions: 70,
       lines: 70,
-      statements: 70,
-    },
+      statements: 70
+    }
   },
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+
+  // تقرير التغطية
+  coverageReporters: ['text', 'lcov', 'html'],
+
+  // timeout للاختبارات
   testTimeout: 10000,
+
+  // verbose output
+  verbose: true,
+
+  // تنظيف mocks تلقائياً
+  clearMocks: true,
+  resetMocks: true,
+  restoreMocks: true
 };
