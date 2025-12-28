@@ -5,8 +5,9 @@
 
 const express = require('express');
 const { body, query, param } = require('express-validator');
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 const { validateRequest } = require('../middleware/validation');
+const { paymentLimiter } = require('../middleware/rateLimiter');
 const {
   createPaymentIntent,
   confirmPayment,
@@ -27,7 +28,8 @@ const router = express.Router();
  */
 router.post(
   '/create-intent',
-  authenticate,
+  paymentLimiter,
+  authenticateToken,
   [
     body('amount')
       .isFloat({ min: 0.01 })
@@ -52,7 +54,7 @@ router.post(
  */
 router.post(
   '/confirm',
-  authenticate,
+  authenticateToken,
   [
     body('paymentIntentId')
       .notEmpty()
@@ -69,7 +71,7 @@ router.post(
  */
 router.get(
   '/',
-  authenticate,
+  authenticateToken,
   [
     query('page')
       .optional()
@@ -99,7 +101,7 @@ router.get(
  */
 router.post(
   '/invoices',
-  authenticate,
+  authenticateToken,
   [
     body('orderId')
       .optional()
@@ -125,7 +127,7 @@ router.post(
  */
 router.get(
   '/invoices',
-  authenticate,
+  authenticateToken,
   [
     query('page')
       .optional()
@@ -151,7 +153,7 @@ router.get(
  */
 router.post(
   '/refund',
-  authenticate,
+  authenticateToken,
   [
     body('paymentIntentId')
       .notEmpty()
@@ -176,7 +178,7 @@ router.post(
  */
 router.get(
   '/statistics',
-  authenticate,
+  authenticateToken,
   [
     query('userId')
       .optional()

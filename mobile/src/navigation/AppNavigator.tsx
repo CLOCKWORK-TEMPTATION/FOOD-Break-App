@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { RouteProp } from '@react-navigation/native';
+import { useAuthStore } from '../store';
 
 // Screens
 import HomeScreen from '../screens/HomeScreen';
@@ -101,137 +102,128 @@ const TabNavigator = () => {
 
 // Main App Navigator
 const AppNavigator = () => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Welcome">
-        {/* Auth Flow */}
-        <Stack.Screen 
-          name="Welcome" 
-          component={WelcomeScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen 
-          name="Onboarding" 
-          component={OnboardingScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen 
-          name="Login" 
-          component={LoginScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen 
-          name="Register" 
-          component={RegisterScreen}
-          options={{ headerShown: false }}
-        />
-        
-        {/* Main App */}
-        <Stack.Screen 
-          name="Main" 
-          component={TabNavigator}
-          options={{ headerShown: false }}
-        />
-        
-        {/* Feature Screens */}
-        <Stack.Screen 
-          name="QRScanner" 
-          component={QRScannerScreen}
-          options={{ 
-            headerShown: true,
-            title: 'مسح QR Code',
-            headerStyle: {
-              backgroundColor: '#007AFF',
-            },
-            headerTintColor: '#fff',
-          }}
-        />
-        <Stack.Screen 
-          name="RestaurantDetail" 
-          component={RestaurantDetailScreen}
-          options={{ 
-            headerShown: true,
-            title: 'تفاصيل المطعم',
-            headerStyle: {
-              backgroundColor: '#fff',
-            },
-            headerTintColor: '#007AFF',
-          }}
-        />
-        <Stack.Screen 
-          name="Menu" 
-          component={MenuScreen}
-          options={{ 
-            headerShown: true,
-            title: 'قائمة الطعام',
-            headerStyle: {
-              backgroundColor: '#fff',
-            },
-            headerTintColor: '#007AFF',
-          }}
-        />
-        <Stack.Screen 
-          name="Cart" 
-          component={CartScreen}
-          options={{ 
-            headerShown: true,
-            title: 'سلة الطلبات',
-            headerStyle: {
-              backgroundColor: '#fff',
-            },
-            headerTintColor: '#007AFF',
-          }}
-        />
-        <Stack.Screen 
-          name="OrderConfirmation" 
-          component={OrderConfirmationScreen}
-          options={{ 
-            headerShown: true,
-            title: 'تأكيد الطلب',
-            headerStyle: {
-              backgroundColor: '#fff',
-            },
-            headerTintColor: '#007AFF',
-          }}
-        />
-        <Stack.Screen 
-          name="OrderTracking" 
-          component={OrderTrackingScreen}
-          options={{ 
-            headerShown: true,
-            title: 'تتبع الطلب',
-            headerStyle: {
-              backgroundColor: '#fff',
-            },
-            headerTintColor: '#007AFF',
-          }}
-        />
-        <Stack.Screen
-          name="OrderHistory"
-          component={OrderHistoryScreen}
-          options={{
-            headerShown: true,
-            title: 'سجل الطلبات',
-            headerStyle: {
-              backgroundColor: '#fff',
-            },
-            headerTintColor: '#007AFF',
-          }}
-        />
-        <Stack.Screen
-          name="DietaryPreferences"
-          component={DietaryPreferencesScreen}
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="AllergyManagement"
-          component={AllergyManagementScreen}
-          options={{
-            headerShown: false,
-          }}
-        />
+      <Stack.Navigator>
+        {!isAuthenticated ? (
+          // Auth Flow
+          <Stack.Group screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Welcome" component={WelcomeScreen} />
+            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Register" component={RegisterScreen} />
+          </Stack.Group>
+        ) : (
+          // Main App
+          <Stack.Group>
+            <Stack.Screen 
+              name="Main" 
+              component={TabNavigator}
+              options={{ headerShown: false }}
+            />
+            {/* Feature Screens */}
+            <Stack.Screen 
+              name="QRScanner" 
+              component={QRScannerScreen}
+              options={{ 
+                headerShown: true,
+                title: 'مسح QR Code',
+                headerStyle: {
+                  backgroundColor: '#007AFF',
+                },
+                headerTintColor: '#fff',
+              }}
+            />
+            <Stack.Screen 
+              name="RestaurantDetail" 
+              component={RestaurantDetailScreen}
+              options={{ 
+                headerShown: true,
+                title: 'تفاصيل المطعم',
+                headerStyle: {
+                  backgroundColor: '#fff',
+                },
+                headerTintColor: '#007AFF',
+              }}
+            />
+            <Stack.Screen 
+              name="Menu" 
+              component={MenuScreen}
+              options={{ 
+                headerShown: true,
+                title: 'قائمة الطعام',
+                headerStyle: {
+                  backgroundColor: '#fff',
+                },
+                headerTintColor: '#007AFF',
+              }}
+            />
+            <Stack.Screen 
+              name="Cart" 
+              component={CartScreen}
+              options={{ 
+                headerShown: true,
+                title: 'سلة الطلبات',
+                headerStyle: {
+                  backgroundColor: '#fff',
+                },
+                headerTintColor: '#007AFF',
+              }}
+            />
+            <Stack.Screen 
+              name="OrderConfirmation" 
+              component={OrderConfirmationScreen}
+              options={{ 
+                headerShown: true,
+                title: 'تأكيد الطلب',
+                headerStyle: {
+                  backgroundColor: '#fff',
+                },
+                headerTintColor: '#007AFF',
+              }}
+            />
+            <Stack.Screen 
+              name="OrderTracking" 
+              component={OrderTrackingScreen}
+              options={{ 
+                headerShown: true,
+                title: 'تتبع الطلب',
+                headerStyle: {
+                  backgroundColor: '#fff',
+                },
+                headerTintColor: '#007AFF',
+              }}
+            />
+            <Stack.Screen
+              name="OrderHistory"
+              component={OrderHistoryScreen}
+              options={{
+                headerShown: true,
+                title: 'سجل الطلبات',
+                headerStyle: {
+                  backgroundColor: '#fff',
+                },
+                headerTintColor: '#007AFF',
+              }}
+            />
+            <Stack.Screen
+              name="DietaryPreferences"
+              component={DietaryPreferencesScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="AllergyManagement"
+              component={AllergyManagementScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
+          </Stack.Group>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );

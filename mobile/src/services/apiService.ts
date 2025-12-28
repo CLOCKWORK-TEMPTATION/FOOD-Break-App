@@ -4,6 +4,33 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // ملاحظة: في Expo استخدم EXPO_PUBLIC_API_URL
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
 
+export interface MenuItem {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  category?: string;
+  imageUrl?: string;
+  isAvailable: boolean;
+  restaurantId: string;
+}
+
+export interface OrderData {
+  id?: string;
+  userId?: string;
+  restaurantId?: string;
+  items: Array<{
+    menuItemId: string;
+    quantity: number;
+    price: number;
+    notes?: string;
+  }>;
+  totalAmount: number;
+  status?: string;
+  deliveryAddress?: string;
+  createdAt?: string;
+}
+
 type ApiResponse<T = any> = {
   success: boolean;
   data?: T;
@@ -89,7 +116,7 @@ const menuService = {
 };
 
 const orderService = {
-  submitOrder: async (orderData: any): Promise<ApiResponse> => {
+  submitOrder: async (orderData: OrderData): Promise<ApiResponse> => {
     const response = await apiClient.post('/workflow/orders', orderData);
     return response.data;
   },
@@ -131,6 +158,38 @@ const recommendationService = {
   getRecommendations: async (): Promise<ApiResponse> => {
     const response = await apiClient.get('/recommendations');
     return response.data;
+  },
+
+  saveRecommendation: async (data: any): Promise<ApiResponse> => {
+    const response = await apiClient.post('/recommendations', data);
+    return response.data;
+  },
+
+  getSavedRecommendations: async (): Promise<ApiResponse> => {
+    const response = await apiClient.get('/recommendations/saved');
+    return response.data;
+  },
+
+  updateUserPreferences: async (preferences: any): Promise<ApiResponse> => {
+    const response = await apiClient.put('/recommendations/preferences', preferences);
+    return response.data;
+  },
+
+  getUserPreferences: async (): Promise<ApiResponse> => {
+    const response = await apiClient.get('/recommendations/preferences');
+    return response.data;
+  }
+};
+
+const exceptionService = {
+  requestException: async (exceptionData: any): Promise<ApiResponse> => {
+    const response = await apiClient.post('/exceptions', exceptionData);
+    return response.data;
+  },
+
+  getUserExceptions: async (filters: any = {}): Promise<ApiResponse> => {
+    const response = await apiClient.get('/exceptions', { params: filters });
+    return response.data;
   }
 };
 
@@ -144,11 +203,31 @@ const apiService = {
   orderService,
   notificationService,
   recommendationService,
+  exceptionService,
 
   // اختصارات مستخدمة في بعض أجزاء التطبيق
   login: authService.login,
   register: authService.register,
   logout: authService.logout,
+
+  // وظائف إضافية للتوافق مع الشاشات
+  getNearbyRestaurants: restaurantService.getNearbyRestaurants,
+  getRestaurantMenu: async (restaurantId: string): Promise<ApiResponse> => {
+    const response = await apiClient.get(`/restaurants/${restaurantId}/menu`);
+    return response.data;
+  },
+  getUserOrders: orderService.getUserOrders,
+  getOrder: async (orderId: string): Promise<ApiResponse> => {
+    const response = await apiClient.get(`/orders/${orderId}`);
+    return response.data;
+  },
+  createOrder: orderService.submitOrder,
+  cancelOrder: async (orderId: string, reason: string): Promise<ApiResponse> => {
+    const response = await apiClient.delete(`/orders/${orderId}`, { data: { reason } });
+    return response.data;
+  },
+  getNotifications: notificationService.getNotifications,
+  markNotificationAsRead: notificationService.markAsRead,
 
   accessProjectByQR: async (qrToken: string): Promise<ApiResponse> => {
     const response = await apiClient.post('/qr/access', { qrToken });
@@ -164,7 +243,8 @@ export {
   menuService,
   orderService,
   notificationService,
-  recommendationService
+  recommendationService,
+  exceptionService
 };
 
 export default apiService;

@@ -1,6 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const emotionController = require('../controllers/emotionController');
+const { authenticateToken } = require('../middleware/auth');
+
+// Security: جميع مسارات Emotion تتطلب مصادقة
+// Why: بيانات المشاعر حساسة ويجب حمايتها
+router.use(authenticateToken);
 
 // Mood Routes
 router.post('/log', emotionController.logMood);

@@ -70,6 +70,7 @@ export const BudgetDashboard: React.FC<BudgetDashboardProps> = ({ userRole = 'RE
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleCheckBudget = async (budgetId: string, amount: number) => {
     try {
       const result = await checkBudget(budgetId, amount);

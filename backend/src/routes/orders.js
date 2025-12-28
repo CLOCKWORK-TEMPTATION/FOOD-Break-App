@@ -3,11 +3,11 @@ const router = express.Router();
 const orderService = require('../services/orderService');
 const qrCodeService = require('../services/qrCodeService');
 const notificationService = require('../services/notificationService');
-const auth = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/auth');
 const { validateOrder, validateOrderStatus } = require('../middleware/validation');
 
 // إنشاء طلب جديد
-router.post('/', auth, validateOrder, async (req, res) => {
+router.post('/', authenticateToken, validateOrder, async (req, res) => {
   try {
     const orderData = {
       ...req.body,
@@ -42,10 +42,17 @@ router.post('/', auth, validateOrder, async (req, res) => {
 });
 
 // الحصول على جميع الطلبات
-router.get('/', auth, async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
   try {
+    // Security: فقط ADMIN يمكنه تحديد userId آخر
+    // Why: منع المستخدمين من رؤية طلبات الآخرين عبر query params
+    let userId = req.user.id;
+    if (req.query.userId && (req.user.role === 'ADMIN' || req.user.role === 'PRODUCER')) {
+      userId = req.query.userId;
+    }
+    
     const filters = {
-      userId: req.query.userId || req.user.id,
+      userId,
       projectId: req.query.projectId,
       status: req.query.status,
       page: req.query.page,
@@ -73,7 +80,7 @@ router.get('/', auth, async (req, res) => {
 });
 
 // الحصول على طلب محدد
-router.get('/:id', auth, async (req, res) => {
+router.get('/:id', authenticateToken, async (req, res) => {
   try {
     const order = await orderService.getOrderById(req.params.id);
 
@@ -104,7 +111,7 @@ router.get('/:id', auth, async (req, res) => {
 });
 
 // تحديث حالة الطلب
-router.patch('/:id/status', auth, validateOrderStatus, async (req, res) => {
+router.patch('/:id/status', authenticateToken, validateOrderStatus, async (req, res) => {
   try {
     const { status } = req.body;
     const order = await orderService.updateOrderStatus(req.params.id, status, req.user.id);
@@ -128,7 +135,7 @@ router.patch('/:id/status', auth, validateOrderStatus, async (req, res) => {
 });
 
 // إلغاء الطلب
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', authenticateToken, async (req, res) => {
   try {
     const { reason } = req.body;
     const order = await orderService.cancelOrder(req.params.id, req.user.id, reason);
@@ -186,7 +193,7 @@ router.post('/track/qr', async (req, res) => {
 });
 
 // إحصائيات الطلبات
-router.get('/stats/:projectId', auth, async (req, res) => {
+router.get('/stats/:projectId', authenticateToken, async (req, res) => {
   try {
     const { projectId } = req.params;
     const { startDate, endDate } = req.query;
@@ -210,7 +217,7 @@ router.get('/stats/:projectId', auth, async (req, res) => {
 });
 
 // إرسال تذكير الطلبات
-router.post('/reminder/:projectId', auth, async (req, res) => {
+router.post('/reminder/:projectId', authenticateToken, async (req, res) => {
   try {
     const { projectId } = req.params;
     const notifications = await notificationService.sendOrderReminder(projectId);

@@ -7,7 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { body, param, query } = require('express-validator');
 const workflowController = require('../controllers/workflowController');
-const { auth, producer } = require('../middleware/auth');
+const { authenticateToken, requireProducer } = require('../middleware/auth');
 const { checkOrderWindow, checkDuplicateOrder } = require('../middleware/orderWindow');
 
 /**
@@ -16,14 +16,14 @@ const { checkOrderWindow, checkDuplicateOrder } = require('../middleware/orderWi
  */
 router.post('/validate-qr', [
   body('qrCode').notEmpty().withMessage('رمز QR مفقود')
-], auth, workflowController.validateProjectQR);
+], authenticateToken, workflowController.validateProjectQR);
 
 /**
  * 2. تقديم طلب جديد
  * POST /api/v1/workflow/orders
  * يتحقق من نافذة الطلب ومن عدم وجود طلب مكرر
  */
-router.post('/orders', auth, [
+router.post('/orders', authenticateToken, [
   body('projectId').notEmpty().withMessage('معرف المشروع مفقود'),
   body('restaurantId').notEmpty().withMessage('معرف المطعم مفقود'),
   body('menuItems').isArray().notEmpty().withMessage('قائمة الطلبات مفقودة')
@@ -33,7 +33,7 @@ router.post('/orders', auth, [
  * 3. تأكيد الطلب
  * PATCH /api/v1/workflow/orders/:orderId/confirm
  */
-router.patch('/orders/:orderId/confirm', auth, [
+router.patch('/orders/:orderId/confirm', authenticateToken, [
   param('orderId').notEmpty().withMessage('معرف الطلب مفقود'),
   body('confirmed').isBoolean().withMessage('تأكيد مفقود')
 ], workflowController.confirmOrder);
@@ -42,7 +42,7 @@ router.patch('/orders/:orderId/confirm', auth, [
  * 4. جلب طلبات المستخدم
  * GET /api/v1/workflow/orders?projectId=:projectId&status=:status&page=1&limit=10
  */
-router.get('/orders', auth, [
+router.get('/orders', authenticateToken, [
   query('page').optional().isInt({ min: 1 }),
   query('limit').optional().isInt({ min: 1, max: 100 })
 ], workflowController.getUserOrders);
@@ -51,7 +51,7 @@ router.get('/orders', auth, [
  * 5. جلب الطلبات المجمعة لفريق الإنتاج
  * GET /api/v1/workflow/projects/:projectId/aggregated-orders
  */
-router.get('/projects/:projectId/aggregated-orders', auth, producer, [
+router.get('/projects/:projectId/aggregated-orders', authenticateToken, requireProducer, [
   param('projectId').notEmpty().withMessage('معرف المشروع مفقود')
 ], workflowController.getAggregatedOrders);
 
@@ -59,7 +59,7 @@ router.get('/projects/:projectId/aggregated-orders', auth, producer, [
  * 6. تحديث حالة الطلب (من قبل المطعم/المسؤول)
  * PATCH /api/v1/workflow/orders/:orderId/status
  */
-router.patch('/orders/:orderId/status', auth, producer, [
+router.patch('/orders/:orderId/status', authenticateToken, requireProducer, [
   param('orderId').notEmpty().withMessage('معرف الطلب مفقود'),
   body('status').notEmpty().withMessage('الحالة مفقودة')
 ], workflowController.updateOrderStatus);
@@ -68,7 +68,7 @@ router.patch('/orders/:orderId/status', auth, producer, [
  * 7. إرسال تذكيرات نصف ساعية
  * POST /api/v1/workflow/send-reminders
  */
-router.post('/send-reminders', auth, producer, [
+router.post('/send-reminders', authenticateToken, requireProducer, [
   body('projectId').notEmpty().withMessage('معرف المشروع مفقود')
 ], workflowController.sendOrderReminders);
 
@@ -76,7 +76,7 @@ router.post('/send-reminders', auth, producer, [
  * 8. جلب موقع التوصيل في الوقت الفعلي
  * GET /api/v1/workflow/orders/:orderId/tracking
  */
-router.get('/orders/:orderId/tracking', auth, [
+router.get('/orders/:orderId/tracking', authenticateToken, [
   param('orderId').notEmpty().withMessage('معرف الطلب مفقود')
 ], workflowController.getOrderTracking);
 
@@ -84,7 +84,7 @@ router.get('/orders/:orderId/tracking', auth, [
  * 9. تحديث موقع التوصيل (من قبل سائق التوصيل)
  * PATCH /api/v1/workflow/orders/:orderId/location
  */
-router.patch('/orders/:orderId/location', auth, [
+router.patch('/orders/:orderId/location', authenticateToken, [
   param('orderId').notEmpty().withMessage('معرف الطلب مفقود'),
   body('latitude').isFloat().withMessage('خط العرض غير صحيح'),
   body('longitude').isFloat().withMessage('خط الطول غير صحيح')
@@ -94,7 +94,7 @@ router.patch('/orders/:orderId/location', auth, [
  * 10. تسليم الطلب
  * PATCH /api/v1/workflow/orders/:orderId/deliver
  */
-router.patch('/orders/:orderId/deliver', auth, [
+router.patch('/orders/:orderId/deliver', authenticateToken, [
   param('orderId').notEmpty().withMessage('معرف الطلب مفقود')
 ], workflowController.deliverOrder);
 

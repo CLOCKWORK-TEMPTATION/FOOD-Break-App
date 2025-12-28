@@ -1,16 +1,46 @@
 const express = require('express');
 const { body } = require('express-validator');
+const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const { authenticateToken } = require('../middleware/auth');
 const { validate } = require('../middleware/validation');
+
+// Security: Rate Limiting للحماية من هجمات Brute Force
+// Why: منع محاولات تسجيل الدخول المتكررة
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 دقيقة
+  max: 10, // 10 محاولات كحد أقصى
+  message: {
+    success: false,
+    error: {
+      code: 'TOO_MANY_REQUESTS',
+      message: 'محاولات كثيرة جداً، يرجى المحاولة لاحقاً'
+    }
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Rate limiting أقل صرامة للتسجيل
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // ساعة واحدة
+  max: 5, // 5 حسابات كحد أقصى
+  message: {
+    success: false,
+    error: {
+      code: 'TOO_MANY_REGISTRATIONS',
+      message: 'تم إنشاء حسابات كثيرة، يرجى المحاولة لاحقاً'
+    }
+  }
+});
 
 /**
  * @route   POST /api/v1/auth/register
  * @desc    تسجيل مستخدم جديد
  * @access  Public
  */
-router.post('/register', [
+router.post('/register', registerLimiter, [
   body('email')
     .isEmail()
     .withMessage('البريد الإلكتروني غير صالح')
@@ -41,7 +71,7 @@ router.post('/register', [
  * @desc    تسجيل الدخول
  * @access  Public
  */
-router.post('/login', [
+router.post('/login', authLimiter, [
   body('email')
     .isEmail()
     .withMessage('البريد الإلكتروني غير صالح')

@@ -145,21 +145,24 @@ const deleteMenuItem = async (menuItemId) => {
 
 /**
  * خدمة القوائم - الحصول على القائمة الأساسية (Core Menu)
+ * Why: Prisma لا يدعم where داخل include - نستخدم الفلترة على مستوى الاستعلام الرئيسي
  * @returns {Promise<Array>} - عناصر القائمة الأساسية
  */
 const getCoreMenu = async () => {
   try {
+    // جلب عناصر القائمة مع فلترة المطاعم الشريكة والنشطة
     const menuItems = await prisma.menuItem.findMany({
       where: {
         menuType: 'CORE',
-        isAvailable: true
+        isAvailable: true,
+        // فلترة حسب المطعم على مستوى الاستعلام الرئيسي
+        restaurant: {
+          isPartner: true,
+          isActive: true
+        }
       },
       include: {
         restaurant: {
-          where: {
-            isPartner: true,
-            isActive: true
-          },
           select: {
             id: true,
             name: true,
@@ -169,13 +172,21 @@ const getCoreMenu = async () => {
         }
       },
       orderBy: [
-        { qualityScore: 'desc' },
-        { restaurant: { rating: 'desc' } }
+        { qualityScore: 'desc' }
       ]
     });
 
+    // ترتيب إضافي حسب تقييم المطعم بعد الجلب
+    const sortedItems = menuItems.sort((a, b) => {
+      // ترتيب أساسي حسب qualityScore (تم بالفعل)
+      // ترتيب ثانوي حسب تقييم المطعم
+      const ratingA = a.restaurant?.rating || 0;
+      const ratingB = b.restaurant?.rating || 0;
+      return ratingB - ratingA;
+    });
+
     // تجميع حسب الفئة
-    const categorizedMenu = menuItems.reduce((acc, item) => {
+    const categorizedMenu = sortedItems.reduce((acc, item) => {
       const category = item.category || 'أخرى';
       if (!acc[category]) {
         acc[category] = [];
@@ -185,7 +196,7 @@ const getCoreMenu = async () => {
     }, {});
 
     return {
-      totalItems: menuItems.length,
+      totalItems: sortedItems.length,
       categories: Object.keys(categorizedMenu).length,
       menu: categorizedMenu
     };

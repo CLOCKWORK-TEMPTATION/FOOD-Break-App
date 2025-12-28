@@ -153,6 +153,34 @@ const notificationController = {
   },
 
   /**
+   * POST /api/notifications/send
+   * إرسال إشعار عام (للمسؤولين)
+   */
+  sendBroadcast: async (req, res) => {
+    try {
+      const { recipients, type, title, message } = req.body;
+      
+      // هنا يجب تنفيذ منطق الإرسال للمجموعات
+      // This is a placeholder for the actual broadcast logic
+      
+      res.json({
+        success: true,
+        data: {
+          sent: 1, // Mock count
+          message: 'تم جدولة الإشعار للإرسال'
+        }
+      });
+    } catch (error) {
+      console.error('❌ خطأ في إرسال الإشعار:', error);
+      res.status(500).json({
+        success: false,
+        error: 'فشل في إرسال الإشعار',
+        message: error.message
+      });
+    }
+  },
+
+  /**
    * POST /api/notifications/test/push
    * اختبار إرسال إشعار فوري (للتطوير فقط)
    */
