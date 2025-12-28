@@ -11,7 +11,8 @@ describe('Order Controller', () => {
       user: { id: 'user-123', role: 'REGULAR' },
       body: {},
       query: {},
-      params: {}
+      params: {},
+      t: jest.fn((key) => key) // Mock localization function
     };
     res = {
       status: jest.fn().mockReturnThis(),
