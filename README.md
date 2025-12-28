@@ -118,9 +118,15 @@ See [TODO.md](./TODO.md) for the complete development roadmap.
 
 ## 📝 Documentation
 
+- [Architecture Overview](./docs/architecture.md)
+- [Database Schema](./docs/database.md)
 - [API Documentation](./docs/api.md) (Coming soon)
-- [Database Schema](./docs/database.md) (Coming soon)
 - [Mobile App Guide](./docs/mobile.md) (Coming soon)
+
+### Feature-Specific Documentation
+- [✅ **Emotion-Based AI System**](./docs/EMOTION_AI_FEATURE.md) - Complete emotion tracking, sentiment analysis, and AI-powered food recommendations
+  - [Quick Activation Guide](./docs/EMOTION_AI_ACTIVATION.md)
+  - [Database Schema](./docs/EMOTION_AI_SCHEMA.md)
 
 ## 🤝 Contributing
 
