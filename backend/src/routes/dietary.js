@@ -75,7 +75,7 @@ router.get('/label-types', dietaryController.getAvailableLabelTypes);
 router.get(
   '/labels/stats/:restaurantId',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'RESTAURANT_OWNER', 'RESTAURANT_MANAGER']),
   dietaryController.getRestaurantLabelStats
 );
 
@@ -92,7 +92,7 @@ router.get('/allergen-info/:menuItemId', dietaryController.getAllergenInfo);
 router.post(
   '/labels/:menuItemId',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'RESTAURANT_OWNER', 'RESTAURANT_MANAGER']),
   dietaryController.updateFoodLabel
 );
 
@@ -100,7 +100,7 @@ router.post(
 router.post(
   '/labels/:menuItemId/verify',
   authenticateToken,
-  authorizeRoles('ADMIN'),
+  authorizeRoles(['ADMIN']),
   dietaryController.verifyFoodLabel
 );
 
@@ -108,7 +108,7 @@ router.post(
 router.post(
   '/labels/:menuItemId/unverify',
   authenticateToken,
-  authorizeRoles('ADMIN'),
+  authorizeRoles(['ADMIN']),
   dietaryController.unverifyFoodLabel
 );
 
@@ -128,7 +128,7 @@ router.post('/messages/auto/:orderId', authenticateToken, dietaryController.crea
 router.get(
   '/messages/stats/:restaurantId',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'RESTAURANT_OWNER', 'RESTAURANT_MANAGER']),
   dietaryController.getMessageStats
 );
 
@@ -136,7 +136,7 @@ router.get(
 router.get(
   '/messages/urgent/:restaurantId',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'RESTAURANT_OWNER', 'RESTAURANT_MANAGER']),
   dietaryController.getUrgentMessages
 );
 
@@ -147,7 +147,7 @@ router.get('/messages/order/:orderId', authenticateToken, dietaryController.getO
 router.get(
   '/messages/restaurant/:restaurantId',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'RESTAURANT_OWNER', 'RESTAURANT_MANAGER']),
   dietaryController.getRestaurantMessages
 );
 
@@ -155,7 +155,7 @@ router.get(
 router.post(
   '/messages/:messageId/acknowledge',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'RESTAURANT_OWNER', 'RESTAURANT_MANAGER']),
   dietaryController.acknowledgeMessage
 );
 
@@ -163,7 +163,7 @@ router.post(
 router.post(
   '/messages/:messageId/reply',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'RESTAURANT_OWNER', 'RESTAURANT_MANAGER']),
   dietaryController.replyToMessage
 );
 

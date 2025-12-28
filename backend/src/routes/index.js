@@ -20,9 +20,11 @@ const orderRoutes = require('./orders');
 const projectRoutes = require('./projects');
 const mlRoutes = require('./mlRoutes');
 const reminderRoutes = require('./reminders');
+const adminRoutes = require('./admin');
 
 // ربط Routes
 router.use('/auth', authRoutes);
+router.use('/admin', adminRoutes);
 router.use('/menus', menuRoutes);
 router.use('/restaurants', restaurantRoutes);
 router.use('/exceptions', exceptionRoutes);

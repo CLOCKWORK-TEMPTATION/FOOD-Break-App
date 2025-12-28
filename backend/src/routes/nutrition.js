@@ -85,7 +85,7 @@ router.get('/reports/weekly', nutritionController.getReports);
  */
 router.post(
   '/challenges',
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'PRODUCER']),
   nutritionController.createChallenge
 );
 

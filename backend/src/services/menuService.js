@@ -149,33 +149,14 @@ const deleteMenuItem = async (menuItemId) => {
  */
 const getCoreMenu = async () => {
   try {
-    // أولاً: جلب المطاعم الشريكة النشطة
-    const partnerRestaurants = await prisma.restaurant.findMany({
-      where: {
-        isPartner: true,
-        isActive: true
-      },
-      select: {
-        id: true
-      }
-    });
-
-    const partnerRestaurantIds = partnerRestaurants.map(r => r.id);
-
-    if (partnerRestaurantIds.length === 0) {
-      return {
-        totalItems: 0,
-        categories: 0,
-        menu: {}
-      };
-    }
-
-    // ثانياً: جلب عناصر القائمة من المطاعم الشريكة فقط
     const menuItems = await prisma.menuItem.findMany({
       where: {
         menuType: 'CORE',
         isAvailable: true,
-        restaurantId: { in: partnerRestaurantIds }
+        restaurant: {
+          isPartner: true,
+          isActive: true
+        }
       },
       include: {
         restaurant: {

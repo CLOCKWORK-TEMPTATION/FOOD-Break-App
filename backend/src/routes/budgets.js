@@ -14,7 +14,7 @@ const router = express.Router();
 router.post(
   '/',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'PRODUCER']),
   [
     body('name')
       .trim()
@@ -90,7 +90,7 @@ router.get(
 router.put(
   '/:budgetId',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'PRODUCER']),
   [
     param('budgetId')
       .isUUID()
@@ -174,7 +174,7 @@ router.get(
 router.put(
   '/alerts/:alertId/resolve',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'PRODUCER']),
   [
     param('alertId')
       .isUUID()
@@ -188,7 +188,7 @@ router.put(
 router.post(
   '/default',
   authenticateToken,
-  authorizeRoles('ADMIN'),
+  authorizeRoles(['ADMIN']),
   [
     body('userId')
       .isUUID()
@@ -205,7 +205,7 @@ router.post(
 router.put(
   '/:budgetId/reset',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'PRODUCER']),
   [
     param('budgetId')
       .isUUID()
@@ -240,7 +240,7 @@ router.get(
 router.get(
   '/analytics/summary',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'PRODUCER']),
   [
     query('startDate')
       .optional()

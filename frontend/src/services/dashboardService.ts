@@ -96,13 +96,13 @@ export interface PredictiveInsight {
 export const statsService = {
   // جلب إحصائيات لوحة التحكم
   async getDashboardStats(): Promise<DashboardStats> {
-    const response = await apiClient.get('/admin/stats');
+    const response = await apiClient.get('/admin/dashboard/stats');
     return response.data.data;
   },
 
   // جلب إحصائيات لفترة زمنية محددة
   async getStatsByDateRange(startDate: string, endDate: string): Promise<DashboardStats> {
-    const response = await apiClient.get('/admin/stats', {
+    const response = await apiClient.get('/admin/dashboard/stats', {
       params: { startDate, endDate },
     });
     return response.data.data;
@@ -127,7 +127,7 @@ export const ordersService = {
     limit?: number;
     search?: string;
   }): Promise<{ orders: Order[]; total: number; page: number; totalPages: number }> {
-    const response = await apiClient.get('/admin/orders', { params });
+    const response = await apiClient.get('/orders', { params });
     return response.data.data;
   },
 
@@ -168,7 +168,7 @@ export const restaurantsService = {
     limit?: number;
     search?: string;
   }): Promise<{ restaurants: Restaurant[]; total: number }> {
-    const response = await apiClient.get('/admin/restaurants', { params });
+    const response = await apiClient.get('/restaurants', { params });
     return response.data.data;
   },
 
@@ -256,7 +256,7 @@ export const notificationsService = {
     title: string;
     message: string;
   }): Promise<{ sent: number }> {
-    const response = await apiClient.post('/admin/notifications/send', data);
+    const response = await apiClient.post('/notifications/send', data);
     return response.data.data;
   },
 

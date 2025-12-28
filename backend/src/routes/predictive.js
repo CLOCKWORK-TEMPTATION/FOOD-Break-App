@@ -36,35 +36,35 @@ router.patch('/suggestions/:suggestionId', authenticateToken, predictiveControll
 router.get(
   '/delivery/schedule',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'PRODUCER']),
   predictiveController.getDeliverySchedule
 );
 
 router.post(
   '/delivery/schedule/predict',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'PRODUCER']),
   predictiveController.predictDeliverySchedule
 );
 
 router.get(
   '/delivery/peak-times',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'PRODUCER']),
   predictiveController.getPeakTimes
 );
 
 router.get(
   '/delivery/capacity',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'PRODUCER']),
   predictiveController.getCapacityRecommendations
 );
 
 router.post(
   '/delivery/optimize-routes',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'PRODUCER']),
   predictiveController.optimizeRoutes
 );
 
@@ -75,14 +75,14 @@ router.post(
 router.get(
   '/forecasts/restaurant/:restaurantId',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'PRODUCER']),
   predictiveController.getQuantityForecasts
 );
 
 router.post(
   '/forecasts/restaurant/:restaurantId/generate',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'PRODUCER']),
   predictiveController.generateForecasts
 );
 
@@ -93,42 +93,42 @@ router.post(
 router.post(
   '/reports/restaurant/:restaurantId/generate',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'PRODUCER']),
   predictiveController.generateDemandReport
 );
 
 router.get(
   '/reports/restaurant/:restaurantId',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'PRODUCER']),
   predictiveController.getRestaurantReports
 );
 
 router.post(
   '/reports/:reportId/send',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'PRODUCER']),
   predictiveController.sendReportToRestaurant
 );
 
 router.post(
   '/reports/:reportId/response',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'PRODUCER']),
   predictiveController.recordRestaurantResponse
 );
 
 router.get(
   '/reports/:reportId/compare',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'PRODUCER']),
   predictiveController.compareActualVsPredicted
 );
 
 router.get(
   '/reports/negotiations/summary',
   authenticateToken,
-  authorizeRoles('ADMIN', 'PRODUCER'),
+  authorizeRoles(['ADMIN', 'PRODUCER']),
   predictiveController.getNegotiationsSummary
 );
 

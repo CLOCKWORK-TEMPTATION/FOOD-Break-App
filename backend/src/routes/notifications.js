@@ -3,7 +3,19 @@ const router = express.Router();
 const { query, param } = require('express-validator');
 
 const notificationService = require('../services/notificationService');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken, authorizeRoles } = require('../middleware/auth');
+
+/**
+ * @route   POST /api/v1/notifications/send
+ * @desc    إرسال إشعار عام
+ * @access  Admin/Producer
+ */
+router.post(
+  '/send',
+  authenticateToken,
+  authorizeRoles(['ADMIN', 'PRODUCER']),
+  notificationController.sendBroadcast
+);
 
 /**
  * @route   GET /api/v1/notifications

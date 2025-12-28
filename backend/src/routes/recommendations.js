@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const recommendationController = require('../controllers/recommendationController');
 const { authenticateToken } = require('../middleware/auth');
-const { body } = require('express-validator');
 
 // جميع المسارات تحتاج إلى مصادقة
 router.use(authenticateToken);
