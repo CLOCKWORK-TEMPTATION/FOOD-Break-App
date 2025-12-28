@@ -1,4 +1,5 @@
 const emotionService = require('../services/emotionService');
+const logger = require('../utils/logger');
 
 class EmotionController {
 
@@ -6,20 +7,14 @@ class EmotionController {
   async logMood(req, res) {
     try {
       const { mood, intensity, notes, context } = req.body;
-      // SECURITY: userId MUST come from authenticated token only
-      const userId = req.user?.id;
-
-      if (!userId) {
-        return res.status(401).json({ 
-          success: false,
-          message: 'Unauthorized: Authentication required' 
-        });
-      }
+      // Security: استخدام userId من الـ token فقط - لا نقبله من body
+      // Why: منع المستخدمين من تسجيل حالات مزاجية باسم آخرين
+      const userId = req.user.id;
 
       const log = await emotionService.logMood(userId, { mood, intensity, notes, context });
       res.json({ success: true, data: log });
     } catch (error) {
-      console.error(error);
+      logger.error('خطأ في تسجيل الحالة المزاجية:', error.message);
       res.status(500).json({ success: false, message: 'Failed to log mood' });
     }
   }
@@ -28,27 +23,15 @@ class EmotionController {
   async getRecommendations(req, res) {
     try {
       const { mood } = req.query;
-      // SECURITY: userId MUST come from authenticated token only
-      const userId = req.user?.id;
+      // Security: استخدام userId من الـ token فقط
+      const userId = req.user.id;
 
-      if (!userId) {
-        return res.status(401).json({ 
-          success: false,
-          message: 'Unauthorized: Authentication required' 
-        });
-      }
-
-      if (!mood) {
-        return res.status(400).json({ 
-          success: false,
-          message: 'Mood is required' 
-        });
-      }
+      if (!mood) return res.status(400).json({ message: 'Mood is required' });
 
       const recs = await emotionService.getMoodRecommendations(userId, mood);
       res.json({ success: true, data: recs });
     } catch (error) {
-      console.error(error);
+      logger.error('خطأ في جلب التوصيات:', error.message);
       res.status(500).json({ success: false, message: 'Failed to get recommendations' });
     }
   }
@@ -57,15 +40,8 @@ class EmotionController {
   async updateConsent(req, res) {
     try {
       const { type, status, version } = req.body;
-      // SECURITY: userId MUST come from authenticated token only
-      const userId = req.user?.id;
-
-      if (!userId) {
-        return res.status(401).json({ 
-          success: false,
-          message: 'Unauthorized: Authentication required' 
-        });
-      }
+      // Security: استخدام userId من الـ token فقط
+      const userId = req.user.id;
 
       const meta = {
         ip: req.ip,
@@ -76,7 +52,7 @@ class EmotionController {
       const record = await emotionService.recordConsent(userId, type, status, meta);
       res.json({ success: true, data: record });
     } catch (error) {
-      console.error(error);
+      logger.error('خطأ في تحديث الموافقة:', error.message);
       res.status(500).json({ success: false, message: 'Failed to update consent' });
     }
   }

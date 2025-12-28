@@ -2,6 +2,25 @@ const logger = require('../utils/logger');
 const { captureException } = require('../utils/monitoring');
 
 /**
+ * تصفية البيانات الحساسة من الـ body قبل التسجيل
+ * Security: منع تسريب كلمات المرور والتوكنات في السجلات
+ */
+const sanitizeBody = (body) => {
+  if (!body || typeof body !== 'object') return body;
+  
+  const sensitiveFields = ['password', 'passwordHash', 'token', 'accessToken', 
+    'refreshToken', 'secret', 'apiKey', 'creditCard', 'cvv', 'ssn'];
+  
+  const sanitized = { ...body };
+  for (const field of sensitiveFields) {
+    if (sanitized[field]) {
+      sanitized[field] = '[REDACTED]';
+    }
+  }
+  return sanitized;
+};
+
+/**
  * Middleware لمعالجة الأخطاء المركزية
  * @param {Error} err - الخطأ
  * @param {Object} req - طلب Express
@@ -9,36 +28,23 @@ const { captureException } = require('../utils/monitoring');
  * @param {Function} next - الوظيفة التالية
  */
 const errorHandler = (err, req, res, next) => {
-  // تسجيل الخطأ - إخفاء البيانات الحساسة من req.body
-  const sanitizedBody = req.body ? {
-    ...Object.keys(req.body).reduce((acc, key) => {
-      // إخفاء الحقول الحساسة
-      if (['password', 'passwordHash', 'token', 'secret', 'apiKey', 'creditCard', 'cvv'].includes(key.toLowerCase())) {
-        acc[key] = '[REDACTED]';
-      } else if (typeof req.body[key] === 'object' && req.body[key] !== null) {
-        acc[key] = '[OBJECT]';
-      } else {
-        acc[key] = req.body[key];
-      }
-      return acc;
-    }, {})
-  } : undefined;
-
+  // Security: تصفية البيانات الحساسة قبل التسجيل
+  const safeBody = sanitizeBody(req.body);
+  
+  // تسجيل الخطأ
   logger.error({
     message: err.message,
-    stack: err.stack,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
     path: req.path,
     method: req.method,
-    query: req.query,
-    ...(sanitizedBody && { body: sanitizedBody })
+    // تسجيل body فقط في بيئة التطوير مع تصفية البيانات الحساسة
+    body: process.env.NODE_ENV === 'development' ? safeBody : undefined
   });
 
-  // Monitoring (Sentry) - بدون البيانات الحساسة
+  // Monitoring (Sentry) - بدون بيانات حساسة
   captureException(err, {
     path: req.path,
-    method: req.method,
-    query: req.query,
-    ...(sanitizedBody && { body: sanitizedBody })
+    method: req.method
   });
 
   // Prisma errors

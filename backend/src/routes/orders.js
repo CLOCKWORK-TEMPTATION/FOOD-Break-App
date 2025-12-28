@@ -44,8 +44,15 @@ router.post('/', authenticateToken, validateOrder, async (req, res) => {
 // الحصول على جميع الطلبات
 router.get('/', authenticateToken, async (req, res) => {
   try {
+    // Security: فقط ADMIN يمكنه تحديد userId آخر
+    // Why: منع المستخدمين من رؤية طلبات الآخرين عبر query params
+    let userId = req.user.id;
+    if (req.query.userId && (req.user.role === 'ADMIN' || req.user.role === 'PRODUCER')) {
+      userId = req.query.userId;
+    }
+    
     const filters = {
-      userId: req.query.userId || req.user.id,
+      userId,
       projectId: req.query.projectId,
       status: req.query.status,
       page: req.query.page,

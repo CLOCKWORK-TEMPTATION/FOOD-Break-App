@@ -67,74 +67,65 @@ export default function AdminDashboard() {
   // تحميل البيانات
   const loadDashboardData = useCallback(async () => {
     try {
-      // محاولة جلب البيانات من API
-      try {
-        const [statsData, ordersData, restaurantsData] = await Promise.all([
-          statsService.getDashboardStats(),
-          ordersService.getOrders({ limit: 20 }),
-          restaurantsService.getRestaurants({ limit: 10 }),
-        ]);
+      const [statsData, ordersData, restaurantsData] = await Promise.all([
+        statsService.getDashboardStats(),
+        ordersService.getOrders({ limit: 20 }),
+        restaurantsService.getRestaurants({ limit: 10 }),
+      ]);
 
-        setStats(statsData);
-        // تحويل البيانات للشكل المحلي
-        setOrders(ordersData.orders.map(o => ({
-          id: o.id,
-          orderNumber: o.orderNumber || `#${o.id.slice(-6)}`,
-          customer: {
-            name: o.user?.name || 'غير محدد',
-            phone: o.user?.phone || '',
-            avatar: o.user?.name?.charAt(0) || 'ز',
-          },
-          restaurant: o.restaurant?.name || 'غير محدد',
-          status: o.status,
-          amount: o.totalAmount,
-          time: o.estimatedDeliveryTime,
-          items: o.items,
-        })));
-        setRestaurants(restaurantsData.restaurants.map(r => ({
-          id: r.id,
-          name: r.name,
-          category: r.cuisine?.[0] || 'عام',
-          todayOrders: r.todayOrders,
-          revenue: r.todayRevenue,
-          rating: r.rating,
-          isActive: r.isActive,
-        })));
-      } catch (apiError) {
-        console.warn('فشل جلب البيانات من API، استخدام بيانات تجريبية:', apiError);
-
-        // بيانات تجريبية
+      setStats(statsData);
+      // تحويل البيانات للشكل المحلي
+      setOrders(ordersData.orders.map(o => ({
+        id: o.id,
+        orderNumber: o.orderNumber || `#${o.id.slice(-6)}`,
+        customer: {
+          name: o.user?.name || 'غير محدد',
+          phone: o.user?.phone || '',
+          avatar: o.user?.name?.charAt(0) || 'ز',
+        },
+        restaurant: o.restaurant?.name || 'غير محدد',
+        status: o.status,
+        amount: o.totalAmount,
+        time: o.estimatedDeliveryTime,
+        items: o.items,
+      })));
+      setRestaurants(restaurantsData.restaurants.map(r => ({
+        id: r.id,
+        name: r.name,
+        category: r.cuisine?.[0] || 'عام',
+        todayOrders: r.todayOrders,
+        revenue: r.todayRevenue,
+        rating: r.rating,
+        isActive: r.isActive,
+      })));
+    } catch (apiError) {
+      console.error('فشل جلب البيانات من API:', apiError);
+      
+      // إظهار رسالة للمستخدم بدلاً من استخدام بيانات وهمية
+      // Why: البيانات الوهمية قد تخفي مشاكل الاتصال
+      if (!stats) {
         setStats({
-          totalOrders: 245,
-          pendingOrders: 12,
-          completedOrders: 233,
-          cancelledOrders: 5,
-          totalRevenue: 12450,
-          avgOrderValue: 50.8,
-          avgDeliveryTime: 32,
-          todayOrders: 45,
-          todayRevenue: 2250,
+          totalOrders: 0,
+          pendingOrders: 0,
+          completedOrders: 0,
+          cancelledOrders: 0,
+          totalRevenue: 0,
+          avgOrderValue: 0,
+          avgDeliveryTime: 0,
+          todayOrders: 0,
+          todayRevenue: 0,
         });
-
-        setOrders([
-          { id: 'ord-1', orderNumber: '#10001', customer: { name: 'أحمد محمد', phone: '0501234567', avatar: 'أ' }, restaurant: 'مطعم البيت الشامي', status: 'PENDING', amount: 85, time: 25, items: [] },
-          { id: 'ord-2', orderNumber: '#10002', customer: { name: 'سارة علي', phone: '0507654321', avatar: 'س' }, restaurant: 'مطعم الريف', status: 'CONFIRMED', amount: 120, time: 30, items: [] },
-          { id: 'ord-3', orderNumber: '#10003', customer: { name: 'محمد خالد', phone: '0509876543', avatar: 'م' }, restaurant: 'البيتزا الإيطالية', status: 'PREPARING', amount: 95, time: 20, items: [] },
-          { id: 'ord-4', orderNumber: '#10004', customer: { name: 'فاطمة أحمد', phone: '0502345678', avatar: 'ف' }, restaurant: 'مطعم البيت الشامي', status: 'OUT_FOR_DELIVERY', amount: 150, time: 10, items: [] },
-          { id: 'ord-5', orderNumber: '#10005', customer: { name: 'عمر حسن', phone: '0503456789', avatar: 'ع' }, restaurant: 'برجر كينج', status: 'DELIVERED', amount: 75, time: 0, items: [] },
-        ]);
-
-        setRestaurants([
-          { id: 'rest-1', name: 'مطعم البيت الشامي', category: 'شامي', todayOrders: 55, revenue: 2750, rating: 4.7, isActive: true },
-          { id: 'rest-2', name: 'مطعم الريف', category: 'سعودي', todayOrders: 42, revenue: 2100, rating: 4.5, isActive: true },
-          { id: 'rest-3', name: 'البيتزا الإيطالية', category: 'إيطالي', todayOrders: 38, revenue: 1900, rating: 4.6, isActive: true },
-          { id: 'rest-4', name: 'برجر كينج', category: 'وجبات سريعة', todayOrders: 60, revenue: 3000, rating: 4.3, isActive: false },
-        ]);
       }
-    } catch (error) {
-      console.error('فشل تحميل البيانات:', error);
+      
+      // في حالة الفشل، الاحتفاظ بالبيانات الموجودة أو إظهار قوائم فارغة
+      if (orders.length === 0) {
+        setOrders([]);
+      }
+      if (restaurants.length === 0) {
+        setRestaurants([]);
+      }
     }
-  }, []);
+  }, [stats, orders.length, restaurants.length]);
 
   useEffect(() => {
     loadDashboardData();

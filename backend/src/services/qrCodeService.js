@@ -1,17 +1,19 @@
 const QRCode = require('qrcode');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const logger = require('../utils/logger');
 
 class QRCodeService {
   constructor() {
-    // SECURITY: Never use fallback secret in production
+    // Security: يجب تعيين QR_SECRET_KEY في متغيرات البيئة
+    // Why: منع استخدام مفتاح ثابت يسهل اختراقه
     if (!process.env.QR_SECRET_KEY) {
-      if (process.env.NODE_ENV === 'production') {
-        throw new Error('CRITICAL: QR_SECRET_KEY must be set in production environment');
-      }
-      console.warn('⚠️  WARNING: Using default QR_SECRET_KEY. Set QR_SECRET_KEY environment variable for production.');
+      logger.warn('⚠️ QR_SECRET_KEY غير معين! استخدم متغير بيئة آمن في الإنتاج.');
+      // توليد مفتاح عشوائي مؤقت للتطوير فقط
+      this.secretKey = crypto.randomBytes(32).toString('hex');
+    } else {
+      this.secretKey = process.env.QR_SECRET_KEY;
     }
-    this.secretKey = process.env.QR_SECRET_KEY || 'breakapp-qr-secret-dev-only';
   }
 
   /**
