@@ -12,9 +12,9 @@ Phase 1: Foundation (MVP)
  Implement QR code generation for projects (موجود كملف لكن غير مفعّل/مربوط بالكامل)
  Create QR code scanning and access management (موجود بالموبايل، يحتاج ربط End-to-End مع API)
  Build daily order submission system (موجود جزئياً؛ يحتاج تفعيل/تكامل نهائي)
- Order window (first hour of shooting)
- Meal selection interface (على الموبايل موجود UI، يحتاج ربط API نهائي)
- Order confirmation (موجود UI، يحتاج ربط API نهائي)
+ ✅ Order window (first hour of shooting) - COMPLETED
+ ✅ Meal selection interface API integration - COMPLETED
+ ✅ Order confirmation API integration - COMPLETED
  Implement order aggregation for production team (جزئي)
  Create notification system (غير مكتمل: Push/SMS/سيرفر فعلي)
  Half-hourly reminders for non-submitters

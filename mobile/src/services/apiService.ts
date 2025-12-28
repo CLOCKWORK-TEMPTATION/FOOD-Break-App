@@ -248,6 +248,99 @@ class ApiService {
   async getDeliveryUpdates(orderId: string) {
     return this.get(`/orders/${orderId}/delivery-updates`);
   }
+
+  // === خدمات سير العمل (Workflow) ===
+
+  // التحقق من صحة رمز QR
+  async validateProjectQR(qrCode: string) {
+    return this.post('/workflow/validate-qr', { qrCode });
+  }
+
+  // تقديم طلب جديد (Workflow)
+  async submitOrder(orderData: {
+    userId: string;
+    projectId: string;
+    restaurantId: string;
+    menuItems: Array<{
+      menuItemId: string;
+      quantity: number;
+    }>;
+    notes?: string;
+    deliveryAddress?: string;
+  }) {
+    return this.post('/workflow/orders', orderData);
+  }
+
+  // تأكيد الطلب
+  async confirmOrder(orderId: string, confirmed: boolean) {
+    return this.patch(`/workflow/orders/${orderId}/confirm`, { confirmed });
+  }
+
+  // جلب طلبات المستخدم من Workflow
+  async getWorkflowOrders(params?: {
+    projectId?: string;
+    status?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const query = new URLSearchParams();
+    if (params?.projectId) query.append('projectId', params.projectId);
+    if (params?.status) query.append('status', params.status);
+    if (params?.page) query.append('page', params.page.toString());
+    if (params?.limit) query.append('limit', params.limit.toString());
+
+    const queryString = query.toString();
+    return this.get(`/workflow/orders${queryString ? '?' + queryString : ''}`);
+  }
+
+  // جلب الطلبات المجمعة للمشروع
+  async getAggregatedOrders(projectId: string) {
+    return this.get(`/workflow/projects/${projectId}/aggregated-orders`);
+  }
+
+  // تحديث حالة الطلب
+  async updateOrderStatus(orderId: string, status: string) {
+    return this.patch(`/workflow/orders/${orderId}/status`, { status });
+  }
+
+  // إرسال تذكيرات الطلبات
+  async sendOrderReminders(projectId: string) {
+    return this.post('/workflow/send-reminders', { projectId });
+  }
+
+  // تتبع الطلب
+  async trackOrder(orderId: string) {
+    return this.get(`/workflow/orders/${orderId}/tracking`);
+  }
+
+  // تحديث موقع التوصيل
+  async updateDeliveryLocation(orderId: string, latitude: number, longitude: number) {
+    return this.patch(`/workflow/orders/${orderId}/location`, { latitude, longitude });
+  }
+
+  // تسليم الطلب
+  async deliverOrder(orderId: string) {
+    return this.patch(`/workflow/orders/${orderId}/deliver`, {});
+  }
+
+  // === Order Service (للتوافق مع الشاشات الحالية) ===
+  orderService = {
+    submitOrder: async (orderData: any) => {
+      return this.submitOrder(orderData);
+    },
+    getOrders: async (params?: any) => {
+      return this.getWorkflowOrders(params);
+    },
+    getOrder: async (orderId: string) => {
+      return this.getOrder(orderId);
+    },
+    cancelOrder: async (orderId: string, reason: string) => {
+      return this.cancelOrder(orderId, reason);
+    },
+    trackOrder: async (orderId: string) => {
+      return this.trackOrder(orderId);
+    }
+  };
 }
 
 // إنشاء مثيل واحد من الخدمة

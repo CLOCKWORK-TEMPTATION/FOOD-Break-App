@@ -7,61 +7,73 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import apiService from '../services/apiService';
 
 const OrderConfirmationScreen = ({ route, navigation }) => {
-  const { selectedItems, totalPrice, projectData } = route.params;
+  const { selectedItems, totalPrice, projectData, restaurantId, userId } = route.params;
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // تقديم الطلب
   const submitOrder = async () => {
     setIsSubmitting(true);
-    
+
     try {
+      // تحضير بيانات الطلب حسب تنسيق API
       const orderData = {
-        userId: 'user123', // TODO: جلب من المصادقة
-        projectId: projectData.projectId,
+        userId: userId || 'temp-user-id', // TODO: جلب من المصادقة الحقيقية
+        projectId: projectData.projectId || projectData.id,
+        restaurantId: restaurantId || selectedItems[0]?.restaurantId || 'temp-restaurant-id',
         menuItems: selectedItems.map(item => ({
-          itemId: item.id,
-          itemName: item.name,
-          restaurantId: item.restaurantId || 'rest1',
-          restaurantName: item.restaurant,
-          price: item.price,
-          quantity: item.quantity,
+          menuItemId: item.menuItemId || item.id,
+          quantity: item.quantity || 1,
         })),
-        orderWindow: {
-          startTime: new Date().setHours(7, 0, 0, 0),
-          endTime: new Date().setHours(9, 0, 0, 0),
-        },
+        notes: '',
+        deliveryAddress: projectData.location || projectData.deliveryAddress,
       };
 
-      const response = await fetch('/api/v1/workflow/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData),
-      });
-
-      const result = await response.json();
+      // استدعاء API من خلال apiService
+      const result = await apiService.submitOrder(orderData);
 
       if (result.success) {
         Alert.alert(
           'تم تقديم الطلب',
-          'تم تقديم طلبك بنجاح. ستصلك إشعارات بحالة الطلب.',
+          result.data?.message || 'تم تقديم طلبك بنجاح. ستصلك إشعارات بحالة الطلب.',
           [
             {
               text: 'موافق',
-              onPress: () => navigation.navigate('OrderTrackingScreen', {
-                orderId: result.order.id,
-              }),
+              onPress: () => {
+                // التنقل إلى شاشة التتبع أو العودة للصفحة الرئيسية
+                if (navigation.canGoBack()) {
+                  navigation.goBack();
+                } else {
+                  navigation.navigate('Home');
+                }
+              },
             },
           ]
         );
       } else {
-        Alert.alert('خطأ', result.error || 'فشل في تقديم الطلب');
+        Alert.alert(
+          'خطأ',
+          result.error?.message || result.error || 'فشل في تقديم الطلب'
+        );
       }
-    } catch (error) {
-      Alert.alert('خطأ', 'فشل في الاتصال بالخادم');
+    } catch (error: any) {
+      console.error('خطأ في تقديم الطلب:', error);
+
+      // معالجة أخطاء نافذة الطلب
+      if (error.message?.includes('ORDER_WINDOW_CLOSED') ||
+          error.message?.includes('انتهت فترة تقديم الطلبات')) {
+        Alert.alert(
+          'انتهت فترة الطلب',
+          'عذراً، انتهت فترة تقديم الطلبات (الساعة الأولى من التصوير). يرجى التواصل مع فريق الإنتاج.'
+        );
+      } else {
+        Alert.alert(
+          'خطأ في الاتصال',
+          error.message || 'فشل في الاتصال بالخادم. يرجى المحاولة مرة أخرى.'
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }
