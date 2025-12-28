@@ -1,0 +1,447 @@
+/* ===========================
+   Predictive Insights Container
+   =========================== */
+
+.container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.loading {
+  padding: 60px;
+  text-align: center;
+  color: #999;
+}
+
+/* ===========================
+   Header
+   =========================== */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #673AB7 0%, #9C27B0 100%);
+  color: white;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.dateSelector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dateSelector label {
+  font-size: 13px;
+}
+
+.dateInput {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.dateInput::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+/* ===========================
+   Tabs
+   =========================== */
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f9f9f9;
+}
+
+.tab {
+  flex: 1;
+  padding: 14px 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+}
+
+.tab:hover {
+  color: #673AB7;
+  background: white;
+}
+
+.tab.active {
+  color: #673AB7;
+  background: white;
+  border-bottom-color: #673AB7;
+}
+
+/* ===========================
+   Content
+   =========================== */
+
+.content {
+  padding: 24px;
+}
+
+/* ===========================
+   Insights List
+   =========================== */
+
+.insightsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.insightCard {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+}
+
+.insightCard:hover {
+  border-color: #673AB7;
+  box-shadow: 0 4px 12px rgba(103, 58, 183, 0.1);
+}
+
+.insightIcon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.insightContent {
+  flex: 1;
+}
+
+.insightHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.insightHeader h4 {
+  margin: 0;
+  font-size: 15px;
+  color: #333;
+}
+
+.insightMeta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.priority {
+  font-size: 11px;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.confidence {
+  font-size: 12px;
+  color: #666;
+  background: #e0e0e0;
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+
+.insightDescription {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.actionBtn {
+  padding: 8px 16px;
+  background: #673AB7;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.actionBtn:hover {
+  background: #5E35B1;
+}
+
+/* ===========================
+   Peak Times Section
+   =========================== */
+
+.peakTimesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.chartContainer {
+  background: #f9f9f9;
+  border-radius: 10px;
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+}
+
+.chartContainer h4 {
+  margin: 0 0 20px;
+  font-size: 15px;
+  color: #333;
+}
+
+.barChart {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 200px;
+  gap: 8px;
+}
+
+.barItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.barWrapper {
+  height: 160px;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.bar {
+  width: 40px;
+  max-width: 100%;
+  background: linear-gradient(to top, #673AB7, #9C27B0);
+  border-radius: 4px 4px 0 0;
+  position: relative;
+  min-height: 20px;
+  transition: height 0.5s ease;
+}
+
+.barValue {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: bold;
+  color: #673AB7;
+}
+
+.barLabel {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #666;
+}
+
+.peakSummary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.summaryCard {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+}
+
+.summaryIcon {
+  font-size: 28px;
+}
+
+.summaryCard h5 {
+  margin: 0;
+  font-size: 13px;
+  color: #999;
+  font-weight: 500;
+}
+
+.summaryCard p {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+/* ===========================
+   Items Section
+   =========================== */
+
+.itemsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.itemsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.itemCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+}
+
+.itemCard:hover {
+  border-color: #673AB7;
+  box-shadow: 0 4px 12px rgba(103, 58, 183, 0.1);
+}
+
+.itemRank {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #673AB7, #9C27B0);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.itemInfo {
+  flex: 1;
+}
+
+.itemInfo h4 {
+  margin: 0;
+  font-size: 15px;
+  color: #333;
+}
+
+.predictedOrders {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.itemTrend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: bold;
+}
+
+.trendIcon {
+  font-size: 18px;
+}
+
+.trendValue {
+  font-size: 14px;
+}
+
+.recommendation {
+  background: #EDE7F6;
+  border-radius: 10px;
+  padding: 20px;
+  border: 1px solid #D1C4E9;
+}
+
+.recommendation h4 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  color: #673AB7;
+}
+
+.recommendation ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.recommendation li {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.recommendation li:last-child {
+  margin-bottom: 0;
+}
+
+/* ===========================
+   Responsive
+   =========================== */
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .tabs {
+    overflow-x: auto;
+  }
+
+  .tab {
+    white-space: nowrap;
+    flex: none;
+    min-width: 120px;
+  }
+
+  .barChart {
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding-bottom: 8px;
+  }
+
+  .barItem {
+    min-width: 60px;
+    flex: none;
+  }
+
+  .insightHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

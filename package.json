@@ -1,0 +1,30 @@
+{
+  "name": "breakapp",
+  "version": "1.0.0",
+  "description": "BreakApp - Food ordering and delivery management system for production teams",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "mobile"
+  ],
+  "scripts": {
+    "install:all": "npm install && npm install --workspace=backend && npm install --workspace=mobile",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:mobile": "npm run start --workspace=mobile",
+    "test": "npm run test --workspaces"
+  },
+  "keywords": [
+    "food-delivery",
+    "production",
+    "menu-management",
+    "restaurant"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
+
+

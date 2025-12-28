@@ -1,0 +1,1412 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Models
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String
+  firstName     String
+  lastName      String
+  phoneNumber   String?
+  role          UserRole @default(REGULAR)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  orders        Order[]
+  exceptions    Exception[]
+  reviews       Review[]
+  notifications Notification[]
+  preferences   UserPreferences?
+  recommendations Recommendation[]
+  budgets       CostBudget[]
+  costAlerts    CostAlert[]
+  behaviors     UserBehavior[]
+  orderPatterns OrderPattern[]
+  autoSuggestions AutoOrderSuggestion[]
+  nutritionLogs UserNutritionLog[]
+  nutritionGoals NutritionGoal[]
+
+  @@map("users")
+}
+
+model UserPreferences {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  dietaryRestrictions String[] // e.g., ["vegetarian", "vegan", "gluten-free"]
+  favoriteCuisines  String[] // e.g., ["italian", "mexican"]
+  spiceLevel        Int?     // 1-5
+  allergies         String[] // specific allergies
+  healthGoals       String[] // e.g., ["weight-loss", "muscle-gain", "maintenance"]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dietaryProfile    DietaryProfile?
+
+  @@map("user_preferences")
+}
+
+// ============================================
+// نظام الحمية المخصصة (Custom Diet System)
+// ============================================
+
+// الملف الشخصي للحمية الغذائية
+model DietaryProfile {
+  id                  String   @id @default(uuid())
+  userPreferencesId   String   @unique
+
+  // أنواع الحمية الأساسية
+  isHalal             Boolean  @default(false)
+  isVegetarian        Boolean  @default(false)
+  isVegan             Boolean  @default(false)
+  isGlutenFree        Boolean  @default(false)
+  isKeto              Boolean  @default(false)
+  isLowSodium         Boolean  @default(false)
+  isLowCarb           Boolean  @default(false)
+  isDairyFree         Boolean  @default(false)
+  isNutFree           Boolean  @default(false)
+  isPescatarian       Boolean  @default(false)
+
+  // حدود غذائية مخصصة
+  maxCaloriesPerMeal  Int?     // الحد الأقصى للسعرات لكل وجبة
+  maxSodiumPerDay     Int?     // الحد الأقصى للصوديوم يومياً (mg)
+  maxCarbsPerMeal     Int?     // الحد الأقصى للكربوهيدرات (g)
+  maxSugarPerDay      Int?     // الحد الأقصى للسكر يومياً (g)
+  minProteinPerMeal   Int?     // الحد الأدنى للبروتين (g)
+
+  // حميات مخصصة إضافية
+  customDiets         String[] // أنظمة غذائية مخصصة
+  avoidIngredients    String[] // مكونات يجب تجنبها
+  preferredIngredients String[] // مكونات مفضلة
+
+  // إعدادات التصفية
+  strictMode          Boolean  @default(false) // وضع صارم - إخفاء كل ما لا يطابق
+  showWarnings        Boolean  @default(true)  // إظهار التحذيرات
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  // Relations
+  userPreferences     UserPreferences @relation(fields: [userPreferencesId], references: [id], onDelete: Cascade)
+  allergyProfile      AllergyProfile?
+
+  @@map("dietary_profiles")
+}
+
+// ملف الحساسية الغذائية
+model AllergyProfile {
+  id                  String   @id @default(uuid())
+  dietaryProfileId    String   @unique
+
+  // الحساسيات الشائعة
+  hasPeanutAllergy    Boolean  @default(false)
+  hasTreeNutAllergy   Boolean  @default(false)
+  hasMilkAllergy      Boolean  @default(false)
+  hasEggAllergy       Boolean  @default(false)
+  hasWheatAllergy     Boolean  @default(false)
+  hasSoyAllergy       Boolean  @default(false)
+  hasFishAllergy      Boolean  @default(false)
+  hasShellfishAllergy Boolean  @default(false)
+  hasSesameAllergy    Boolean  @default(false)
+
+  // حساسيات إضافية
+  otherAllergies      String[] // حساسيات أخرى
+
+  // مستوى الخطورة
+  severityLevel       AllergySeverity @default(MODERATE)
+
+  // إعدادات التنبيه
+  showAlerts          Boolean  @default(true)
+  requireConfirmation Boolean  @default(true) // تأكيد قبل الطلب
+  emergencyContact    String?  // رقم طوارئ
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  // Relations
+  dietaryProfile      DietaryProfile @relation(fields: [dietaryProfileId], references: [id], onDelete: Cascade)
+
+  @@map("allergy_profiles")
+}
+
+enum AllergySeverity {
+  MILD        // خفيفة
+  MODERATE    // متوسطة
+  SEVERE      // شديدة
+  CRITICAL    // حرجة (تهدد الحياة)
+}
+
+// تسميات الأطعمة للقوائم
+model FoodLabel {
+  id              String   @id @default(uuid())
+  menuItemId      String   @unique
+
+  // تسميات الحمية
+  isHalal         Boolean  @default(false)
+  isHalalCertified Boolean @default(false) // معتمد حلال
+  isVegetarian    Boolean  @default(false)
+  isVegan         Boolean  @default(false)
+  isGlutenFree    Boolean  @default(false)
+  isKeto          Boolean  @default(false)
+  isLowSodium     Boolean  @default(false)
+  isLowCarb       Boolean  @default(false)
+  isDairyFree     Boolean  @default(false)
+  isNutFree       Boolean  @default(false)
+  isOrganic       Boolean  @default(false)
+  isSpicy         Boolean  @default(false)
+  spicyLevel      Int?     // 1-5
+
+  // معلومات الحساسية
+  containsAllergens String[] // قائمة المسببات
+  mayContainAllergens String[] // قد يحتوي على
+  crossContaminationRisk Boolean @default(false) // خطر التلوث المتبادل
+
+  // معلومات إضافية
+  ingredients     String[] // قائمة المكونات
+  warnings        String[] // تحذيرات خاصة
+  certifications  String[] // شهادات (حلال، عضوي، إلخ)
+
+  // التحقق
+  isVerified      Boolean  @default(false)
+  verifiedBy      String?  // من قام بالتحقق
+  verifiedAt      DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("food_labels")
+}
+
+// رسائل مخصصة للمطعم
+model CustomOrderMessage {
+  id              String   @id @default(uuid())
+  orderId         String
+  userId          String
+  restaurantId    String
+
+  messageType     OrderMessageType
+  subject         String   // موضوع الرسالة
+  message         String   // نص الرسالة
+  dietaryNotes    String?  // ملاحظات غذائية
+  allergyNotes    String?  // ملاحظات الحساسية
+  specialRequests String[] // طلبات خاصة
+
+  // حالة الرسالة
+  status          MessageStatus @default(PENDING)
+  restaurantReply String?
+  repliedAt       DateTime?
+
+  // الأهمية
+  priority        MessagePriority @default(NORMAL)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("custom_order_messages")
+}
+
+enum OrderMessageType {
+  DIETARY_REQUEST   // طلب غذائي
+  ALLERGY_WARNING   // تحذير حساسية
+  MODIFICATION      // تعديل على الطلب
+  SPECIAL_COOKING   // طريقة طهي خاصة
+  INGREDIENT_SWAP   // استبدال مكون
+  GENERAL_NOTE      // ملاحظة عامة
+}
+
+enum MessageStatus {
+  PENDING           // في الانتظار
+  RECEIVED          // تم الاستلام
+  ACKNOWLEDGED      // تم الإقرار
+  IN_PROGRESS       // قيد التنفيذ
+  COMPLETED         // مكتمل
+  CANNOT_FULFILL    // لا يمكن التنفيذ
+}
+
+enum MessagePriority {
+  LOW               // منخفضة
+  NORMAL            // عادية
+  HIGH              // عالية
+  URGENT            // عاجلة (حساسية)
+}
+
+enum UserRole {
+  REGULAR
+  VIP
+  ADMIN
+  PRODUCER
+}
+
+// Restaurant Models
+model Restaurant {
+  id            String   @id @default(uuid())
+  name          String
+  description   String?
+  cuisineType   String?
+  address       String
+  latitude      Float
+  longitude     Float
+  phoneNumber   String?
+  email         String?
+  isPartner     Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  rating        Float?   @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lastReviewed  DateTime?
+
+  // Relations
+  menuItems     MenuItem[]
+  orders        Order[]
+  reviews       Review[]
+  orderPatterns OrderPattern[]
+  quantityForecasts QuantityForecast[]
+  demandReports DemandForecastReport[]
+
+  @@map("restaurants")
+}
+
+// Menu Models
+model MenuItem {
+  id            String      @id @default(uuid())
+  restaurantId  String
+  name          String
+  nameAr        String?     // Arabic name
+  description   String?
+  descriptionAr String?     // Arabic description
+  price         Float
+  category      String?
+  imageUrl      String?
+  isAvailable   Boolean     @default(true)
+  menuType      MenuType    @default(CORE)
+  qualityScore  Float?      @default(0)
+  nutritionalInfo NutritionalInfo?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relations
+  restaurant    Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  orderItems    OrderItem[]
+  recommendations Recommendation[]
+  quantityForecasts QuantityForecast[]
+
+  @@map("menu_items")
+}
+
+model NutritionalInfo {
+  id          String   @id @default(uuid())
+  menuItemId  String   @unique
+  calories    Float?
+  protein     Float?   // grams
+  carbs       Float?   // grams
+  fat         Float?   // grams
+  fiber       Float?   // grams
+  sugar       Float?   // grams
+  sodium      Float?   // mg
+  vitamins    Json?    // vitamins data
+  allergens   String[] // common allergens
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  menuItem    MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+
+  @@map("nutritional_info")
+}
+
+enum MenuType {
+  CORE          // Core Menu (القائمة الثابتة المتجددة)
+  GEOGRAPHIC    // Geographic Menu (القائمة الجغرافية)
+}
+
+// Order Models
+model Order {
+  id              String      @id @default(uuid())
+  userId          String
+  restaurantId    String?
+  projectId       String?     // QR code project reference
+  status          OrderStatus @default(PENDING)
+  orderType       OrderType   @default(REGULAR)
+  totalAmount     Float
+  exceptionType   ExceptionType?
+  exceptionAmount Float?      // Amount paid by user for exception
+  deliveryAddress String?
+  deliveryLat     Float?
+  deliveryLng     Float?
+  estimatedTime   DateTime?
+  deliveredAt     DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relations
+  user            User        @relation(fields: [userId], references: [id])
+  restaurant      Restaurant? @relation(fields: [restaurantId], references: [id])
+  items           OrderItem[]
+
+  @@map("orders")
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum OrderType {
+  REGULAR
+  EXCEPTION
+}
+
+enum ExceptionType {
+  FULL        // Full Exception (الاستثناء التام)
+  LIMITED     // Limited Exception (الاستثناء في الحدود)
+  SELF_PAID   // Self-Paid Exception (الاستثناء المدفوع بالكامل)
+}
+
+model OrderItem {
+  id          String   @id @default(uuid())
+  orderId     String
+  menuItemId  String
+  quantity    Int      @default(1)
+  price       Float    // Price at time of order
+  specialInstructions String?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem    MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@map("order_items")
+}
+
+// Exception Models
+model Exception {
+  id            String        @id @default(uuid())
+  userId        String
+  orderId       String?       @unique
+  exceptionType ExceptionType
+  amount        Float
+  quotaUsed     Boolean       @default(true)
+  approvedBy    String?       // Admin/Producer ID
+  createdAt     DateTime      @default(now())
+
+  // Relations
+  user          User          @relation(fields: [userId], references: [id])
+
+  @@map("exceptions")
+}
+
+// Review Models
+model Review {
+  id          String   @id @default(uuid())
+  userId      String
+  restaurantId String
+  menuItemId  String?
+  rating      Int      // 1-5
+  comment     String?
+  images      String[] // URLs to uploaded images
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id])
+  restaurant  Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@map("reviews")
+}
+
+// Notification Models
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?            // Additional data
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  // Relations
+  user      User             @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+enum NotificationType {
+  ORDER_CONFIRMED
+  ORDER_READY
+  ORDER_DELIVERED
+  EXCEPTION_APPROVED
+  REMINDER
+  SYSTEM
+}
+
+enum BudgetType {
+  VIP
+  PRODUCER
+  DEPARTMENT
+  PROJECT
+}
+
+// نظام إدارة الميزانية والتنبيهات
+model CostBudget {
+  id            String      @id @default(uuid())
+  name          String      // اسم الميزانية
+  type          BudgetType  // نوع الميزانية
+  targetUserId  String?     // مستخدم محدد (للـ VIP/Producer)
+  maxLimit      Float       // الحد الأقصى للميزانية
+  usedAmount    Float       @default(0) // المبلغ المستخدم
+  warningThreshold Float    @default(0.8) // حد التحذير (80% من الحد)
+  isActive      Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  expiresAt     DateTime?   // تاريخ انتهاء الصلاحية
+
+  // Relations
+  user          User?       @relation(fields: [targetUserId], references: [id])
+  alerts        CostAlert[]
+
+  @@map("cost_budgets")
+}
+
+model CostAlert {
+  id            String       @id @default(uuid())
+  budgetId      String
+  userId        String       // المستخدم المسؤول
+  alertType     AlertType
+  severity      AlertSeverity
+  title         String
+  message       String
+  currentAmount Float        // المبلغ الحالي
+  budgetLimit   Float        // حد الميزانية
+  percentage    Float        // النسبة المئوية
+  isRead        Boolean      @default(false)
+  isResolved    Boolean      @default(false)
+  resolvedBy    String?      // من قام بحل التنبيه
+  resolvedAt    DateTime?
+  createdAt     DateTime     @default(now())
+
+  // Relations
+  budget        CostBudget   @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  user          User         @relation(fields: [userId], references: [id])
+
+  @@map("cost_alerts")
+}
+
+enum AlertType {
+  WARNING      // تحذير عند الوصول لـ 80%
+  CRITICAL     // حرج عند تجاوز 100%
+  EXCEEDED     // تجاوز الحد
+  RESET        // إعادة تعيين
+}
+
+enum AlertSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+// Project/QR Code Models
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  qrCode      String   @unique
+  location    String?
+  startDate   DateTime
+  endDate     DateTime?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("projects")
+}
+
+// Recommendation Models
+model Recommendation {
+  id            String             @id @default(uuid())
+  userId        String
+  menuItemId    String
+  recommendationType RecommendationType
+  score         Float              // recommendation score/confidence
+  reason        String             // why recommended
+  weatherData   Json?              // weather context if applicable
+  isActive      Boolean            @default(true)
+  expiresAt     DateTime?          // when recommendation expires
+  createdAt     DateTime           @default(now())
+
+  // Relations
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  menuItem      MenuItem           @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+
+  @@map("recommendations")
+}
+
+enum RecommendationType {
+  WEATHER_BASED     // based on current weather
+  PERSONALIZED      // based on order history
+  SIMILAR_ITEMS     // similar to favorites
+  DIETARY_DIVERSITY // to balance nutrition
+  TRENDING          // popular items
+}
+
+// ============================================
+// نظام التنبؤ بالطلبات (Predictive Ordering)
+// ============================================
+
+// نموذج سلوك المستخدم - لتحليل أنماط الطلب
+model UserBehavior {
+  id              String   @id @default(uuid())
+  userId          String
+  dayOfWeek       Int      // 0-6 (Sunday-Saturday)
+  timeSlot        String   // morning, lunch, afternoon, evening
+  avgOrderValue   Float    // متوسط قيمة الطلب
+  orderFrequency  Float    // عدد الطلبات في الأسبوع
+  preferredCuisines String[] // المطابخ المفضلة
+  preferredItems  String[] // العناصر المفضلة (menuItemIds)
+  lastOrderDate   DateTime?
+  totalOrders     Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dayOfWeek, timeSlot])
+  @@map("user_behaviors")
+}
+
+// نموذج أنماط الطلب - للتعرف على الأنماط المتكررة
+model OrderPattern {
+  id              String   @id @default(uuid())
+  userId          String
+  patternType     PatternType
+  confidence      Float    // نسبة الثقة في النمط (0-1)
+  frequency       Int      // عدد التكرارات
+  menuItemIds     String[] // العناصر في النمط
+  restaurantId    String?  // المطعم المرتبط
+  dayOfWeek       Int?     // اليوم المحدد (إن وجد)
+  timePreference  String?  // الوقت المفضل
+  isActive        Boolean  @default(true)
+  lastTriggered   DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurant      Restaurant? @relation(fields: [restaurantId], references: [id])
+
+  @@map("order_patterns")
+}
+
+enum PatternType {
+  DAILY           // يومي
+  WEEKLY          // أسبوعي
+  BIWEEKLY        // كل أسبوعين
+  MONTHLY         // شهري
+  SEASONAL        // موسمي
+  WEATHER_BASED   // حسب الطقس
+}
+
+// توقعات الكمية - للتنبؤ بالكميات المطلوبة
+model QuantityForecast {
+  id              String   @id @default(uuid())
+  restaurantId    String
+  menuItemId      String
+  forecastDate    DateTime
+  predictedQty    Int      // الكمية المتوقعة
+  actualQty       Int?     // الكمية الفعلية (للتحقق)
+  confidence      Float    // نسبة الثقة
+  factors         Json     // العوامل المؤثرة (الطقس، المناسبات، إلخ)
+  createdAt       DateTime @default(now())
+
+  // Relations
+  restaurant      Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  menuItem        MenuItem   @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+
+  @@unique([restaurantId, menuItemId, forecastDate])
+  @@map("quantity_forecasts")
+}
+
+// اقتراحات الطلب التلقائي
+model AutoOrderSuggestion {
+  id              String   @id @default(uuid())
+  userId          String
+  suggestedItems  Json     // [{menuItemId, quantity, price}]
+  totalAmount     Float
+  suggestedTime   DateTime // الوقت المقترح للطلب
+  reason          String   // سبب الاقتراح
+  confidence      Float    // نسبة الثقة
+  status          SuggestionStatus @default(PENDING)
+  userResponse    String?  // رد المستخدم
+  respondedAt     DateTime?
+  expiresAt       DateTime
+  createdAt       DateTime @default(now())
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("auto_order_suggestions")
+}
+
+enum SuggestionStatus {
+  PENDING         // في الانتظار
+  ACCEPTED        // مقبول
+  MODIFIED        // معدل
+  REJECTED        // مرفوض
+  EXPIRED         // منتهي الصلاحية
+}
+
+// جدولة التوصيل والتنبؤ بأوقات الذروة
+model DeliverySchedule {
+  id              String   @id @default(uuid())
+  date            DateTime
+  timeSlot        String   // فترة زمنية (مثل: 12:00-12:30)
+  predictedOrders Int      // عدد الطلبات المتوقع
+  actualOrders    Int?     // عدد الطلبات الفعلي
+  isPeakTime      Boolean  @default(false)
+  capacityStatus  CapacityStatus @default(NORMAL)
+  recommendedDrivers Int   // عدد السائقين المقترح
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([date, timeSlot])
+  @@map("delivery_schedules")
+}
+
+enum CapacityStatus {
+  LOW             // طلب منخفض
+  NORMAL          // طلب عادي
+  HIGH            // طلب مرتفع
+  CRITICAL        // طلب حرج
+}
+
+// تقارير التنبؤ للمطاعم (للتفاوض على الخصومات)
+model DemandForecastReport {
+  id              String   @id @default(uuid())
+  restaurantId    String
+  reportPeriod    String   // weekly, monthly
+  startDate       DateTime
+  endDate         DateTime
+  totalPredictedOrders Int
+  totalPredictedRevenue Float
+  itemForecasts   Json     // [{menuItemId, predictedQty, predictedRevenue}]
+  bulkDiscountEligible Boolean @default(false)
+  suggestedDiscount Float? // نسبة الخصم المقترحة
+  status          ReportStatus @default(DRAFT)
+  sentToRestaurant Boolean @default(false)
+  restaurantResponse Json? // رد المطعم
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  restaurant      Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@map("demand_forecast_reports")
+}
+
+enum ReportStatus {
+  DRAFT           // مسودة
+  GENERATED       // تم الإنشاء
+  SENT            // تم الإرسال
+  RESPONDED       // تم الرد
+  NEGOTIATING     // قيد التفاوض
+  AGREED          // تم الاتفاق
+  REJECTED        // مرفوض
+}
+
+// ============================================
+// نظام التغذية الشخصية (Personal Nutrition)
+// ============================================
+
+// سجل التغذية اليومي للمستخدم
+model UserNutritionLog {
+  id              String   @id @default(uuid())
+  userId          String
+  date            DateTime @default(now())
+  orderId         String?  // الطلب المرتبط (إن وجد)
+  
+  // القيم الغذائية المستهلكة
+  totalCalories   Float    @default(0)
+  totalProtein    Float    @default(0)  // جرامات
+  totalCarbs      Float    @default(0)  // جرامات
+  totalFat        Float    @default(0)  // جرامات
+  totalFiber      Float    @default(0)  // جرامات
+  totalSugar      Float    @default(0)  // جرامات
+  totalSodium     Float    @default(0)  // ملليجرام
+  
+  // معلومات إضافية
+  mealsCount      Int      @default(0)
+  waterIntake     Float?   // لترات (اختياري)
+  exerciseMinutes Int?     // دقائق التمارين (اختياري)
+  notes           String?  // ملاحظات المستخدم
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@map("user_nutrition_logs")
+}
+
+// أهداف التغذية للمستخدم
+model NutritionGoal {
+  id                String   @id @default(uuid())
+  userId            String
+  goalType          GoalType
+  
+  // الأهداف اليومية
+  targetCalories    Float?
+  targetProtein     Float?  // جرامات
+  targetCarbs       Float?  // جرامات
+  targetFat         Float?  // جرامات
+  targetFiber       Float?  // جرامات
+  targetWater       Float?  // لترات
+  
+  // معلومات إضافية
+  startDate         DateTime @default(now())
+  endDate           DateTime?
+  isActive          Boolean  @default(true)
+  currentStreak     Int      @default(0)  // أيام الالتزام المتتالية
+  longestStreak     Int      @default(0)  // أطول سلسلة التزام
+  successDays       Int      @default(0)  // عدد الأيام الناجحة
+  totalDays         Int      @default(0)  // إجمالي الأيام
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("nutrition_goals")
+}
+
+enum GoalType {
+  WEIGHT_LOSS       // خسارة الوزن
+  WEIGHT_GAIN       // زيادة الوزن
+  MUSCLE_BUILD      // بناء العضلات
+  MAINTENANCE       // الحفاظ على الوزن
+  HEALTHY_EATING    // أكل صحي
+  CUSTOM            // هدف مخصص
+}
+
+// التحديات الجماعية للصحة
+model TeamChallenge {
+  id              String          @id @default(uuid())
+  title           String
+  titleAr         String?         // العنوان بالعربية
+  description     String
+  descriptionAr   String?         // الوصف بالعربية
+  challengeType   ChallengeType
+  
+  // أهداف التحدي
+  targetType      TargetType      // نوع الهدف
+  targetValue     Float           // القيمة المستهدفة
+  currentValue    Float           @default(0) // القيمة الحالية
+  
+  // الفترة الزمنية
+  startDate       DateTime
+  endDate         DateTime
+  
+  // الجوائز والحوافز
+  rewardPoints    Int?            // نقاط المكافأة
+  rewardBadge     String?         // شارة الإنجاز
+  rewardDescription String?       // وصف المكافأة
+  
+  // الحالة
+  status          ChallengeStatus @default(UPCOMING)
+  isTeamChallenge Boolean         @default(true)
+  maxParticipants Int?            // الحد الأقصى للمشاركين
+  currentParticipants Int         @default(0)
+  
+  createdBy       String?         // منشئ التحدي
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  // Relations
+  participants    ChallengeParticipant[]
+  leaderboard     ChallengeLeaderboard[]
+
+  @@map("team_challenges")
+}
+
+enum ChallengeType {
+  CALORIE_GOAL      // هدف السعرات
+  HEALTHY_CHOICES   // خيارات صحية
+  VEGETABLE_DAYS    // أيام الخضروات
+  NO_SUGAR_WEEK     // أسبوع بدون سكر
+  PROTEIN_POWER     // قوة البروتين
+  WATER_INTAKE      // شرب الماء
+  CUSTOM            // تحدي مخصص
+}
+
+enum TargetType {
+  TOTAL_CALORIES    // إجمالي السعرات
+  AVG_CALORIES      // متوسط السعرات
+  TOTAL_PROTEIN     // إجمالي البروتين
+  HEALTHY_MEALS     // وجبات صحية
+  VEGETABLE_SERVINGS // حصص الخضار
+  WATER_LITERS      // لترات الماء
+  SUGAR_FREE_DAYS   // أيام بدون سكر
+}
+
+enum ChallengeStatus {
+  UPCOMING          // قادم
+  ACTIVE            // نشط
+  COMPLETED         // مكتمل
+  CANCELLED         // ملغى
+}
+
+// مشاركة المستخدم في التحديات
+model ChallengeParticipant {
+  id              String          @id @default(uuid())
+  challengeId     String
+  userId          String
+  
+  // التقدم
+  currentProgress Float           @default(0)
+  progressPercent Float           @default(0)
+  rank            Int?            // الترتيب الحالي
+  
+  // الحالة
+  joinedAt        DateTime        @default(now())
+  completedAt     DateTime?
+  status          ParticipantStatus @default(ACTIVE)
+  
+  // المكافآت
+  pointsEarned    Int             @default(0)
+  badgeEarned     String?
+  
+  // Relations
+  challenge       TeamChallenge   @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@unique([challengeId, userId])
+  @@map("challenge_participants")
+}
+
+enum ParticipantStatus {
+  ACTIVE            // نشط
+  COMPLETED         // أكمل التحدي
+  WITHDRAWN         // انسحب
+  DISQUALIFIED      // استبعد
+}
+
+// لوحة الصدارة للتحديات
+model ChallengeLeaderboard {
+  id              String        @id @default(uuid())
+  challengeId     String
+  userId          String
+  score           Float         // النقاط المحققة
+  rank            Int           // الترتيب
+  achievements    String[]      // الإنجازات المحققة
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  challenge       TeamChallenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@unique([challengeId, userId])
+  @@map("challenge_leaderboard")
+}
+
+// تقارير التغذية الأسبوعية
+model WeeklyNutritionReport {
+  id              String   @id @default(uuid())
+  userId          String
+  weekStart       DateTime
+  weekEnd         DateTime
+  
+  // متوسطات أسبوعية
+  avgCalories     Float    @default(0)
+  avgProtein      Float    @default(0)
+  avgCarbs        Float    @default(0)
+  avgFat          Float    @default(0)
+  avgFiber        Float    @default(0)
+  
+  // إحصائيات
+  totalMeals      Int      @default(0)
+  healthyMealsCount Int    @default(0)
+  healthyMealsPercent Float @default(0)
+  
+  // التقييم
+  overallScore    Float?   // 0-100
+  strengths       String[] // نقاط القوة
+  improvements    String[] // نقاط التحسين
+  recommendations String[] // التوصيات
+  
+  // الإنجازات
+  goalsAchieved   Int      @default(0)
+  streakDays      Int      @default(0)
+  badgesEarned    String[]
+  
+  generatedAt     DateTime @default(now())
+
+  @@unique([userId, weekStart])
+  @@map("weekly_nutrition_reports")
+}
+
+// ============================================
+// نظام الذكاء العاطفي (Emotion AI System)
+// ============================================
+
+model UserMoodLog {
+  id          String    @id @default(uuid())
+  userId      String
+  mood        MoodType
+  intensity   Int       @default(5) // 1-10
+  notes       String?
+  context     String?   // activity performed (e.g., "shooting", "break")
+  
+  // AI Analysis
+  sentimentScore Float? // -1.0 to 1.0
+  suggestedAction String? // AI recommendation
+  
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_mood_logs")
+}
+
+enum MoodType {
+  HAPPY       // سعيد
+  EXCITED     // متحمس
+  CALM        // هادئ
+  FOCUSED     // مركز
+  TIRED       // متعب
+  STRESSED    // مضغوط
+  SAD         // حزين
+  ANXIOUS     // قلق
+  HUNGRY      // جائع (hangry)
+}
+
+model EmotionProfile {
+  id          String    @id @default(uuid())
+  userId      String    @unique
+  
+  // Patterns
+  stressTriggers String[]
+  comfortFoods   String[] // MenuItem IDs linked to comfort
+  energyFoods    String[] // MenuItem IDs for energy
+  
+  // Privacy Settings for AI
+  allowMoodAnalysis Boolean @default(true)
+  allowSuggestions  Boolean @default(true)
+  
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("emotion_profiles")
+}
+
+// ============================================
+// الأمن والامتثال (Security & Compliance)
+// ============================================
+
+model ConsentRecord {
+  id          String    @id @default(uuid())
+  userId      String
+  type        ConsentType
+  status      ConsentStatus
+  ipAddress   String?
+  userAgent   String?
+  version     String    // Policy version consented to
+  
+  consentedAt DateTime  @default(now())
+  revokedAt   DateTime?
+
+  // Relations
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@map("consent_records")
+}
+
+enum ConsentType {
+  TERMS_OF_SERVICE
+  PRIVACY_POLICY
+  DATA_PROCESSING // GDPR
+  MARKETING_COMMUNICATIONS
+  AI_ANALYSIS
+  HEALTH_DATA_PROCESSING // HIPAA/sensitive data
+}
+
+enum ConsentStatus {
+  GRANTED
+  DENIED
+  REVOKED
+}
+
+// ============================================
+// نظام الطوارئ (Emergency Mode System)
+// ============================================
+
+// شبكة مطاعم الطوارئ
+model EmergencyRestaurant {
+  id                String   @id @default(uuid())
+  restaurantId      String   @unique
+  isEmergencyReady  Boolean  @default(true)
+  emergencyLevel    EmergencyLevel @default(STANDARD)
+  
+  // قدرات الطوارئ
+  maxEmergencyOrders Int     @default(10) // الحد الأقصى لطلبات الطوارئ
+  currentEmergencyOrders Int @default(0) // الطلبات الحالية
+  avgPreparationTime Int     @default(15) // متوسط وقت التحضير بالدقائق
+  
+  // أوقات العمل في حالات الطوارئ
+  emergencyHoursStart String? // وقت بداية العمل في الطوارئ (HH:MM)
+  emergencyHoursEnd   String? // وقت نهاية العمل في الطوارئ (HH:MM)
+  is24HourAvailable Boolean  @default(false)
+  
+  // معلومات الاتصال بالطوارئ
+  emergencyPhone    String?
+  emergencyEmail    String?
+  emergencyContact  String? // اسم جهة الاتصال
+  
+  // الخدمات المتاحة
+  servicesAvailable String[] // ["delivery", "pickup", "drive-thru"]
+  paymentMethods    String[] // طرق الدفع المتاحة
+  
+  // الحالة
+  isActive          Boolean  @default(true)
+  lastVerified      DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("emergency_restaurants")
+}
+
+enum EmergencyLevel {
+  STANDARD    // معياري
+  PRIORITY    // أولوية
+  CRITICAL    // حرج
+  DISASTER    // كارثة
+}
+
+// طلبات الطوارئ السريعة
+model EmergencyOrder {
+  id                String   @id @default(uuid())
+  userId            String
+  restaurantId      String
+  
+  // معلومات الطوارئ
+  emergencyType     EmergencyType
+  emergencyReason   String? // سبب الطوارئ
+  priorityLevel     PriorityLevel @default(HIGH)
+  
+  // تفاصيل الطلب السريع
+  preApprovedItems  Json? // العناصر المسبقة الموافقة
+  estimatedTime     Int     // الوقت المقدر بالدقائق
+  actualTime        Int?    // الوقت الفعلي
+  
+  // معلومات التوصيل السريع
+  fastTrackDelivery Boolean @default(true)
+  deliveryPriority  Int     @default(1) // أولوية التوصيل (1-5)
+  
+  // الحالة
+  status            EmergencyOrderStatus @default(PENDING)
+  isResolved        Boolean  @default(false)
+  resolvedAt        DateTime?
+  
+  // التكلفة
+  emergencyFee      Float   @default(0) // رسوم الطوارئ
+  totalAmount       Float
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("emergency_orders")
+}
+
+enum EmergencyType {
+  NATURAL_DISASTER    // كارثة طبيعية
+  MEDICAL_EMERGENCY   // طوارئ طبية
+  SECURITY_EMERGENCY  // طوارئ أمنية
+  SYSTEM_FAILURE      // عطل في النظام
+  CUSTOM             // طوارئ مخصصة
+}
+
+enum PriorityLevel {
+  LOW      // منخفضة
+  MEDIUM   // متوسطة
+  HIGH     // عالية
+  CRITICAL // حرجة
+}
+
+enum EmergencyOrderStatus {
+  PENDING      // قيد الانتظار
+  APPROVED     // تمت الموافقة
+  PREPARING    // قيد التحضير
+  DELIVERING   // قيد التوصيل
+  COMPLETED    // مكتمل
+  CANCELLED    // ملغى
+}
+
+// مخزون الوجبات المعدة مسبقاً
+model PrePreparedMeal {
+  id                String   @id @default(uuid())
+  restaurantId      String
+  name              String
+  description       String?
+  
+  // معلومات التخزين
+  quantity          Int      // الكمية المتاحة
+  expirationDate    DateTime // تاريخ الانتهاء
+  storageLocation   String?  // موقع التخزين
+  storageTemperature String? // درجة حرارة التخزين
+  
+  // معلومات التغذية
+  nutritionalInfo   Json?    // معلومات التغذية
+  allergens         String[] // الحساسيات
+  dietaryLabels     String[] // تسميات غذائية
+  
+  // التكلفة
+  cost              Float
+  emergencyPrice    Float    // السعر في حالات الطوارئ
+  
+  // الحالة
+  isAvailable       Boolean  @default(true)
+  isReserved        Boolean  @default(false)
+  reservedBy        String?  // من قام بالحجز
+  reservedAt        DateTime?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("pre_prepared_meals")
+}
+
+// بروتوكولات الطوارئ
+model EmergencyProtocol {
+  id                String   @id @default(uuid())
+  name              String   // اسم البروتوكول
+  description       String?
+  
+  // نوع الطوارئ
+  emergencyType     EmergencyType
+  triggerConditions Json     // شروط التفعيل
+  
+  // الإجراءات
+  requiredActions   String[] // الإجراءات المطلوبة
+  notificationSteps Json?    // خطوات الإشعار
+  escalationRules   Json?    // قواعد التصعيد
+  
+  // الأطراف المعنية
+  notifyUsers       Boolean  @default(true)
+  notifyRestaurants Boolean  @default(true)
+  notifyAdmins      Boolean  @default(true)
+  emergencyContacts String[] // جهات الاتصال بالطوارئ
+  
+  // الحالة
+  isActive          Boolean  @default(true)
+  lastExecuted      DateTime?
+  executionCount    Int      @default(0)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("emergency_protocols")
+}
+
+// ============================================
+// نظام التنبيهات الطبية (Medical Alert System)
+// ============================================
+
+// الملف الطبي الشخصي
+model MedicalProfile {
+  id                  String   @id @default(uuid())
+  userId              String   @unique
+  
+  // المعلومات الأساسية
+  bloodType           String?  // فصيلة الدم
+  emergencyContact    String?  // جهة الاتصال في الطوارئ
+  emergencyPhone      String?  // رقم الطوارئ
+  medicalNotes        String?  // ملاحظات طبية عامة
+  
+  // الحالات المزمنة
+  chronicConditions   String[] // الحالات المزمنة
+  medications         String[] // الأدوية الحالية
+  
+  // الحساسية الغذائية (تفصيلي)
+  foodAllergies       Json?    // {allergen: severity, ...}
+  dietaryRestrictions String[] // القيود الغذائية
+  
+  // إعدادات التنبيه
+  alertLevel          AlertLevel @default(MEDIUM)
+  enableNotifications Boolean    @default(true)
+  enableSoundAlert    Boolean    @default(true)
+  
+  // خصوصية البيانات
+  dataSharingConsent  Boolean  @default(false)
+  consentDate         DateTime?
+  consentVersion      String   @default("1.0")
+  
+  // الحالة
+  isActive            Boolean  @default(true)
+  lastUpdated         DateTime @default(now())
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  @@map("medical_profiles")
+}
+
+enum AlertLevel {
+  LOW      // منخفض
+  MEDIUM   // متوسط
+  HIGH     // عالي
+  CRITICAL // حرج
+}
+
+// نظام التنبيه الأحمر للحساسية
+model AllergyAlert {
+  id                String   @id @default(uuid())
+  userId            String
+  menuItemId        String
+  
+  // معلومات التنبيه
+  allergen          String   // المسبب للحساسية
+  severity          AllergySeverity
+  alertType         AlertType @default(WARNING)
+  
+  // تفاصيل الخطر
+  riskLevel         RiskLevel @default(HIGH)
+  crossContamination Boolean  @default(false)
+  hiddenIngredient   Boolean  @default(false)
+  
+  // الحالة
+  isAcknowledged    Boolean  @default(false)
+  acknowledgedBy    String?
+  acknowledgedAt      DateTime?
+  
+  // الإجراءات
+  actionRequired    String[] // الإجراءات المطلوبة
+  alternativeItems  String[] // العناصر البديلة
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("allergy_alerts")
+}
+
+enum AlertType {
+  WARNING     // تحذير
+  BLOCKING    // منع
+  CONFIRMATION // تأكيد
+}
+
+enum RiskLevel {
+  LOW       // منخفض
+  MEDIUM    // متوسط
+  HIGH      // عالي
+  CRITICAL  // حرج
+}
+
+// خط الطوارئ الطبي
+model MedicalEmergencyHotline {
+  id                String   @id @default(uuid())
+  name              String   // اسم الخدمة
+  phoneNumber       String   // رقم الهاتف
+  
+  // معلومات الخدمة
+  serviceType       String[] // أنواع الخدمة
+  coverageArea      String?  // منطقة التغطية
+  languages         String[] // اللغات المتاحة
+  
+  // التكلفة
+  isFree            Boolean  @default(true)
+  costInfo          String?  // معلومات التكلفة
+  
+  // التوفر
+  availability      String   // أوقات العمل
+  is24Hour          Boolean  @default(false)
+  
+  // الحالة
+  isActive          Boolean  @default(true)
+  priority          Int      @default(1) // أولوية الخدمة
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("medical_emergency_hotlines")
+}
+
+// فحص المكونات المتقاطع
+model IngredientCrossCheck {
+  id                String   @id @default(uuid())
+  menuItemId        String
+  userId            String
+  
+  // نتائج الفحص
+  safeIngredients   String[] // المكونات الآمنة
+  unsafeIngredients String[] // المكونات غير الآمنة
+  unknownIngredients String[] // المكونات غير معروفة
+  
+  // التحليل
+  riskAssessment    String?  // تقييم المخاطر
+  safetyScore       Float?   // درجة الأمان (0-100)
+  
+  // التوصيات
+  recommendations   String[] // التوصيات
+  alternativeItems  String[] // العناصر البديلة
+  
+  // الحالة
+  isSafe            Boolean  @default(false)
+  requiresApproval  Boolean  @default(false)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("ingredient_cross_checks")
+}
+
+// سجل التنبيهات الطبية
+model MedicalAlertLog {
+  id                String   @id @default(uuid())
+  userId            String
+  alertType         String   // نوع التنبيه
+  
+  // تفاصيل التنبيه
+  triggerCondition  String   // شرط التفعيل
+  alertMessage      String   // رسالة التنبيه
+  severity          AlertSeverity
+  
+  // النتائج
+  userAction        String?  // إجراء المستخدم
+  systemAction      String?  // إجراء النظام
+  
+  // الحالة
+  isResolved        Boolean  @default(false)
+  resolvedAt        DateTime?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("medical_alert_logs")
+}
+
+enum AlertSeverity {
+  INFO      // معلومات
+  WARNING   // تحذير
+  ERROR     // خطأ
+  CRITICAL  // حرج
+}
