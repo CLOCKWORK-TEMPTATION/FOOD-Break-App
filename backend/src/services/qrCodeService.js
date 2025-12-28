@@ -1,10 +1,19 @@
 const QRCode = require('qrcode');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const logger = require('../utils/logger');
 
 class QRCodeService {
   constructor() {
-    this.secretKey = process.env.QR_SECRET_KEY || 'breakapp-qr-secret';
+    // Security: يجب تعيين QR_SECRET_KEY في متغيرات البيئة
+    // Why: منع استخدام مفتاح ثابت يسهل اختراقه
+    if (!process.env.QR_SECRET_KEY) {
+      logger.warn('⚠️ QR_SECRET_KEY غير معين! استخدم متغير بيئة آمن في الإنتاج.');
+      // توليد مفتاح عشوائي مؤقت للتطوير فقط
+      this.secretKey = crypto.randomBytes(32).toString('hex');
+    } else {
+      this.secretKey = process.env.QR_SECRET_KEY;
+    }
   }
 
   /**

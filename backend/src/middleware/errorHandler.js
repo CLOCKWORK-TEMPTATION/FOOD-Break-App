@@ -2,6 +2,25 @@ const logger = require('../utils/logger');
 const { captureException } = require('../utils/monitoring');
 
 /**
+ * تصفية البيانات الحساسة من الـ body قبل التسجيل
+ * Security: منع تسريب كلمات المرور والتوكنات في السجلات
+ */
+const sanitizeBody = (body) => {
+  if (!body || typeof body !== 'object') return body;
+  
+  const sensitiveFields = ['password', 'passwordHash', 'token', 'accessToken', 
+    'refreshToken', 'secret', 'apiKey', 'creditCard', 'cvv', 'ssn'];
+  
+  const sanitized = { ...body };
+  for (const field of sensitiveFields) {
+    if (sanitized[field]) {
+      sanitized[field] = '[REDACTED]';
+    }
+  }
+  return sanitized;
+};
+
+/**
  * Middleware لمعالجة الأخطاء المركزية
  * @param {Error} err - الخطأ
  * @param {Object} req - طلب Express
@@ -9,20 +28,23 @@ const { captureException } = require('../utils/monitoring');
  * @param {Function} next - الوظيفة التالية
  */
 const errorHandler = (err, req, res, next) => {
+  // Security: تصفية البيانات الحساسة قبل التسجيل
+  const safeBody = sanitizeBody(req.body);
+  
   // تسجيل الخطأ
   logger.error({
     message: err.message,
-    stack: err.stack,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
     path: req.path,
     method: req.method,
-    body: req.body
+    // تسجيل body فقط في بيئة التطوير مع تصفية البيانات الحساسة
+    body: process.env.NODE_ENV === 'development' ? safeBody : undefined
   });
 
-  // Monitoring (Sentry)
+  // Monitoring (Sentry) - بدون بيانات حساسة
   captureException(err, {
     path: req.path,
-    method: req.method,
-    body: req.body
+    method: req.method
   });
 
   // Prisma errors

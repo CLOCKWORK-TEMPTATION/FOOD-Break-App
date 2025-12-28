@@ -20,6 +20,7 @@ const orderRoutes = require('./orders');
 const projectRoutes = require('./projects');
 const mlRoutes = require('./mlRoutes');
 const reminderRoutes = require('./reminders');
+const adminRoutes = require('./admin');
 
 // ربط Routes
 router.use('/auth', authRoutes);
@@ -40,6 +41,7 @@ router.use('/orders', orderRoutes);
 router.use('/projects', projectRoutes);
 router.use('/ml', mlRoutes);
 router.use('/reminders', reminderRoutes);
+router.use('/admin', adminRoutes);
 
 // Route رئيسي
 router.get('/', (req, res) => {
@@ -63,7 +65,8 @@ router.get('/', (req, res) => {
       orders: '/orders',
       projects: '/projects',
       ml: '/ml',
-      reminders: '/reminders'
+      reminders: '/reminders',
+      admin: '/admin'
     }
   });
 });

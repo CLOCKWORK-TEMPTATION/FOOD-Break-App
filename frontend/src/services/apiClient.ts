@@ -5,7 +5,8 @@
 
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+// تكوين URL الـ API - يدعم المنفذين 3000 و 3001
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1';
 
 // إنشاء instance من axios
 const apiClient: AxiosInstance = axios.create({
