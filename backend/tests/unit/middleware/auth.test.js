@@ -1,6 +1,11 @@
 const jwt = require('jsonwebtoken');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 const { authenticateToken, authorizeRoles } = require('../../../src/middleware/auth');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
+
 jest.mock('jsonwebtoken');
+jest.mock('@prisma/client');
 jest.mock('../../../src/utils/logger');
 
 describe('Auth Middleware', () => {
@@ -13,7 +18,6 @@ describe('Auth Middleware', () => {
       json: jest.fn().mockReturnThis()
     };
     next = jest.fn();
-    mockPrisma = global.mockPrisma;
     jest.clearAllMocks();
   });
 

@@ -4,7 +4,9 @@
  */
 
 const { users, orders, restaurants, menuItems, orderItems, requestBodies } = require('../../fixtures/testData');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 const { generateUserToken } = require('../../helpers/testHelpers');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 
 describe('Orders API Integration Tests', () => {
   let mockPrisma;
@@ -18,7 +20,6 @@ describe('Orders API Integration Tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPrisma = global.mockPrisma;
   });
 
   // ==========================================

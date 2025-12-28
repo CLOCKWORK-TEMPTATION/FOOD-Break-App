@@ -4,9 +4,12 @@
  */
 
 const bcrypt = require('bcryptjs');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 
 const { users, orders, restaurants, menuItems } = require('../fixtures/testData');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 const { generateUserToken, generateUUID } = require('../helpers/testHelpers');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 
 describe('E2E: Admin Management Journey', () => {
   let mockPrisma;
@@ -20,7 +23,6 @@ describe('E2E: Admin Management Journey', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPrisma = global.mockPrisma;
   });
 
   // ==========================================

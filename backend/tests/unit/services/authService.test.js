@@ -4,40 +4,30 @@
  */
 
 const bcrypt = require('bcryptjs');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 const jwt = require('jsonwebtoken');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 
 // Mock dependencies before requiring the service
 jest.mock('bcryptjs');
 jest.mock('jsonwebtoken');
-jest.mock('@prisma/client', () => ({
-  PrismaClient: jest.fn(() => global.mockPrisma)
-}));
 
 const { users, requestBodies } = require('../../fixtures/testData');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 const { 
   createMockRequest, 
   createMockResponse, 
   generateUserToken 
-} = require('../../utils/testHelpers');
+} = require('../../helpers/testHelpers');
 
 describe('Auth Service', () => {
   let authService;
+  let mockPrisma;
 
   beforeEach(() => {
     jest.clearAllMocks();
     
-    // Reset all mock functions
-    if (global.mockPrisma) {
-      Object.keys(global.mockPrisma).forEach(model => {
-        if (typeof global.mockPrisma[model] === 'object' && global.mockPrisma[model] !== null) {
-          Object.keys(global.mockPrisma[model]).forEach(method => {
-            if (jest.isMockFunction(global.mockPrisma[model][method])) {
-              global.mockPrisma[model][method].mockReset();
-            }
-          });
-        }
-      });
-    }
+    // Get the mocked Prisma client
     
     // Require authService after mocks are set up
     authService = require('../../../src/services/authService');
@@ -51,9 +41,9 @@ describe('Auth Service', () => {
       const userData = requestBodies.validRegistration;
       const hashedPassword = 'hashed-password-123';
       
-      global.mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.findUnique.mockResolvedValue(null);
       bcrypt.hash.mockResolvedValue(hashedPassword);
-      global.mockPrisma.user.create.mockResolvedValue({
+      mockPrisma.user.create.mockResolvedValue({
         ...users.validUser,
         email: userData.email,
         firstName: userData.firstName,
@@ -62,15 +52,15 @@ describe('Auth Service', () => {
       jwt.sign.mockReturnValue('mock-token');
       
       // Test registration logic (simulated)
-      expect(global.mockPrisma.user.findUnique).toBeDefined();
+      expect(mockPrisma.user.findUnique).toBeDefined();
       expect(bcrypt.hash).toBeDefined();
     });
 
     it('should reject registration with existing email', async () => {
-      global.mockPrisma.user.findUnique.mockResolvedValue(users.validUser);
+      mockPrisma.user.findUnique.mockResolvedValue(users.validUser);
       
       // Verify that findUnique was called
-      expect(global.mockPrisma.user.findUnique).toBeDefined();
+      expect(mockPrisma.user.findUnique).toBeDefined();
     });
 
     it('should hash password before storing', async () => {
@@ -89,7 +79,7 @@ describe('Auth Service', () => {
       const hashedPassword = 'hashed-password';
       
       bcrypt.hash.mockResolvedValue(hashedPassword);
-      global.mockPrisma.user.create.mockImplementation((args) => {
+      mockPrisma.user.create.mockImplementation((args) => {
         // Verify password is hashed
         expect(args.data.passwordHash).not.toBe(userData.password);
         return Promise.resolve({ ...users.validUser, passwordHash: hashedPassword });
@@ -106,7 +96,7 @@ describe('Auth Service', () => {
   // ==========================================
   describe('login', () => {
     it('should login successfully with valid credentials', async () => {
-      global.mockPrisma.user.findUnique.mockResolvedValue(users.validUser);
+      mockPrisma.user.findUnique.mockResolvedValue(users.validUser);
       bcrypt.compare.mockResolvedValue(true);
       jwt.sign.mockReturnValue('mock-jwt-token');
       
@@ -117,7 +107,7 @@ describe('Auth Service', () => {
     });
 
     it('should reject login with invalid password', async () => {
-      global.mockPrisma.user.findUnique.mockResolvedValue(users.validUser);
+      mockPrisma.user.findUnique.mockResolvedValue(users.validUser);
       bcrypt.compare.mockResolvedValue(false);
       
       const result = await bcrypt.compare('wrongpassword', users.validUser.passwordHash);
@@ -126,17 +116,17 @@ describe('Auth Service', () => {
     });
 
     it('should reject login for non-existent user', async () => {
-      global.mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.findUnique.mockResolvedValue(null);
       
-      const user = await global.mockPrisma.user.findUnique({ where: { email: 'notfound@example.com' } });
+      const user = await mockPrisma.user.findUnique({ where: { email: 'notfound@example.com' } });
       
       expect(user).toBeNull();
     });
 
     it('should reject login for inactive user', async () => {
-      global.mockPrisma.user.findUnique.mockResolvedValue(users.inactiveUser);
+      mockPrisma.user.findUnique.mockResolvedValue(users.inactiveUser);
       
-      const user = await global.mockPrisma.user.findUnique({ where: { email: users.inactiveUser.email } });
+      const user = await mockPrisma.user.findUnique({ where: { email: users.inactiveUser.email } });
       
       expect(user.isActive).toBe(false);
     });
@@ -199,7 +189,7 @@ describe('Auth Service', () => {
       
       bcrypt.compare.mockResolvedValue(true);
       bcrypt.hash.mockResolvedValue(newHash);
-      global.mockPrisma.user.update.mockResolvedValue({
+      mockPrisma.user.update.mockResolvedValue({
         ...users.validUser,
         passwordHash: newHash,
       });
@@ -225,18 +215,18 @@ describe('Auth Service', () => {
   // ==========================================
   describe('getUserById', () => {
     it('should return user by ID', async () => {
-      global.mockPrisma.user.findUnique.mockResolvedValue(users.validUser);
+      mockPrisma.user.findUnique.mockResolvedValue(users.validUser);
       
-      const user = await global.mockPrisma.user.findUnique({ where: { id: users.validUser.id } });
+      const user = await mockPrisma.user.findUnique({ where: { id: users.validUser.id } });
       
       expect(user).toEqual(users.validUser);
       expect(user.id).toBe(users.validUser.id);
     });
 
     it('should return null for non-existent ID', async () => {
-      global.mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.findUnique.mockResolvedValue(null);
       
-      const user = await global.mockPrisma.user.findUnique({ where: { id: 'non-existent-id' } });
+      const user = await mockPrisma.user.findUnique({ where: { id: 'non-existent-id' } });
       
       expect(user).toBeNull();
     });
