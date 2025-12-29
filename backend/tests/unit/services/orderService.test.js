@@ -4,6 +4,7 @@
  */
 
 const { users, restaurants, menuItems, orders, orderItems, requestBodies } = require('../../fixtures/testData');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 const { generateUUID } = require('../../helpers/testHelpers');
 
 describe('Order Service', () => {
@@ -11,7 +12,6 @@ describe('Order Service', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
     mockPrisma = global.mockPrisma;
   });
 

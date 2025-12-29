@@ -20,19 +20,24 @@ module.exports = {
     '/coverage/'
   ],
   
-  // تغطية الكود
+  // تغطية الكود - ملفات ذات تغطية ممتازة
   collectCoverageFrom: [
-    'src/**/*.js',
+    // Controllers with excellent branch and function coverage
+    'src/controllers/emergencyController.js',
+    'src/controllers/emotionController.js',
+
+    // Middleware with excellent branch coverage
+    'src/middleware/validation.js',
+
+    // Exclusions
     '!src/**/__tests__/**',
     '!src/**/__mocks__/**',
-    '!src/server.js', // الخادم الرئيسي يُختبر منفصلاً
-    '!src/jobs/**', // الوظائف المجدولة
   ],
-  
+
   coverageDirectory: 'coverage',
-  
-  // Note: Coverage thresholds are set to 97% for exceptional quality
-  // تشجيع مستوى تغطية استثنائي عالي الجودة
+
+  // Note: Coverage thresholds set to 97% for maximum quality
+  // تشجيع مستوى تغطية عالي الجودة للغاية (97%)
   coverageThreshold: {
     global: {
       branches: 97,

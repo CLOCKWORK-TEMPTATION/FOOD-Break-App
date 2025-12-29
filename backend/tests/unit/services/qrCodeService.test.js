@@ -4,6 +4,7 @@
  */
 
 const crypto = require('crypto');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 const jwt = require('jsonwebtoken');
 
 jest.mock('qrcode', () => ({
@@ -19,7 +20,6 @@ describe('QR Code Service', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
     mockPrisma = global.mockPrisma;
     qrcode = require('qrcode');
   });
