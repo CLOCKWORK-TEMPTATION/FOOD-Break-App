@@ -57,10 +57,6 @@ module.exports = {
   // تقارير الاختبار
   reporters: [
     'default',
-    ['jest-junit', {
-      outputDirectory: 'test-results',
-      outputName: 'junit.xml',
-    }]
   ],
   
   // ترتيب تشغيل الاختبارات
