@@ -4,10 +4,14 @@
  */
 
 const request = require('supertest');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 const bcrypt = require('bcryptjs');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 const jwt = require('jsonwebtoken');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 
 const { users, restaurants, menuItems, orders, projects } = require('../fixtures/testData');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 const { 
   generateUserToken, 
   generateUUID, 
