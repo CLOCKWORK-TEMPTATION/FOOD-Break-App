@@ -10,8 +10,8 @@ const exceptionRoutes = require('./exceptions');
 const workflowRoutes = require('./workflow');
 const recommendationRoutes = require('./recommendations');
 const predictiveRoutes = require('./predictive');
-const paymentRoutes = require('./payments');
-const paymentSystemRoutes = require('./payment');
+// const paymentRoutes = require('./payments');
+// const paymentSystemRoutes = require('./payment');
 const nutritionRoutes = require('./nutrition');
 const dietaryRoutes = require('./dietary');
 const emotionRoutes = require('./emotion');
@@ -22,9 +22,9 @@ const orderRoutes = require('./orders');
 const projectRoutes = require('./projects');
 const mlRoutes = require('./mlRoutes');
 const reminderRoutes = require('./reminders');
-const analyticsRoutes = require('./analytics');
+// const analyticsRoutes = require('./analytics');
 const productionIntegrationRoutes = require('./production');
-const arabicReportsRoutes = require('./arabicReports');
+// const arabicReportsRoutes = require('./arabicReports');
 
 // Phase 4 Innovation Routes - مسارات المرحلة الرابعة المتقدمة
 const emergencyRoutes = require('./emergency');
@@ -40,8 +40,8 @@ router.use('/exceptions', exceptionRoutes);
 router.use('/workflow', workflowRoutes);
 router.use('/recommendations', recommendationRoutes);
 router.use('/predictive', predictiveRoutes);
-router.use('/payments', paymentRoutes);
-router.use('/payment', paymentSystemRoutes);
+// router.use('/payments', paymentRoutes);
+// router.use('/payment', paymentSystemRoutes);
 router.use('/nutrition', nutritionRoutes);
 router.use('/dietary', dietaryRoutes);
 router.use('/emotion', emotionRoutes);
@@ -52,9 +52,9 @@ router.use('/orders', orderRoutes);
 router.use('/projects', projectRoutes);
 router.use('/ml', mlRoutes);
 router.use('/reminders', reminderRoutes);
-router.use('/analytics', analyticsRoutes);
+// // router.use('/analytics', analyticsRoutes);
 router.use('/production-integration', productionIntegrationRoutes);
-router.use('/arabic-reports', arabicReportsRoutes);
+// router.use('/arabic-reports', arabicReportsRoutes);
 
 // Phase 4 Innovation Routes - مسارات المرحلة الرابعة المتقدمة
 router.use('/emergency', emergencyRoutes);
@@ -75,6 +75,8 @@ router.get('/', (req, res) => {
       workflow: '/workflow',
       recommendations: '/recommendations',
       predictive: '/predictive',
+      // payments: '/payments',
+      // payment: '/payment',
       nutrition: '/nutrition',
       dietary: '/dietary',
       emotion: '/emotion',
@@ -85,9 +87,9 @@ router.get('/', (req, res) => {
       projects: '/projects',
       ml: '/ml',
       reminders: '/reminders',
-      analytics: '/analytics',
+      // analytics: '/analytics',
       productionIntegration: '/production-integration',
-      arabicReports: '/arabic-reports',
+      // arabicReports: '/arabic-reports',
       // Phase 4 Innovation Features - المميزات المتقدمة للمرحلة الرابعة
       emergency: '/emergency',
       medical: '/medical',

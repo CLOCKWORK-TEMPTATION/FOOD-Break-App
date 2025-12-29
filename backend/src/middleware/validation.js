@@ -26,10 +26,14 @@ const validate = (req, res, next) => {
 
 const validateOrder = (req, res, next) => next();
 const validateOrderStatus = (req, res, next) => next();
+const validatePaymentRequest = (req, res, next) => next();
+const validateRefundRequest = (req, res, next) => next();
 
-module.exports = { 
+module.exports = {
   validate,
   validateRequest: validate,
   validateOrder,
-  validateOrderStatus
+  validateOrderStatus,
+  validatePaymentRequest,
+  validateRefundRequest
 };

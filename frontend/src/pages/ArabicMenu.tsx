@@ -329,22 +329,65 @@ const ArabicMenu: React.FC = () => {
             <h1 className="text-2xl font-bold text-gray-900">
               {t('menu.title')}
             </h1>
-            </p>
+          </div>
+        </div>
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+            <p className="mt-4 text-gray-600">{t('common.loading')}</p>
+          </div>
+        ) : error ? (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            {error}
           </div>
         ) : (
-          filteredItems.map((item) => (
-            <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-              {/* صورة العنصر */}
-              <div className="h-48 bg-gray-200 relative">
-                {item.image ? (
-                  <img
-                    src={item.image}
-                    alt={item.nameAr}
-                    className="w-full h-full object-cover"
-          )}
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredItems.map((item) => (
+              <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                {/* صورة العنصر */}
+                <div className="h-48 bg-gray-200 relative">
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.nameAr}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      لا توجد صورة
+                    </div>
+                  )}
+                </div>
+                {/* معلومات العنصر */}
+                <div className="p-4">
+                  <h3 className="text-lg font-semibold text-gray-900">{item.nameAr}</h3>
+                  <p className="text-sm text-gray-600">{item.name}</p>
+                  <p className="text-gray-700 mt-2">{item.descriptionAr}</p>
+                  <div className="mt-2 flex justify-between items-center">
+                    <span className="text-lg font-bold text-gray-900">{item.price} ر.س</span>
+                    <div className="space-x-2 space-x-reverse">
+                      <button
+                        onClick={() => handleEditItem(item)}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        تعديل
+                      </button>
+                      <button
+                        onClick={() => handleDeleteItem(item.id)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        حذف
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
-        {/* نافذة إضافة/تعديل عنصر */}
+      {/* نافذة إضافة/تعديل عنصر */}
         {showItemModal && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
             <div className="relative top-10 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">

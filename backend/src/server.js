@@ -4,12 +4,12 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const compression = require('compression');
-const swaggerUi = require('swagger-ui-express');
+// const swaggerUi = require('swagger-ui-express');
 const logger = require('./utils/logger');
 const { startJobs } = require('./jobs');
 const { initMonitoring } = require('./utils/monitoring');
 const { localizationMiddleware } = require('./config/localization');
-const swaggerSpec = require('./config/swagger');
+// const swaggerSpec = require('./config/swagger');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -95,24 +95,25 @@ app.get('/lb-health', loadBalancerHealthCheck);
 
 // Swagger API Documentation
 // توثيق API باستخدام Swagger
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  explorer: true,
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'BreakApp API Documentation',
-  swaggerOptions: {
-    persistAuthorization: true,
-    displayRequestDuration: true,
-    docExpansion: 'none',
-    filter: true,
-    showRequestHeaders: true,
-    tryItOutEnabled: true
-  }
-}));
+// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+//   explorer: true,
+//   customCss: '.swagger-ui .topbar { display: none }',
+//   customSiteTitle: 'BreakApp API Documentation',
+//   swaggerOptions: {
+//     persistAuthorization: true,
+//     displayRequestDuration: true,
+//     docExpansion: 'none',
+//     filter: true,
+//     showRequestHeaders: true,
+//     tryItOutEnabled: true
+//   }
+// }));
 
 // Swagger JSON endpoint
 app.get('/api-docs.json', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
-  res.send(swaggerSpec);
+  // res.send(swaggerSpec);
+  res.json({ message: 'Swagger documentation temporarily disabled' });
 });
 
 // API Routes

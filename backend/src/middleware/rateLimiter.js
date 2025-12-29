@@ -113,7 +113,37 @@ const adminLimiter = rateLimit({
   legacyHeaders: false
 });
 
+/**
+ * Rate limiter ديناميكي مع خيارات قابلة للتخصيص
+ */
+function rateLimiter(options = {}) {
+  const {
+    windowMs = 15 * 60 * 1000,
+    max = 100,
+    message = {
+      success: false,
+      error: {
+        code: 'RATE_LIMIT_EXCEEDED',
+        message: 'لقد تجاوزت الحد الأقصى للطلبات. يرجى المحاولة لاحقاً.'
+      }
+    }
+  } = options;
+
+  return rateLimit({
+    windowMs,
+    max,
+    message,
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res) => {
+      logger.warn(`Rate limit exceeded for IP: ${req.ip} on ${req.path}`);
+      res.status(429).json(message);
+    }
+  });
+}
+
 module.exports = {
+  rateLimiter,
   authLimiter,
   qrGenerationLimiter,
   apiLimiter,

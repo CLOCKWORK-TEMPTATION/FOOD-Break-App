@@ -1,3 +1,181 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="0" failures="0" errors="0" time="0.002">
+<testsuites name="jest tests" tests="13" failures="13" errors="0" time="4.692">
+  <testsuite name="Analytics Service" errors="0" failures="13" skipped="0" timestamp="2025-12-28T12:43:43" time="2.527" tests="13">
+    <testcase classname="Analytics Service getDashboardStats should return dashboard stats" name="Analytics Service getDashboardStats should return dashboard stats" time="0.002">
+      <failure>TypeError: prisma.order.aggregate is not a function
+    at AnalyticsService.aggregate [as getDashboardStats] (E:\breakapp\backend\src\services\analyticsService.js:24:22)
+    at Object.getDashboardStats (E:\breakapp\backend\tests\unit\services\analyticsService.test.js:35:44)
+    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
+    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
+    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
+    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
+    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)</failure>
+    </testcase>
+    <testcase classname="Analytics Service getDashboardStats should handle date range filtering" name="Analytics Service getDashboardStats should handle date range filtering" time="0">
+      <failure>TypeError: prisma.order.aggregate is not a function
+    at AnalyticsService.aggregate [as getDashboardStats] (E:\breakapp\backend\src\services\analyticsService.js:24:22)
+    at Object.getDashboardStats (E:\breakapp\backend\tests\unit\services\analyticsService.test.js:47:30)
+    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
+    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
+    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
+    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
+    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)</failure>
+    </testcase>
+    <testcase classname="Analytics Service getSpendingReport should return daily spending report" name="Analytics Service getSpendingReport should return daily spending report" time="0">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;forEach&apos;)
+    at AnalyticsService.forEach [as getSpendingReport] (E:\breakapp\backend\src\services\analyticsService.js:69:14)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at Object.&lt;anonymous&gt; (E:\breakapp\backend\tests\unit\services\analyticsService.test.js:60:22)</failure>
+    </testcase>
+    <testcase classname="Analytics Service getSpendingReport should exclude cancelled orders" name="Analytics Service getSpendingReport should exclude cancelled orders" time="0">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;forEach&apos;)
+    at AnalyticsService.forEach [as getSpendingReport] (E:\breakapp\backend\src\services\analyticsService.js:69:14)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at Object.&lt;anonymous&gt; (E:\breakapp\backend\tests\unit\services\analyticsService.test.js:66:7)</failure>
+    </testcase>
+    <testcase classname="Analytics Service forecastBudget should return budget forecast" name="Analytics Service forecastBudget should return budget forecast" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;forEach&apos;)
+    at AnalyticsService.forEach [as getSpendingReport] (E:\breakapp\backend\src\services\analyticsService.js:69:14)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at AnalyticsService.forecastBudget (E:\breakapp\backend\src\services\analyticsService.js:108:26)
+    at Object.&lt;anonymous&gt; (E:\breakapp\backend\tests\unit\services\analyticsService.test.js:76:24)</failure>
+    </testcase>
+    <testcase classname="Analytics Service forecastBudget should return empty forecast when no data" name="Analytics Service forecastBudget should return empty forecast when no data" time="0">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;forEach&apos;)
+    at AnalyticsService.forEach [as getSpendingReport] (E:\breakapp\backend\src\services\analyticsService.js:69:14)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at AnalyticsService.forecastBudget (E:\breakapp\backend\src\services\analyticsService.js:108:26)
+    at Object.&lt;anonymous&gt; (E:\breakapp\backend\tests\unit\services\analyticsService.test.js:85:24)</failure>
+    </testcase>
+    <testcase classname="Analytics Service compareProjects should compare multiple projects" name="Analytics Service compareProjects should compare multiple projects" time="0">
+      <failure>TypeError: prisma.order.aggregate is not a function
+    at aggregate (E:\breakapp\backend\src\services\analyticsService.js:154:26)
+    at Array.map (&lt;anonymous&gt;)
+    at AnalyticsService.map [as compareProjects] (E:\breakapp\backend\src\services\analyticsService.js:143:20)
+    at Object.compareProjects (E:\breakapp\backend\tests\unit\services\analyticsService.test.js:97:49)
+    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
+    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
+    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
+    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
+    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)</failure>
+    </testcase>
+    <testcase classname="Analytics Service compareProjects should calculate averages correctly" name="Analytics Service compareProjects should calculate averages correctly" time="0">
+      <failure>TypeError: prisma.order.aggregate is not a function
+    at aggregate (E:\breakapp\backend\src\services\analyticsService.js:154:26)
+    at Array.map (&lt;anonymous&gt;)
+    at AnalyticsService.map [as compareProjects] (E:\breakapp\backend\src\services\analyticsService.js:143:20)
+    at Object.compareProjects (E:\breakapp\backend\tests\unit\services\analyticsService.test.js:107:49)
+    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
+    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
+    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
+    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
+    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)</failure>
+    </testcase>
+    <testcase classname="Analytics Service analyzeExceptions should analyze exception orders" name="Analytics Service analyzeExceptions should analyze exception orders" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;forEach&apos;)
+    at AnalyticsService.forEach [as analyzeExceptions] (E:\breakapp\backend\src\services\analyticsService.js:211:18)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at Object.&lt;anonymous&gt; (E:\breakapp\backend\tests\unit\services\analyticsService.test.js:120:24)</failure>
+    </testcase>
+    <testcase classname="Analytics Service analyzeExceptions should handle no exceptions" name="Analytics Service analyzeExceptions should handle no exceptions" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;forEach&apos;)
+    at AnalyticsService.forEach [as analyzeExceptions] (E:\breakapp\backend\src\services\analyticsService.js:211:18)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at Object.&lt;anonymous&gt; (E:\breakapp\backend\tests\unit\services\analyticsService.test.js:128:24)</failure>
+    </testcase>
+    <testcase classname="Analytics Service getTopRestaurants should return top restaurants" name="Analytics Service getTopRestaurants should return top restaurants" time="0">
+      <failure>TypeError: prisma.order.groupBy is not a function
+    at AnalyticsService.groupBy [as getTopRestaurants] (E:\breakapp\backend\src\services\analyticsService.js:248:41)
+    at Object.getTopRestaurants (E:\breakapp\backend\tests\unit\services\analyticsService.test.js:139:53)
+    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
+    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
+    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
+    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
+    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)</failure>
+    </testcase>
+    <testcase classname="Analytics Service getTopMenuItems should return top menu items" name="Analytics Service getTopMenuItems should return top menu items" time="0.001">
+      <failure>TypeError: prisma.orderItem.groupBy is not a function
+    at AnalyticsService.groupBy [as getTopMenuItems] (E:\breakapp\backend\src\services\analyticsService.js:285:44)
+    at Object.getTopMenuItems (E:\breakapp\backend\tests\unit\services\analyticsService.test.js:151:47)
+    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
+    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
+    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
+    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
+    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)</failure>
+    </testcase>
+    <testcase classname="Analytics Service exportReport should export comprehensive report" name="Analytics Service exportReport should export comprehensive report" time="0.001">
+      <failure>TypeError: prisma.order.aggregate is not a function
+    at AnalyticsService.aggregate [as getDashboardStats] (E:\breakapp\backend\src\services\analyticsService.js:24:22)
+    at AnalyticsService.getDashboardStats [as exportReport] (E:\breakapp\backend\src\services\analyticsService.js:318:14)
+    at Object.exportReport (E:\breakapp\backend\tests\unit\services\analyticsService.test.js:168:45)
+    at Promise.then.completed (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (E:\breakapp\backend\node_modules\jest-circus\build\utils.js:231:10)
+    at _callCircusTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (E:\breakapp\backend\node_modules\jest-circus\build\run.js:252:3)
+    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:126:9)
+    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
+    at _runTestsForDescribeBlock (E:\breakapp\backend\node_modules\jest-circus\build\run.js:121:9)
+    at run (E:\breakapp\backend\node_modules\jest-circus\build\run.js:71:3)
+    at runAndTransformResultsToJestFormat (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+    at jestAdapter (E:\breakapp\backend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+    at runTestInternal (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:367:16)
+    at runTest (E:\breakapp\backend\node_modules\jest-runner\build\runTest.js:444:34)</failure>
+    </testcase>
+  </testsuite>
 </testsuites>
