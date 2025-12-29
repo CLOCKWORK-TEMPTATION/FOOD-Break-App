@@ -1,4 +1,5 @@
 const emotionService = require('../../../src/services/emotionService');
+
 describe('Emotion Service', () => {
   let mockPrisma;
 

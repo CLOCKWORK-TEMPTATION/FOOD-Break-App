@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 const { authenticateToken, authorizeRoles } = require('../../../src/middleware/auth');
+
 jest.mock('jsonwebtoken');
 jest.mock('../../../src/utils/logger');
 

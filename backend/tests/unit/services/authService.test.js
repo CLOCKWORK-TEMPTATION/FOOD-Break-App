@@ -4,7 +4,9 @@
  */
 
 const bcrypt = require('bcryptjs');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 const jwt = require('jsonwebtoken');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 
 // Mock dependencies before requiring the service
 jest.mock('bcryptjs');
@@ -14,6 +16,7 @@ jest.mock('@prisma/client', () => ({
 }));
 
 const { users, requestBodies } = require('../../fixtures/testData');
+const { prisma: mockPrisma } = require("../../utils/testHelpers");
 const { 
   createMockRequest, 
   createMockResponse, 
@@ -25,7 +28,7 @@ describe('Auth Service', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Reset all mock functions
     if (global.mockPrisma) {
       Object.keys(global.mockPrisma).forEach(model => {
@@ -38,7 +41,7 @@ describe('Auth Service', () => {
         }
       });
     }
-    
+
     // Require authService after mocks are set up
     authService = require('../../../src/services/authService');
   });

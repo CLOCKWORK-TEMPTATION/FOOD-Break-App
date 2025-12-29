@@ -4,9 +4,9 @@
  */
 
 const { restaurants, menuItems } = require('../../fixtures/testData');
+const { prisma: mockPrisma } = require('../../utils/testHelpers');
 
 describe('Menu Service', () => {
-  let mockPrisma;
 
   beforeEach(() => {
     jest.clearAllMocks();
