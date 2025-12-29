@@ -1756,3 +1756,73 @@ enum InvoiceStatus {
   CANCELLED    // ملغى
   REFUNDED     // تم الاسترداد
 }
+
+// ============================================
+// نظام تقارير جاهزية الإنتاج (Production Readiness Reports)
+// ============================================
+
+// تقرير جاهزية الإنتاج
+model ProductionReadinessReport {
+  id                String   @id @default(uuid())
+  
+  // معلومات عامة
+  reportDate        DateTime
+  facilityName      String?
+  projectName       String?
+  reportingPeriod   String?
+  
+  // البيانات الخام
+  productionData    Json     // البيانات الأولية المقدمة
+  
+  // التقييمات (من 1-5)
+  equipmentStatus   Int?     // حالة المعدات
+  hrReadiness       Int?     // جاهزية الموارد البشرية
+  materialsStatus   Int?     // حالة المواد الخام
+  qualitySafety     Int?     // الجودة والسلامة
+  infrastructure    Int?     // البنية التحتية
+  
+  // التقييم العام
+  overallRating     ReadinessRating
+  overallNotes      String?
+  
+  // التحديات والمخاطر
+  challenges        Json?    // قائمة التحديات
+  risks             Json?    // قائمة المخاطر
+  
+  // التوصيات
+  recommendations   Json?    // قائمة التوصيات
+  
+  // التقرير المُنشأ
+  generatedReport   String   @db.Text // التقرير الكامل بصيغة markdown/text
+  reportPdfUrl      String?  // رابط PDF إن وُجد
+  
+  // بيانات إضافية
+  createdBy         String?
+  approvedBy        String?
+  approvalStatus    ApprovalStatus @default(PENDING)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([reportDate])
+  @@index([facilityName])
+  @@index([projectName])
+  @@index([overallRating])
+  @@index([approvalStatus])
+  @@map("production_readiness_reports")
+}
+
+enum ReadinessRating {
+  FULLY_READY           // جاهز تماماً
+  READY_WITH_NOTES      // جاهز مع ملاحظات
+  PARTIALLY_READY       // جاهز جزئياً
+  NOT_READY             // غير جاهز
+  REQUIRES_INTERVENTION // يتطلب تدخل
+}
+
+enum ApprovalStatus {
+  PENDING     // في الانتظار
+  APPROVED    // معتمد
+  REJECTED    // مرفوض
+  UNDER_REVIEW // قيد المراجعة
+}
