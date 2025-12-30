@@ -31,6 +31,12 @@ const emergencyRoutes = require('./emergency');
 const medicalRoutes = require('./medical');
 const voiceRoutes = require('./voice');
 
+// GPS Tracking Routes - مسارات تتبع التوصيل
+const gpsTrackingRoutes = require('./gpsTrackingRoutes');
+
+// Schedule Integration Routes - مسارات تكامل جداول التصوير
+const scheduleRoutes = require('./scheduleRoutes');
+
 // ربط Routes
 router.use('/auth', authRoutes);
 router.use('/admin', adminRoutes);
@@ -60,6 +66,12 @@ router.use('/production-integration', productionIntegrationRoutes);
 router.use('/emergency', emergencyRoutes);
 router.use('/medical', medicalRoutes);
 router.use('/voice', voiceRoutes);
+
+// GPS Tracking Routes - مسارات تتبع التوصيل
+router.use('/tracking', gpsTrackingRoutes);
+
+// Schedule Integration Routes - مسارات تكامل جداول التصوير
+router.use('/schedules', scheduleRoutes);
 
 // Route رئيسي
 router.get('/', (req, res) => {
@@ -93,12 +105,18 @@ router.get('/', (req, res) => {
       // Phase 4 Innovation Features - المميزات المتقدمة للمرحلة الرابعة
       emergency: '/emergency',
       medical: '/medical',
-      voice: '/voice'
+      voice: '/voice',
+      // GPS Tracking Features - مميزات تتبع التوصيل
+      tracking: '/tracking',
+      // Schedule Integration Features - مميزات تكامل جداول التصوير
+      schedules: '/schedules'
     },
     phase4Features: {
       emergency: 'وضع الطوارئ - Emergency Mode',
       medical: 'التنبيهات الطبية - Medical Alerts',
-      voice: 'الطلب الصوتي - Voice Ordering'
+      voice: 'الطلب الصوتي - Voice Ordering',
+      gpsTracking: 'تتبع التوصيل GPS - GPS Delivery Tracking',
+      scheduleIntegration: 'تكامل جداول التصوير - Schedule Integration'
     }
   });
 });

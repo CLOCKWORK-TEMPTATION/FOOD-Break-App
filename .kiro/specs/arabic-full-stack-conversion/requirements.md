@@ -1,213 +1,141 @@
-# مواصفات تحويل BreakApp إلى نظام عربي متكامل
-# Requirements Document: Arabic Full Stack BreakApp Conversion
 
-## مقدمة
+# Requirements Document: Arabic Film Production Break App
 
-تحويل تطبيق BreakApp الحالي إلى نظام Full Stack متكامل باللغة العربية، جاهز للإنتاج مع دعم كامل للـ RTL وتجربة مستخدم عربية أصيلة.
+## Introduction
 
-## المصطلحات
+This document outlines the requirements for transforming the existing FOOD Break App into a comprehensive Arabic-language film production break request system. The system will serve Egyptian film production crews by providing native Arabic language support, film industry-specific terminology, and culturally appropriate workflows for meal ordering during film shoots.
 
-- **النظام**: تطبيق BreakApp المحول للعربية
-- **المستخدم**: أي شخص يستخدم التطبيق (عضو فريق، منتج، مدير)
-- **المدير**: مستخدم بصلاحيات إدارية
-- **المنتج**: مستخدم مسؤول عن إدارة المشاريع والميزانيات
-- **الطلب**: طلب طعام من مطعم
-- **المطعم**: مقدم خدمة الطعام
-- **المشروع**: مشروع إنتاج له QR Code خاص
-- **الاستثناء**: طلب خارج الميزانية المحددة
+## Glossary
 
-## المتطلبات
+- **BreakApp**: The Arabic film production break request application
+- **Film_Crew**: Personnel working on film production including actors, directors, technicians
+- **Production_Manager**: Person responsible for coordinating film production logistics
+- **VIP_Personnel**: Key personnel including stars, directors, and senior crew members
+- **Regular_Crew**: Standard crew members with limited exception privileges
+- **Exception_Order**: Special meal order outside standard menu options
+- **Core_Menu**: Fixed menu items available from partner restaurants
+- **Geographic_Menu**: Location-based menu items from nearby restaurants
+- **Break_Window**: Time period during filming when meal orders can be placed
+- **Shooting_Schedule**: Film production timeline with designated break periods
 
-### المتطلب 1: تعريب النظام الخلفي الكامل
+## Requirements
 
-**قصة المستخدم:** كمطور، أريد أن يكون النظام الخلفي معرب بالكامل، حتى تكون جميع الرسائل والاستجابات باللغة العربية.
+### Requirement 1: Arabic Language and Cultural Integration
 
-#### معايير القبول
+**User Story:** As a film crew member, I want to use the app in Arabic with Egyptian cultural context, so that I can navigate and order meals naturally in my native language.
 
-1. WHEN يتم استدعاء أي API endpoint THEN النظام SHALL إرجاع الرسائل باللغة العربية
-2. WHEN يحدث خطأ في النظام THEN النظام SHALL عرض رسالة خطأ واضحة بالعربية
-3. WHEN يتم التحقق من البيانات THEN النظام SHALL إرجاع رسائل التحقق بالعربية
-4. THE النظام SHALL دعم استبدال المعاملات في الرسائل العربية
-5. THE النظام SHALL اكتشاف لغة المستخدم تلقائياً من headers أو تفضيلات المستخدم
+#### Acceptance Criteria
 
-### المتطلب 2: واجهة مستخدم عربية متكاملة
+1. THE BreakApp SHALL display all user interface text in Arabic script
+2. THE BreakApp SHALL use authentic Egyptian Arabic terminology for film production concepts
+3. THE BreakApp SHALL implement right-to-left (RTL) layout for all interface components
+4. THE BreakApp SHALL convert business terms to Egyptian film industry terminology
+5. THE BreakApp SHALL use Egyptian cultural expressions and social etiquette in communications
 
-**قصة المستخدم:** كمستخدم عربي، أريد واجهة مستخدم باللغة العربية مع دعم RTL كامل، حتى أتمكن من استخدام التطبيق بسهولة.
+### Requirement 2: Film Industry Role Management
 
-#### معايير القبول
+**User Story:** As a production manager, I want to manage crew roles and permissions based on film industry hierarchy, so that I can control access and ordering privileges appropriately.
 
-1. THE النظام SHALL عرض جميع النصوص باللغة العربية
-2. THE النظام SHALL دعم اتجاه النص من اليمين لليسار (RTL)
-3. WHEN يتفاعل المستخدم مع أي عنصر THEN النظام SHALL عرض التغذية الراجعة بالعربية
-4. THE النظام SHALL استخدام خطوط عربية واضحة ومقروءة
-5. THE النظام SHALL ترتيب العناصر بما يتناسب مع القراءة العربية
-6. THE النظام SHALL حفظ تفضيلات اللغة للمستخدم
+#### Acceptance Criteria
 
-### المتطلب 3: لوحة تحكم إدارية عربية
+1. WHEN a user registers, THE BreakApp SHALL assign film industry roles (director, actor, technician, etc.)
+2. THE BreakApp SHALL map generic user roles to specific Egyptian film production positions
+3. THE BreakApp SHALL distinguish between VIP_Personnel and Regular_Crew access levels
+4. THE BreakApp SHALL display role titles in Arabic with appropriate film industry terminology
+5. THE BreakApp SHALL enforce role-based permissions for ordering and system access
 
-**قصة المستخدم:** كمدير، أريد لوحة تحكم باللغة العربية لإدارة النظام، حتى أتمكن من متابعة العمليات بفعالية.
+### Requirement 3: Egyptian Cultural Design System
 
-#### معايير القبول
+**User Story:** As a user, I want the app to reflect Egyptian cultural aesthetics and design patterns, so that it feels familiar and culturally appropriate.
 
-1. THE النظام SHALL عرض إحصائيات شاملة باللغة العربية
-2. WHEN يعرض المدير التقارير THEN النظام SHALL تنسيق البيانات بالعربية
-3. THE النظام SHALL دعم تصدير التقارير بصيغة PDF عربية
-4. THE النظام SHALL عرض الرسوم البيانية مع تسميات عربية
-5. WHEN يدير المدير المطاعم THEN النظام SHALL عرض واجهة إدارة عربية
-6. THE النظام SHALL دعم البحث والتصفية باللغة العربية
+#### Acceptance Criteria
 
-### المتطلب 4: نظام الطلبات العربي
+1. THE BreakApp SHALL use Egyptian color schemes and cultural symbols in the interface
+2. THE BreakApp SHALL implement design patterns appropriate to Egyptian cultural context
+3. THE BreakApp SHALL use Arabic typography and font rendering optimized for readability
+4. THE BreakApp SHALL incorporate Egyptian cultural references in notifications and messages
+5. THE BreakApp SHALL format currency amounts in Egyptian Pounds (EGP) with Arabic numerals
 
-**قصة المستخدم:** كعضو فريق، أريد تقديم طلبات الطعام بواجهة عربية سهلة، حتى أتمكن من طلب الطعام بسرعة.
+### Requirement 4: Comprehensive Localization System
 
-#### معايير القبول
+**User Story:** As a system administrator, I want robust localization management tools, so that I can maintain and update Arabic content efficiently.
 
-1. WHEN يعرض المستخدم القوائم THEN النظام SHALL عرض أسماء الأطباق بالعربية
-2. WHEN يضيف المستخدم عنصر للسلة THEN النظام SHALL عرض تأكيد بالعربية
-3. THE النظام SHALL عرض أسعار الأطباق بالعملة المحلية والأرقام العربية
-4. WHEN يتتبع المستخدم الطلب THEN النظام SHALL عرض حالة الطلب بالعربية
-5. THE النظام SHALL إرسال إشعارات الطلب باللغة العربية
-6. WHEN يلغي المستخدم طلب THEN النظام SHALL عرض تأكيد الإلغاء بالعربية
+#### Acceptance Criteria
 
-### المتطلب 5: نظام الدفع والفواتير العربي
+1. THE BreakApp SHALL provide translation management tools for content updates
+2. THE BreakApp SHALL automatically adjust UI components for RTL layout direction
+3. THE BreakApp SHALL handle Arabic date and time formatting correctly
+4. THE BreakApp SHALL support Arabic text input with proper validation
+5. THE BreakApp SHALL format numerical values using Arabic or Western numerals based on user preference
 
-**قصة المستخدم:** كمستخدم، أريد نظام دفع وفواتير باللغة العربية، حتى أفهم تفاصيل المدفوعات بوضوح.
+### Requirement 5: Menu Management System
 
-#### معايير القبول
+**User Story:** As a production manager, I want to manage restaurant partnerships and menu options, so that crew members have appropriate meal choices during filming.
 
-1. WHEN يعرض النظام فاتورة THEN النظام SHALL تنسيق الفاتورة بالعربية مع RTL
-2. THE النظام SHALL عرض تفاصيل الدفع باللغة العربية
-3. WHEN يفشل الدفع THEN النظام SHALL عرض رسالة خطأ واضحة بالعربية
-4. THE النظام SHALL دعم طرق الدفع المحلية مع أسماء عربية
-5. WHEN يتم إنشاء فاتورة PDF THEN النظام SHALL تنسيق PDF بالعربية مع RTL
-6. THE النظام SHALL عرض تاريخ ووقت المعاملات بالتقويم الهجري والميلادي
+#### Acceptance Criteria
 
-### المتطلب 6: نظام التوصيات الذكية العربي
+1. WHEN managing restaurants, THE BreakApp SHALL maintain Core_Menu items from partner restaurants
+2. THE BreakApp SHALL implement Geographic_Menu filtering within 2-3 km radius of filming location
+3. THE BreakApp SHALL support daily and weekly menu rotation for variety
+4. THE BreakApp SHALL track restaurant quality and hygiene ratings
+5. THE BreakApp SHALL integrate with mapping services for distance calculation and delivery time estimation
 
-**قصة المستخدم:** كمستخدم، أريد توصيات ذكية باللغة العربية، حتى أحصل على اقتراحات مناسبة لذوقي.
+### Requirement 6: Exception Order System
 
-#### معايير القبول
+**User Story:** As a crew member, I want to place special meal orders outside the standard menu, so that I can accommodate dietary needs or preferences when necessary.
 
-1. WHEN يعرض النظام توصيات THEN النظام SHALL شرح أسباب التوصية بالعربية
-2. THE النظام SHALL تحليل تفضيلات المستخدم مع مراعاة الثقافة العربية
-3. WHEN يقترح النظام أطباق THEN النظام SHALL مراعاة المناسبات الإسلامية والعربية
-4. THE النظام SHALL دعم التوصيات حسب الطقس مع وصف عربي
-5. WHEN يرفض المستخدم توصية THEN النظام SHALL تعلم من الرفض وتحسين التوصيات
-6. THE النظام SHALL عرض توصيات صحية مع نصائح غذائية بالعربية
+#### Acceptance Criteria
 
-### المتطلب 7: نظام التغذية والصحة العربي
+1. WHEN a Regular_Crew member requests an exception, THE BreakApp SHALL enforce quota limits (once every 3 weeks)
+2. WHEN a VIP_Personnel requests an exception, THE BreakApp SHALL allow unlimited exceptions
+3. THE BreakApp SHALL support Full Exception orders (production pays all costs)
+4. THE BreakApp SHALL support Limited Exception orders (user pays difference from standard meal cost)
+5. THE BreakApp SHALL support Self-Paid Exception orders (user pays all costs)
 
-**قصة المستخدم:** كمستخدم مهتم بالصحة، أريد متابعة تغذيتي بواجهة عربية، حتى أحافظ على نظام غذائي صحي.
+### Requirement 7: Order Workflow Management
 
-#### معايير القبول
+**User Story:** As a crew member, I want to place meal orders during designated break windows, so that I can receive meals at appropriate times during filming.
 
-1. THE النظام SHALL عرض المعلومات الغذائية بالعربية (سعرات، بروتين، كربوهيدرات)
-2. WHEN يسجل المستخدم وجبة THEN النظام SHALL حساب القيم الغذائية وعرضها بالعربية
-3. THE النظام SHALL تقديم نصائح غذائية مناسبة للثقافة العربية
-4. WHEN يحقق المستخدم هدف غذائي THEN النظام SHALL عرض تهنئة بالعربية
-5. THE النظام SHALL دعم الأهداف الغذائية الإسلامية (صيام، إفطار)
-6. THE النظام SHALL عرض تقارير التغذية الأسبوعية والشهرية بالعربية
+#### Acceptance Criteria
 
-### المتطلب 8: نظام الطوارئ والحساسية العربي
+1. WHEN a Break_Window opens, THE BreakApp SHALL allow meal order submission for the first hour of shooting
+2. THE BreakApp SHALL generate and manage QR codes for project access control
+3. THE BreakApp SHALL provide meal selection interface with cart and checkout functionality
+4. THE BreakApp SHALL send half-hourly reminders to crew members who haven't submitted orders
+5. THE BreakApp SHALL aggregate orders for production team coordination
 
-**قصة المستخدم:** كمستخدم لديه حساسية غذائية، أريد نظام تنبيه باللغة العربية، حتى أتجنب الأطعمة الضارة.
+### Requirement 8: Payment Integration System
 
-#### معايير القبول
+**User Story:** As a user, I want to process payments for exception orders using Egyptian payment methods, so that I can complete transactions conveniently.
 
-1. WHEN يحتوي طبق على مسبب حساسية THEN النظام SHALL عرض تحذير واضح بالعربية
-2. THE النظام SHALL دعم إدخال الحساسيات الغذائية بالعربية
-3. WHEN يحدث تنبيه طبي THEN النظام SHALL عرض إرشادات الطوارئ بالعربية
-4. THE النظام SHALL دعم أرقام الطوارئ المحلية
-5. WHEN يطلب المستخدم طعام محظور THEN النظام SHALL منع الطلب مع شرح السبب بالعربية
-6. THE النظام SHALL إرسال تنبيهات فورية لجهات الاتصال الطارئة بالعربية
+#### Acceptance Criteria
 
-### المتطلب 9: نظام إدارة المشاريع العربي
+1. THE BreakApp SHALL integrate with Egyptian payment gateways for local payment processing
+2. THE BreakApp SHALL support Egyptian Pounds (EGP) as the primary currency
+3. THE BreakApp SHALL calculate differential payments for Limited Exception orders
+4. THE BreakApp SHALL support Egyptian mobile payment methods (Vodafone Cash, Orange Money, etc.)
+5. THE BreakApp SHALL generate Arabic invoices and billing statements
 
-**قصة المستخدم:** كمنتج، أريد إدارة مشاريع الإنتاج بواجهة عربية، حتى أتمكن من متابعة الفرق بفعالية.
+### Requirement 9: GPS Tracking and Delivery
 
-#### معايير القبول
+**User Story:** As a crew member, I want to track meal delivery in real-time, so that I know when my order will arrive at the filming location.
 
-1. WHEN ينشئ المنتج مشروع جديد THEN النظام SHALL عرض نموذج إنشاء بالعربية
-2. THE النظام SHALL عرض معلومات المشروع (الاسم، التاريخ، الموقع) بالعربية
-3. WHEN يولد النظام QR Code THEN النظام SHALL عرض تعليمات الاستخدام بالعربية
-4. THE النظام SHALL عرض قائمة أعضاء الفريق مع أدوارهم بالعربية
-5. WHEN ينتهي وقت تقديم الطلبات THEN النظام SHALL إرسال تذكيرات بالعربية
-6. THE النظام SHALL عرض تقارير المشروع والميزانية بالعربية
+#### Acceptance Criteria
 
-### المتطلب 10: نظام الإشعارات العربي
+1. THE BreakApp SHALL provide real-time GPS tracking of delivery personnel
+2. THE BreakApp SHALL calculate and display estimated time of arrival (ETA) for orders
+3. THE BreakApp SHALL show delivery progress on an interactive map view
+4. THE BreakApp SHALL send notifications when delivery personnel are approaching the location
+5. THE BreakApp SHALL update delivery status throughout the fulfillment process
 
-**قصة المستخدم:** كمستخدم، أريد تلقي إشعارات باللغة العربية، حتى أبقى على اطلاع بحالة طلباتي.
+### Requirement 10: Data Migration and System Conversion
 
-#### معايير القبول
+**User Story:** As a system administrator, I want to migrate existing data to the Arabic system safely, so that historical information is preserved during the conversion.
 
-1. THE النظام SHALL إرسال جميع الإشعارات باللغة العربية
-2. WHEN يتغير وضع الطلب THEN النظام SHALL إرسال إشعار فوري بالعربية
-3. THE النظام SHALL دعم إشعارات البريد الإلكتروني والرسائل النصية بالعربية
-4. WHEN يقترب موعد تقديم الطلبات من الانتهاء THEN النظام SHALL إرسال تذكيرات بالعربية
-5. THE النظام SHALL عرض تاريخ ووقت الإشعارات بالتوقيت المحلي والتقويم الهجري
-6. WHEN يتلقى المستخدم إشعار THEN النظام SHALL عرض الإشعار بتنسيق عربي واضح
+#### Acceptance Criteria
 
-### المتطلب 11: نظام التقارير والإحصائيات العربي
-
-**قصة المستخدم:** كمدير، أريد تقارير وإحصائيات شاملة باللغة العربية، حتى أتخذ قرارات مدروسة.
-
-#### معايير القبول
-
-1. THE النظام SHALL إنشاء تقارير PDF باللغة العربية مع دعم RTL
-2. WHEN يعرض النظام إحصائيات THEN النظام SHALL استخدام الأرقام العربية والتواريخ الهجرية
-3. THE النظام SHALL عرض الرسوم البيانية مع تسميات وألوان مناسبة للثقافة العربية
-4. WHEN يصدر المدير تقرير THEN النظام SHALL تضمين ملخص تنفيذي بالعربية
-5. THE النظام SHALL دعم تصدير البيانات بصيغة Excel مع تنسيق عربي
-6. THE النظام SHALL عرض مقارنات الأداء مع فترات سابقة بالعربية
-
-### المتطلب 12: نظام الأمان والخصوصية العربي
-
-**قصة المستخدم:** كمستخدم، أريد فهم سياسات الخصوصية والأمان بالعربية، حتى أثق في النظام.
-
-#### معايير القبول
-
-1. THE النظام SHALL عرض سياسة الخصوصية باللغة العربية
-2. WHEN يطلب النظام موافقة المستخدم THEN النظام SHALL شرح الغرض بالعربية
-3. THE النظام SHALL دعم حقوق المستخدم في البيانات وفقاً لـ GDPR بالعربية
-4. WHEN يحدث خرق أمني THEN النظام SHALL إشعار المستخدمين بالعربية
-5. THE النظام SHALL عرض إعدادات الخصوصية بواجهة عربية واضحة
-6. THE النظام SHALL دعم حذف البيانات الشخصية مع تأكيد بالعربية
-
-### المتطلب 13: تحسين الأداء والاستجابة
-
-**قصة المستخدم:** كمستخدم، أريد تطبيق سريع ومتجاوب، حتى أتمكن من استخدامه بكفاءة.
-
-#### معايير القبول
-
-1. WHEN يحمل المستخدم أي صفحة THEN النظام SHALL تحميل الصفحة في أقل من 3 ثوان
-2. THE النظام SHALL دعم التحميل التدريجي للمحتوى العربي
-3. WHEN يتفاعل المستخدم مع النظام THEN النظام SHALL الاستجابة فوراً (أقل من 500ms)
-4. THE النظام SHALL تحسين الخطوط العربية للتحميل السريع
-5. THE النظام SHALL دعم التخزين المؤقت للمحتوى العربي
-6. THE النظام SHALL العمل بكفاءة على الأجهزة المحمولة
-
-### المتطلب 14: دعم الأجهزة المحمولة العربي
-
-**قصة المستخدم:** كمستخدم محمول، أريد تجربة مثلى على الهاتف باللغة العربية، حتى أستخدم التطبيق في أي مكان.
-
-#### معايير القبول
-
-1. THE النظام SHALL التكيف مع جميع أحجام الشاشات مع دعم RTL
-2. WHEN يستخدم المستخدم اللمس THEN النظام SHALL دعم الإيماءات العربية (السحب من اليمين)
-3. THE النظام SHALL دعم لوحة المفاتيح العربية
-4. WHEN يدور المستخدم الجهاز THEN النظام SHALL الحفاظ على تخطيط RTL
-5. THE النظام SHALL تحسين استهلاك البطارية والبيانات
-6. THE النظام SHALL دعم الإشعارات المحمولة باللغة العربية
-
-### المتطلب 15: اختبار وضمان الجودة
-
-**قصة المستخدم:** كمطور، أريد نظام اختبار شامل، حتى أضمن جودة التطبيق العربي.
-
-#### معايير القبول
-
-1. THE النظام SHALL اجتياز جميع اختبارات الوحدة للمكونات العربية
-2. WHEN يتم تشغيل اختبارات التكامل THEN النظام SHALL التحقق من صحة الترجمات
-3. THE النظام SHALL اختبار دعم RTL على جميع المتصفحات
-4. THE النظام SHALL اختبار الأداء مع المحتوى العربي
-5. THE النظام SHALL اختبار إمكانية الوصول للمستخدمين العرب
-6. THE النظام SHALL اختبار التوافق مع أنظمة التشغيل العربية
+1. WHEN migrating data, THE BreakApp SHALL preserve all existing user accounts and order history
+2. THE BreakApp SHALL convert existing menu items to Arabic labels and descriptions
+3. THE BreakApp SHALL maintain data integrity throughout the migration process
+4. THE BreakApp SHALL provide rollback capabilities if migration issues occur
+5. THE BreakApp SHALL validate migrated data for completeness and accuracy

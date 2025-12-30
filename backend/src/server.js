@@ -155,6 +155,13 @@ if (require.main === module) {
       logger.info('Cron Jobs started successfully');
     }
 
+    // تشغيل مهام جداول التصوير المجدولة
+    if (process.env.ENABLE_SCHEDULE_CRON_JOBS !== 'false') {
+      const scheduleCronService = require('./services/cronJobService');
+      scheduleCronService.startCronJobs();
+      logger.info('Schedule Integration Cron Jobs started successfully');
+    }
+
     // تشغيل نظام التذكيرات
     try {
       await reminderScheduler.initialize();
@@ -182,6 +189,13 @@ if (require.main === module) {
     logger.warn('إيقاف التطبيق...');
     reminderScheduler.stopAll();
     cronJobs.stopAllJobs();
+    
+    // إيقاف مهام جداول التصوير
+    if (process.env.ENABLE_SCHEDULE_CRON_JOBS !== 'false') {
+      const scheduleCronService = require('./services/cronJobService');
+      scheduleCronService.stopCronJobs();
+    }
+    
     process.exit(0);
   });
 
@@ -189,6 +203,13 @@ if (require.main === module) {
     logger.warn('إيقاف التطبيق...');
     reminderScheduler.stopAll();
     cronJobs.stopAllJobs();
+    
+    // إيقاف مهام جداول التصوير
+    if (process.env.ENABLE_SCHEDULE_CRON_JOBS !== 'false') {
+      const scheduleCronService = require('./services/cronJobService');
+      scheduleCronService.stopCronJobs();
+    }
+    
     process.exit(0);
   });
 }

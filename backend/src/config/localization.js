@@ -23,57 +23,57 @@ const messages = {
       nameRequired: 'الاسم مطلوب'
     },
 
-    // رسائل الطلبات
+    // رسائل طلبات البريك في التصوير
     orders: {
-      orderCreated: 'تم إنشاء الطلب بنجاح',
-      orderUpdated: 'تم تحديث الطلب بنجاح',
-      orderCancelled: 'تم إلغاء الطلب',
-      orderNotFound: 'الطلب غير موجود',
-      orderAlreadyConfirmed: 'الطلب مؤكد بالفعل',
-      orderWindowClosed: 'انتهت فترة تقديم الطلبات',
-      insufficientBalance: 'الرصيد غير كافي',
-      itemNotAvailable: 'العنصر غير متوفر',
-      quantityExceeded: 'تم تجاوز الكمية المسموحة',
-      deliveryScheduled: 'تم جدولة التوصيل',
-      orderDelivered: 'تم توصيل الطلب',
-      orderPreparing: 'جاري تحضير الطلب',
-      orderOutForDelivery: 'الطلب في الطريق',
-      itemsRequired: 'يجب إضافة عنصر واحد على الأقل للطلب',
-      orderCreationFailed: 'فشل في إنشاء الطلب',
-      ordersFetchFailed: 'فشل في جلب الطلبات',
-      orderAccessDenied: 'غير مصرح لك بالوصول إلى هذا الطلب',
-      orderStatusUpdateDenied: 'غير مصرح لك بتحديث حالة الطلب',
-      orderStatusRequired: 'حالة الطلب مطلوبة',
-      orderStatusUpdated: 'تم تحديث حالة الطلب إلى {status}',
-      orderStatusUpdateFailed: 'فشل في تحديث حالة الطلب',
-      orderCancellationFailed: 'فشل في إلغاء الطلب',
-      aggregationAccessDenied: 'غير مصرح لك بالوصول إلى تجميع الطلبات',
-      aggregationSuccess: 'تم تجميع الطلبات بنجاح',
-      aggregationFailed: 'فشل في تجميع الطلبات',
-      summaryAccessDenied: 'غير مصرح لك بالوصول إلى ملخص الطلبات',
-      summaryFetchFailed: 'فشل في جلب ملخص اليوم',
-      exportAccessDenied: 'غير مصرح لك بتصدير التقارير',
-      exportSuccess: 'تم تصدير التقرير بنجاح',
-      exportFailed: 'فشل في تصدير التقرير',
-      statsAccessDenied: 'غير مصرح لك بالوصول إلى الإحصائيات',
-      statsFetchFailed: 'فشل في جلب الإحصائيات',
+      orderCreated: 'تم طلب وجبة البريك بنجاح',
+      orderUpdated: 'تم تحديث طلب البريك بنجاح',
+      orderCancelled: 'تم إلغاء طلب البريك',
+      orderNotFound: 'طلب البريك غير موجود',
+      orderAlreadyConfirmed: 'طلب البريك مؤكد بالفعل',
+      orderWindowClosed: 'انتهت فترة طلب وجبات البريك لهذا اليوم',
+      insufficientBalance: 'الرصيد غير كافي لطلب البريك',
+      itemNotAvailable: 'هذا الطبق غير متوفر في قائمة البريك اليوم',
+      quantityExceeded: 'تم تجاوز الكمية المسموحة لوجبة البريك',
+      deliveryScheduled: 'تم جدولة توصيل وجبة البريك لموقع التصوير',
+      orderDelivered: 'تم توصيل وجبة البريك لموقع التصوير',
+      orderPreparing: 'جاري تحضير وجبة البريك',
+      orderOutForDelivery: 'وجبة البريك في الطريق لموقع التصوير',
+      itemsRequired: 'يجب اختيار وجبة واحدة على الأقل للبريك',
+      orderCreationFailed: 'فشل في طلب وجبة البريك',
+      ordersFetchFailed: 'فشل في جلب طلبات البريك',
+      orderAccessDenied: 'غير مصرح لك بالوصول إلى طلب البريك هذا',
+      orderStatusUpdateDenied: 'غير مصرح لك بتحديث حالة طلب البريك',
+      orderStatusRequired: 'حالة طلب البريك مطلوبة',
+      orderStatusUpdated: 'تم تحديث حالة طلب البريك إلى {status}',
+      orderStatusUpdateFailed: 'فشل في تحديث حالة طلب البريك',
+      orderCancellationFailed: 'فشل في إلغاء طلب البريك',
+      aggregationAccessDenied: 'غير مصرح لك بالوصول إلى تجميع طلبات البريك',
+      aggregationSuccess: 'تم تجميع طلبات البريك للفريق بنجاح',
+      aggregationFailed: 'فشل في تجميع طلبات البريك',
+      summaryAccessDenied: 'غير مصرح لك بالوصول إلى ملخص طلبات البريك',
+      summaryFetchFailed: 'فشل في جلب ملخص طلبات البريك لليوم',
+      exportAccessDenied: 'غير مصرح لك بتصدير تقارير البريك',
+      exportSuccess: 'تم تصدير تقرير طلبات البريك بنجاح',
+      exportFailed: 'فشل في تصدير تقرير طلبات البريك',
+      statsAccessDenied: 'غير مصرح لك بالوصول إلى إحصائيات البريك',
+      statsFetchFailed: 'فشل في جلب إحصائيات طلبات البريك',
       usersInfoAccessDenied: 'غير مصرح لك بالوصول إلى هذه المعلومات',
-      usersFetchFailed: 'فشل في جلب المستخدمين'
+      usersFetchFailed: 'فشل في جلب قائمة الطاقم الذين لم يطلبوا البريك'
     },
 
-    // رسائل القوائم والمطاعم
+    // رسائل قوائم الطعام والمطاعم
     menu: {
-      menuItemAdded: 'تم إضافة عنصر القائمة',
-      menuItemUpdated: 'تم تحديث عنصر القائمة',
-      menuItemDeleted: 'تم حذف عنصر القائمة',
-      menuItemNotFound: 'عنصر القائمة غير موجود',
-      restaurantAdded: 'تم إضافة المطعم',
-      restaurantUpdated: 'تم تحديث المطعم',
-      restaurantNotFound: 'المطعم غير موجود',
-      menuNotAvailable: 'القائمة غير متوفرة حالياً',
-      priceRequired: 'السعر مطلوب',
-      nameRequired: 'الاسم مطلوب',
-      categoryRequired: 'الفئة مطلوبة'
+      menuItemAdded: 'تم إضافة طبق جديد لقائمة البريك',
+      menuItemUpdated: 'تم تحديث طبق في قائمة البريك',
+      menuItemDeleted: 'تم حذف طبق من قائمة البريك',
+      menuItemNotFound: 'الطبق غير موجود في قائمة البريك',
+      restaurantAdded: 'تم إضافة مطعم جديد لشراكة البريك',
+      restaurantUpdated: 'تم تحديث معلومات مطعم البريك',
+      restaurantNotFound: 'مطعم البريك غير موجود',
+      menuNotAvailable: 'قائمة البريك غير متوفرة حالياً',
+      priceRequired: 'سعر وجبة البريك مطلوب',
+      nameRequired: 'اسم الطبق مطلوب',
+      categoryRequired: 'فئة الطبق مطلوبة'
     },
 
     // رسائل الاستثناءات
@@ -292,24 +292,24 @@ const messages = {
       trainingFailed: 'فشل في تدريب النموذج الصوتي'
     },
 
-    // رسائل المشاريع
+    // رسائل مشاريع التصوير
     projects: {
-      projectCreated: 'تم إنشاء المشروع بنجاح',
-      projectUpdated: 'تم تحديث المشروع بنجاح',
-      projectDeleted: 'تم حذف المشروع',
-      projectNotFound: 'المشروع غير موجود',
-      qrCodeGenerated: 'تم إنشاء رمز QR',
-      qrCodeInvalid: 'رمز QR غير صحيح',
-      accessGranted: 'تم منح الوصول',
-      accessDenied: 'تم رفض الوصول',
-      orderWindowActive: 'نافذة الطلبات مفتوحة',
-      orderWindowClosed: 'نافذة الطلبات مغلقة',
-      qrTokenRequired: 'QR Token مطلوب',
-      qrCodeInvalidOrExpired: 'QR Code غير صحيح أو منتهي الصلاحية',
-      projectInactive: 'المشروع غير نشط',
-      projectAccessSuccess: 'تم الوصول للمشروع بنجاح',
-      projectDeactivated: 'تم إلغاء تفعيل المشروع بنجاح',
-      qrCodeRegenerated: 'تم توليد QR Code جديد بنجاح'
+      projectCreated: 'تم إنشاء مشروع التصوير بنجاح',
+      projectUpdated: 'تم تحديث مشروع التصوير بنجاح',
+      projectDeleted: 'تم حذف مشروع التصوير',
+      projectNotFound: 'مشروع التصوير غير موجود',
+      qrCodeGenerated: 'تم إنشاء رمز QR لموقع التصوير',
+      qrCodeInvalid: 'رمز QR لموقع التصوير غير صحيح',
+      accessGranted: 'تم منح الوصول لموقع التصوير',
+      accessDenied: 'تم رفض الوصول لموقع التصوير',
+      orderWindowActive: 'نافذة طلب البريك مفتوحة الآن',
+      orderWindowClosed: 'انتهت فترة طلب البريك لهذا اليوم',
+      qrTokenRequired: 'رمز QR لموقع التصوير مطلوب',
+      qrCodeInvalidOrExpired: 'رمز QR غير صحيح أو منتهي الصلاحية',
+      projectInactive: 'مشروع التصوير غير نشط',
+      projectAccessSuccess: 'تم الوصول لموقع التصوير بنجاح',
+      projectDeactivated: 'تم إلغاء تفعيل مشروع التصوير بنجاح',
+      qrCodeRegenerated: 'تم توليد رمز QR جديد لموقع التصوير بنجاح'
     },
 
     // رسائل الإشعارات
@@ -357,8 +357,43 @@ const messages = {
       statsRetrieved: 'تم جلب إحصائيات التذكيرات بنجاح'
     },
 
-    // رسائل سير العمل
-    workflow: {
+    // رسائل تتبع التوصيل GPS
+    tracking: {
+      trackingCreated: 'تم إنشاء تتبع توصيل البريك بنجاح',
+      trackingCreationFailed: 'فشل في إنشاء تتبع التوصيل',
+      locationUpdated: 'تم تحديث موقع سائق البريك',
+      locationUpdateFailed: 'فشل في تحديث موقع السائق',
+      statusUpdated: 'تم تحديث حالة توصيل البريك إلى {status}',
+      statusUpdateFailed: 'فشل في تحديث حالة التوصيل',
+      trackingNotFound: 'تتبع التوصيل غير موجود',
+      trackingAccessDenied: 'غير مصرح لك بالوصول إلى تتبع هذا التوصيل',
+      trackingFetchFailed: 'فشل في جلب معلومات التتبع',
+      activeDeliveriesAccessDenied: 'غير مصرح لك بالوصول إلى التوصيلات النشطة',
+      activeDeliveriesFetchFailed: 'فشل في جلب التوصيلات النشطة',
+      driverAssignmentAccessDenied: 'غير مصرح لك بتعيين السائقين',
+      driverInfoRequired: 'معلومات السائق (الاسم والهاتف) مطلوبة',
+      driverAssigned: 'تم تعيين السائق {name} لتوصيل البريك',
+      driverAssignmentFailed: 'فشل في تعيين السائق',
+      routeFetchFailed: 'فشل في جلب مسار التوصيل',
+      deliveryConfirmed: 'تم تأكيد تسليم البريك بنجاح',
+      deliveryConfirmationFailed: 'فشل في تأكيد التسليم',
+      driverNearby: 'سائق البريك قريب من موقع التصوير',
+      estimatedArrival: 'الوصول المتوقع خلال {minutes} دقيقة',
+      deliveryInProgress: 'جاري توصيل البريك لموقع التصوير',
+      deliveryCompleted: 'تم توصيل البريك لموقع التصوير بنجاح'
+    },
+
+    // حالات التوصيل
+    deliveryStatus: {
+      PREPARING: 'قيد التحضير',
+      DRIVER_ASSIGNED: 'تم تعيين السائق',
+      PICKED_UP: 'تم الاستلام من المطعم',
+      ON_THE_WAY: 'في الطريق لموقع التصوير',
+      NEARBY: 'قريب من موقع التصوير',
+      DELIVERED: 'تم التسليم',
+      FAILED: 'فشل التسليم',
+      RETURNED: 'تم الإرجاع'
+    },
       qrValidated: 'تم التحقق من رمز QR بنجاح',
       orderSubmitted: 'تم تقديم الطلب بنجاح',
       orderConfirmed: 'تم تأكيد الطلب',
@@ -397,6 +432,44 @@ const messages = {
       reportGenerateFailed: 'حدث خطأ في إنشاء تقرير الميزانية',
       analyticsFetched: 'تم جلب الإحصائيات بنجاح',
       analyticsFetchFailed: 'حدث خطأ في جلب إحصائيات الميزانية'
+    },
+
+    // رسائل تتبع التوصيل GPS
+    tracking: {
+      trackingCreated: 'تم إنشاء تتبع توصيل البريك بنجاح',
+      trackingCreationFailed: 'فشل في إنشاء تتبع التوصيل',
+      locationUpdated: 'تم تحديث موقع سائق البريك',
+      locationUpdateFailed: 'فشل في تحديث موقع السائق',
+      statusUpdated: 'تم تحديث حالة توصيل البريك إلى {status}',
+      statusUpdateFailed: 'فشل في تحديث حالة التوصيل',
+      trackingNotFound: 'تتبع التوصيل غير موجود',
+      trackingAccessDenied: 'غير مصرح لك بالوصول إلى تتبع هذا التوصيل',
+      trackingFetchFailed: 'فشل في جلب معلومات التتبع',
+      activeDeliveriesAccessDenied: 'غير مصرح لك بالوصول إلى التوصيلات النشطة',
+      activeDeliveriesFetchFailed: 'فشل في جلب التوصيلات النشطة',
+      driverAssignmentAccessDenied: 'غير مصرح لك بتعيين السائقين',
+      driverInfoRequired: 'معلومات السائق (الاسم والهاتف) مطلوبة',
+      driverAssigned: 'تم تعيين السائق {name} لتوصيل البريك',
+      driverAssignmentFailed: 'فشل في تعيين السائق',
+      routeFetchFailed: 'فشل في جلب مسار التوصيل',
+      deliveryConfirmed: 'تم تأكيد تسليم البريك بنجاح',
+      deliveryConfirmationFailed: 'فشل في تأكيد التسليم',
+      driverNearby: 'سائق البريك قريب من موقع التصوير',
+      estimatedArrival: 'الوصول المتوقع خلال {minutes} دقيقة',
+      deliveryInProgress: 'جاري توصيل البريك لموقع التصوير',
+      deliveryCompleted: 'تم توصيل البريك لموقع التصوير بنجاح'
+    },
+
+    // حالات التوصيل
+    deliveryStatus: {
+      PREPARING: 'قيد التحضير',
+      DRIVER_ASSIGNED: 'تم تعيين السائق',
+      PICKED_UP: 'تم الاستلام من المطعم',
+      ON_THE_WAY: 'في الطريق لموقع التصوير',
+      NEARBY: 'قريب من موقع التصوير',
+      DELIVERED: 'تم التسليم',
+      FAILED: 'فشل التسليم',
+      RETURNED: 'تم الإرجاع'
     },
 
     // رسائل عامة

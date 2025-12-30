@@ -1,6 +1,6 @@
 /**
- * صفحة القوائم العربية
- * Arabic Menu Page with RTL support
+ * صفحة قوائم البريك العربية
+ * Arabic Break Menu Page with RTL support for Film Crews
  */
 
 import React, { useState, useEffect } from 'react';
@@ -18,7 +18,9 @@ import {
   MagnifyingGlassIcon,
   FunnelIcon,
   TagIcon,
-  CurrencyDollarIcon
+  CurrencyDollarIcon,
+  FilmIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline';
 
 interface MenuItem {
@@ -325,10 +327,67 @@ const ArabicMenu: React.FC = () => {
         
         {/* العنوان والإجراءات */}
         <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              {t('menu.title')}
-            </h1>
+          <div className="flex items-center space-x-3 space-x-reverse">
+            <FilmIcon className="h-8 w-8 text-blue-600" />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {t('menu.title')}
+              </h1>
+              <p className="text-sm text-gray-600">إدارة وجبات البريك المتاحة لطاقم التصوير</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3 space-x-reverse">
+            <ArabicButton
+              variant="outline"
+              onClick={() => setShowCategoryModal(true)}
+              icon={<TagIcon className="h-4 w-4" />}
+            >
+              إضافة نوع وجبة
+            </ArabicButton>
+            <ArabicButton
+              variant="primary"
+              onClick={() => {
+                resetItemForm();
+                setShowItemModal(true);
+              }}
+              icon={<PlusIcon className="h-4 w-4" />}
+            >
+              إضافة وجبة بريك
+            </ArabicButton>
+          </div>
+        </div>
+
+        {/* البحث والتصفية */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="md:col-span-2">
+              <ArabicInput
+                label="البحث في وجبات البريك"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="ابحث عن وجبة أو مطعم..."
+                icon={<MagnifyingGlassIcon className="h-4 w-4" />}
+              />
+            </div>
+            <ArabicSelect
+              label="نوع الوجبة"
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              options={[
+                { value: 'ALL', label: 'جميع الأنواع' },
+                ...categories.map(cat => ({ value: cat.name, label: cat.nameAr }))
+              ]}
+            />
+            <ArabicSelect
+              label="التوفر"
+              value={availabilityFilter}
+              onChange={(e) => setAvailabilityFilter(e.target.value)}
+              options={[
+                { value: 'ALL', label: 'الكل' },
+                { value: 'true', label: 'متوفر للبريك' },
+                { value: 'false', label: 'غير متوفر' }
+              ]}
+            />
           </div>
         </div>
         {loading ? (
@@ -398,44 +457,49 @@ const ArabicMenu: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <ArabicInput
-                    label="الاسم بالعربية"
+                    label="اسم الوجبة بالعربية"
                     value={itemForm.nameAr}
                     onChange={(e) => setItemForm({...itemForm, nameAr: e.target.value})}
+                    placeholder="مثال: كباب مشوي، فراخ بانيه، كشري..."
                     required
                   />
                   <ArabicInput
-                    label="الاسم بالإنجليزية"
+                    label="اسم الوجبة بالإنجليزية"
                     value={itemForm.name}
                     onChange={(e) => setItemForm({...itemForm, name: e.target.value})}
+                    placeholder="English name for the dish"
                     required
                   />
                   <div className="md:col-span-2">
                     <ArabicInput
-                      label="الوصف بالعربية"
+                      label="وصف الوجبة بالعربية"
                       value={itemForm.descriptionAr}
                       onChange={(e) => setItemForm({...itemForm, descriptionAr: e.target.value})}
+                      placeholder="وصف مفصل للوجبة ومكوناتها..."
                       multiline
                       rows={3}
                     />
                   </div>
                   <div className="md:col-span-2">
                     <ArabicInput
-                      label="الوصف بالإنجليزية"
+                      label="وصف الوجبة بالإنجليزية"
                       value={itemForm.description}
                       onChange={(e) => setItemForm({...itemForm, description: e.target.value})}
+                      placeholder="Detailed description of the dish..."
                       multiline
                       rows={3}
                     />
                   </div>
                   <ArabicInput
-                    label="السعر (ج.م)"
+                    label="سعر الوجبة (ج.م)"
                     type="number"
                     value={itemForm.price}
                     onChange={(e) => setItemForm({...itemForm, price: parseFloat(e.target.value) || 0})}
+                    placeholder="0.00"
                     required
                   />
                   <ArabicSelect
-                    label="الفئة"
+                    label="نوع الوجبة"
                     value={itemForm.category}
                     onChange={(e) => {
                       const selectedCategory = categories.find(cat => cat.name === e.target.value);
@@ -449,9 +513,10 @@ const ArabicMenu: React.FC = () => {
                     required
                   />
                   <ArabicInput
-                    label="رابط الصورة"
+                    label="رابط صورة الوجبة"
                     value={itemForm.image}
                     onChange={(e) => setItemForm({...itemForm, image: e.target.value})}
+                    placeholder="https://example.com/image.jpg"
                   />
                   
                   {/* خيارات إضافية */}
@@ -465,7 +530,7 @@ const ArabicMenu: React.FC = () => {
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
                       <label htmlFor="isAvailable" className="text-sm text-gray-700">
-                        {t('menu.available')}
+                        {t('menu.available')} للبريك
                       </label>
                     </div>
                     <div className="flex items-center space-x-3 space-x-reverse">
@@ -477,7 +542,7 @@ const ArabicMenu: React.FC = () => {
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
                       <label htmlFor="isHalal" className="text-sm text-gray-700">
-                        حلال
+                        حلال (مناسب للمسلمين)
                       </label>
                     </div>
                     <div className="flex items-center space-x-3 space-x-reverse">
@@ -489,7 +554,7 @@ const ArabicMenu: React.FC = () => {
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
                       <label htmlFor="isVegetarian" className="text-sm text-gray-700">
-                        نباتي
+                        نباتي (بدون لحوم)
                       </label>
                     </div>
                   </div>

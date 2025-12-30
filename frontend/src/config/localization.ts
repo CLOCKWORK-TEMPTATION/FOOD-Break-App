@@ -40,17 +40,17 @@ export const messages: Record<string, LocalizedMessages> = {
 
     // التنقل
     navigation: {
-      dashboard: 'لوحة التحكم',
-      orders: 'الطلبات',
-      menu: 'القائمة',
-      restaurants: 'المطاعم',
-      users: 'المستخدمون',
-      reports: 'التقارير',
+      dashboard: 'لوحة تحكم البريك',
+      orders: 'طلبات البريك',
+      menu: 'قائمة البريك',
+      restaurants: 'مطاعم البريك',
+      users: 'طاقم التصوير',
+      reports: 'تقارير البريك',
       settings: 'الإعدادات',
       profile: 'الملف الشخصي',
       logout: 'تسجيل الخروج',
       home: 'الرئيسية',
-      about: 'حول',
+      about: 'حول BreakApp',
       contact: 'اتصل بنا',
       help: 'مساعدة'
     },
@@ -78,80 +78,80 @@ export const messages: Record<string, LocalizedMessages> = {
       nameRequired: 'الاسم مطلوب'
     },
 
-    // الطلبات
+    // طلبات البريك
     orders: {
-      title: 'إدارة الطلبات',
-      newOrder: 'طلب جديد',
-      orderHistory: 'تاريخ الطلبات',
-      orderDetails: 'تفاصيل الطلب',
-      orderNumber: 'رقم الطلب',
-      orderDate: 'تاريخ الطلب',
-      orderTime: 'وقت الطلب',
-      orderStatus: 'حالة الطلب',
-      orderTotal: 'إجمالي الطلب',
-      orderItems: 'عناصر الطلب',
-      deliveryAddress: 'عنوان التوصيل',
-      deliveryTime: 'وقت التوصيل',
+      title: 'إدارة طلبات البريك',
+      newOrder: 'طلب بريك جديد',
+      orderHistory: 'تاريخ طلبات البريك',
+      orderDetails: 'تفاصيل طلب البريك',
+      orderNumber: 'رقم طلب البريك',
+      orderDate: 'تاريخ طلب البريك',
+      orderTime: 'وقت طلب البريك',
+      orderStatus: 'حالة طلب البريك',
+      orderTotal: 'إجمالي طلب البريك',
+      orderItems: 'وجبات البريك المطلوبة',
+      deliveryAddress: 'موقع التصوير',
+      deliveryTime: 'وقت توصيل البريك',
       paymentMethod: 'طريقة الدفع',
-      orderNotes: 'ملاحظات الطلب',
-      cancelOrder: 'إلغاء الطلب',
-      confirmOrder: 'تأكيد الطلب',
-      trackOrder: 'تتبع الطلب',
-      reorder: 'إعادة الطلب',
-      orderCancelled: 'تم إلغاء الطلب',
-      orderConfirmed: 'تم تأكيد الطلب',
-      orderPreparing: 'جاري تحضير الطلب',
-      orderDelivered: 'تم توصيل الطلب',
-      noOrders: 'لا توجد طلبات',
-      orderCreated: 'تم إنشاء الطلب بنجاح'
+      orderNotes: 'ملاحظات خاصة بالبريك',
+      cancelOrder: 'إلغاء طلب البريك',
+      confirmOrder: 'تأكيد طلب البريك',
+      trackOrder: 'تتبع طلب البريك',
+      reorder: 'إعادة طلب نفس البريك',
+      orderCancelled: 'تم إلغاء طلب البريك',
+      orderConfirmed: 'تم تأكيد طلب البريك',
+      orderPreparing: 'جاري تحضير وجبة البريك',
+      orderDelivered: 'تم توصيل البريك لموقع التصوير',
+      noOrders: 'لا توجد طلبات بريك',
+      orderCreated: 'تم طلب البريك بنجاح'
     },
 
-    // القوائم
+    // قوائم البريك
     menu: {
-      title: 'إدارة القوائم',
-      menuItems: 'عناصر القائمة',
-      addItem: 'إضافة عنصر',
-      editItem: 'تعديل عنصر',
-      deleteItem: 'حذف عنصر',
-      itemName: 'اسم العنصر',
-      itemDescription: 'وصف العنصر',
-      itemPrice: 'سعر العنصر',
-      itemCategory: 'فئة العنصر',
-      itemImage: 'صورة العنصر',
+      title: 'إدارة قوائم البريك',
+      menuItems: 'وجبات البريك المتاحة',
+      addItem: 'إضافة وجبة جديدة',
+      editItem: 'تعديل وجبة البريك',
+      deleteItem: 'حذف وجبة من القائمة',
+      itemName: 'اسم الوجبة',
+      itemDescription: 'وصف الوجبة',
+      itemPrice: 'سعر الوجبة',
+      itemCategory: 'نوع الوجبة',
+      itemImage: 'صورة الوجبة',
       availability: 'التوفر',
-      available: 'متوفر',
+      available: 'متوفر للبريك',
       unavailable: 'غير متوفر',
-      categories: 'الفئات',
-      addCategory: 'إضافة فئة',
-      categoryName: 'اسم الفئة',
-      noItems: 'لا توجد عناصر في القائمة',
-      itemAdded: 'تم إضافة العنصر بنجاح',
-      itemUpdated: 'تم تحديث العنصر بنجاح',
-      itemDeleted: 'تم حذف العنصر بنجاح'
+      categories: 'أنواع وجبات البريك',
+      addCategory: 'إضافة نوع جديد',
+      categoryName: 'اسم النوع',
+      noItems: 'لا توجد وجبات متاحة للبريك',
+      itemAdded: 'تم إضافة الوجبة لقائمة البريك بنجاح',
+      itemUpdated: 'تم تحديث وجبة البريك بنجاح',
+      itemDeleted: 'تم حذف الوجبة من قائمة البريك بنجاح'
     },
 
-    // المطاعم
+    // مطاعم البريك
     restaurants: {
-      title: 'إدارة المطاعم',
-      addRestaurant: 'إضافة مطعم',
-      editRestaurant: 'تعديل مطعم',
-      deleteRestaurant: 'حذف مطعم',
+      title: 'إدارة مطاعم البريك',
+      addRestaurant: 'إضافة مطعم للشراكة',
+      editRestaurant: 'تعديل مطعم البريك',
+      deleteRestaurant: 'حذف مطعم من الشراكة',
       restaurantName: 'اسم المطعم',
       restaurantAddress: 'عنوان المطعم',
       restaurantPhone: 'هاتف المطعم',
       restaurantEmail: 'بريد المطعم',
       cuisineType: 'نوع المطبخ',
-      rating: 'التقييم',
-      deliveryTime: 'وقت التوصيل',
-      minimumOrder: 'الحد الأدنى للطلب',
-      deliveryFee: 'رسوم التوصيل',
+      rating: 'تقييم المطعم',
+      deliveryTime: 'وقت توصيل البريك',
+      minimumOrder: 'الحد الأدنى لطلب البريك',
+      deliveryFee: 'رسوم توصيل البريك',
       workingHours: 'ساعات العمل',
       isActive: 'نشط',
-      isPartner: 'شريك',
-      noRestaurants: 'لا توجد مطاعم',
-      restaurantAdded: 'تم إضافة المطعم بنجاح',
-      restaurantUpdated: 'تم تحديث المطعم بنجاح',
-      restaurantDeleted: 'تم حذف المطعم بنجاح'
+      isPartner: 'شريك في البريك',
+      noRestaurants: 'لا توجد مطاعم شريكة',
+      restaurantAdded: 'تم إضافة المطعم للشراكة بنجاح',
+      restaurantUpdated: 'تم تحديث معلومات مطعم البريك بنجاح',
+      restaurantDeleted: 'تم حذف المطعم من الشراكة بنجاح'
     },
 
     // الميزانية
@@ -278,8 +278,45 @@ export const messages: Record<string, LocalizedMessages> = {
       contactSupport: 'اتصل بالدعم الفني'
     },
 
-    // التواريخ والأوقات
-    datetime: {
+    // تتبع التوصيل GPS
+    tracking: {
+      title: 'تتبع توصيل البريك',
+      driverInfo: 'معلومات السائق',
+      driverName: 'اسم السائق',
+      driverPhone: 'رقم هاتف السائق',
+      vehicleInfo: 'معلومات المركبة',
+      currentLocation: 'الموقع الحالي',
+      estimatedArrival: 'الوصول المتوقع',
+      remainingDistance: 'المسافة المتبقية',
+      deliveryStatus: 'حالة التوصيل',
+      trackingMap: 'خريطة التتبع',
+      locationSharing: 'مشاركة الموقع',
+      startLocationSharing: 'بدء مشاركة الموقع',
+      stopLocationSharing: 'إيقاف مشاركة الموقع',
+      updateStatus: 'تحديث الحالة',
+      confirmDelivery: 'تأكيد التسليم',
+      deliveryConfirmed: 'تم تأكيد التسليم',
+      recipientName: 'اسم المستلم',
+      deliveryNotes: 'ملاحظات التسليم',
+      driverNearby: 'السائق قريب من الموقع',
+      deliveryCompleted: 'تم التوصيل بنجاح',
+      noActiveDeliveries: 'لا توجد توصيلات نشطة',
+      trackingNotAvailable: 'التتبع غير متاح',
+      locationUpdateFailed: 'فشل في تحديث الموقع',
+      statusUpdateSuccess: 'تم تحديث الحالة بنجاح'
+    },
+
+    // حالات التوصيل
+    deliveryStatus: {
+      PREPARING: 'قيد التحضير',
+      DRIVER_ASSIGNED: 'تم تعيين السائق',
+      PICKED_UP: 'تم الاستلام من المطعم',
+      ON_THE_WAY: 'في الطريق لموقع التصوير',
+      NEARBY: 'قريب من موقع التصوير',
+      DELIVERED: 'تم التسليم',
+      FAILED: 'فشل التسليم',
+      RETURNED: 'تم الإرجاع'
+    },
       now: 'الآن',
       today: 'اليوم',
       yesterday: 'أمس',
@@ -405,3 +442,42 @@ export function useTranslation(lang: string = getSavedLanguage()) {
   
   return { t, lang, direction };
 }
+    // تتبع التوصيل GPS
+    tracking: {
+      title: 'تتبع توصيل البريك',
+      driverInfo: 'معلومات السائق',
+      driverName: 'اسم السائق',
+      driverPhone: 'رقم هاتف السائق',
+      vehicleInfo: 'معلومات المركبة',
+      currentLocation: 'الموقع الحالي',
+      estimatedArrival: 'الوصول المتوقع',
+      remainingDistance: 'المسافة المتبقية',
+      deliveryStatus: 'حالة التوصيل',
+      trackingMap: 'خريطة التتبع',
+      locationSharing: 'مشاركة الموقع',
+      startLocationSharing: 'بدء مشاركة الموقع',
+      stopLocationSharing: 'إيقاف مشاركة الموقع',
+      updateStatus: 'تحديث الحالة',
+      confirmDelivery: 'تأكيد التسليم',
+      deliveryConfirmed: 'تم تأكيد التسليم',
+      recipientName: 'اسم المستلم',
+      deliveryNotes: 'ملاحظات التسليم',
+      driverNearby: 'السائق قريب من الموقع',
+      deliveryCompleted: 'تم التوصيل بنجاح',
+      noActiveDeliveries: 'لا توجد توصيلات نشطة',
+      trackingNotAvailable: 'التتبع غير متاح',
+      locationUpdateFailed: 'فشل في تحديث الموقع',
+      statusUpdateSuccess: 'تم تحديث الحالة بنجاح'
+    },
+
+    // حالات التوصيل
+    deliveryStatus: {
+      PREPARING: 'قيد التحضير',
+      DRIVER_ASSIGNED: 'تم تعيين السائق',
+      PICKED_UP: 'تم الاستلام من المطعم',
+      ON_THE_WAY: 'في الطريق لموقع التصوير',
+      NEARBY: 'قريب من موقع التصوير',
+      DELIVERED: 'تم التسليم',
+      FAILED: 'فشل التسليم',
+      RETURNED: 'تم الإرجاع'
+    },
