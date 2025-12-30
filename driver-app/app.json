@@ -1,0 +1,54 @@
+{
+  "expo": {
+    "name": "BreakApp Driver",
+    "slug": "breakapp-driver",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#667eea"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.breakapp.driver",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "نحتاج موقعك لتتبع التوصيل",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "نحتاج موقعك لتتبع التوصيل",
+        "NSCameraUsageDescription": "نحتاج الكاميرا لتأكيد التوصيل",
+        "NSPhotoLibraryUsageDescription": "نحتاج الوصول للصور لتأكيد التوصيل"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#667eea"
+      },
+      "package": "com.breakapp.driver",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow BreakApp Driver to use your location for delivery tracking."
+        }
+      ]
+    ]
+  }
+}

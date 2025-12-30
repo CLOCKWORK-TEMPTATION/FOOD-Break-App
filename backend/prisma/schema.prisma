@@ -265,9 +265,12 @@ enum UserRole {
 model Restaurant {
   id           String    @id @default(uuid())
   name         String
+  nameAr       String?   // الاسم بالعربية
   description  String?
+  descriptionAr String?  // الوصف بالعربية
   cuisineType  String?
   address      String
+  addressAr    String?   // العنوان بالعربية
   latitude     Float
   longitude    Float
   phoneNumber  String?
@@ -275,6 +278,14 @@ model Restaurant {
   isPartner    Boolean   @default(false)
   isActive     Boolean   @default(true)
   rating       Float?    @default(0)
+  reviewCount  Int       @default(0) // عدد التقييمات
+  averageDeliveryTime Int? // متوسط وقت التوصيل بالدقائق
+  minimumOrder Float?    @default(0) // الحد الأدنى للطلب
+  deliveryFee  Float?    @default(0) // رسوم التوصيل
+  openingTime  String?   // وقت الفتح (HH:mm)
+  closingTime  String?   // وقت الإغلاق (HH:mm)
+  workingDays  String[]  @default([]) // أيام العمل ["MON", "TUE", etc.]
+  features     String[]  @default([]) // مميزات ["halal", "delivery", "takeout"]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   lastReviewed DateTime?
@@ -291,6 +302,7 @@ model Restaurant {
   @@index([isActive, isPartner])
   @@index([rating])
   @@index([createdAt])
+  @@index([nameAr]) // فهرس للبحث بالعربية
   @@map("restaurants")
 }
 
@@ -359,8 +371,10 @@ model Order {
   status          OrderStatus    @default(PENDING)
   orderType       OrderType      @default(REGULAR)
   totalAmount     Float
+  userPayAmount   Float          @default(0) // المبلغ الذي يدفعه المستخدم
   exceptionType   ExceptionType?
-  exceptionAmount Float? // Amount paid by user for exception
+  exceptionAmount Float? // المبلغ الاستثنائي الذي تدفعه الشركة
+  exceptionReason String? // سبب الطلب الاستثنائي
   deliveryAddress String?
   deliveryLat     Float?
   deliveryLng     Float?
@@ -383,6 +397,7 @@ model Order {
   @@index([projectId, status])
   @@index([restaurantId, status])
   @@index([status, createdAt])
+  @@index([orderType]) // فهرس لنوع الطلب
   @@map("orders")
 }
 
@@ -404,6 +419,7 @@ model OrderTracking {
 
 enum OrderStatus {
   PENDING
+  PENDING_APPROVAL // في انتظار الموافقة (للطلبات الاستثنائية)
   CONFIRMED
   PREPARING
   OUT_FOR_DELIVERY
