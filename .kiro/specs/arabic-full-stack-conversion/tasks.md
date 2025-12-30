@@ -81,7 +81,7 @@ This implementation plan converts the design into actionable coding tasks for bu
     - Add restaurant quality tracking and rating system
     - _Requirements: 5.1, 5.4_
 
-  - [ ]* 5.2 Write property test for geographic menu filtering
+  - [ ] 5.2 Write property test for geographic menu filtering
     - **Property 8: Geographic Menu Filtering**
     - **Validates: Requirements 5.2, 5.5**
 
@@ -91,7 +91,7 @@ This implementation plan converts the design into actionable coding tasks for bu
     - Create menu rotation scheduling system
     - _Requirements: 5.1, 5.3_
 
-  - [ ]* 5.4 Write property test for menu management consistency
+  - [ ] 5.4 Write property test for menu management consistency
     - **Property 9: Menu Management Consistency**
     - **Validates: Requirements 5.1, 5.3, 5.4**
 
@@ -102,7 +102,7 @@ This implementation plan converts the design into actionable coding tasks for bu
     - Add order aggregation for production teams
     - _Requirements: 7.1, 7.5_
 
-  - [ ]* 6.2 Write property test for break window order management
+  - [ ] 6.2 Write property test for break window order management
     - **Property 11: Break Window Order Management**
     - **Validates: Requirements 7.1, 7.4**
 
@@ -112,7 +112,7 @@ This implementation plan converts the design into actionable coding tasks for bu
     - Create cost calculation and differential payment logic
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
 
-  - [ ]* 6.4 Write property test for exception order processing
+  - [ ] 6.4 Write property test for exception order processing
     - **Property 10: Exception Order Processing**
     - **Validates: Requirements 6.3, 6.4, 6.5, 8.3**
 
@@ -123,7 +123,7 @@ This implementation plan converts the design into actionable coding tasks for bu
     - Add access control based on QR codes
     - _Requirements: 7.2_
 
-  - [ ]* 7.2 Write property test for QR code and order aggregation
+  - [ ] 7.2 Write property test for QR code and order aggregation
     - **Property 12: QR Code and Order Aggregation**
     - **Validates: Requirements 7.2, 7.5**
 
@@ -137,7 +137,7 @@ This implementation plan converts the design into actionable coding tasks for bu
     - Implement InstaPay integration
     - _Requirements: 8.1, 8.4_
 
-  - [ ]* 9.2 Write property test for Egyptian payment processing
+  - [ ] 9.2 Write property test for Egyptian payment processing
     - **Property 13: Egyptian Payment Processing**
     - **Validates: Requirements 8.2, 8.5**
 
@@ -154,7 +154,7 @@ This implementation plan converts the design into actionable coding tasks for bu
     - Add geofencing for delivery notifications
     - _Requirements: 9.1, 9.2, 9.4_
 
-  - [ ]* 10.2 Write property test for real-time GPS tracking
+  - [ ] 10.2 Write property test for real-time GPS tracking
     - **Property 14: Real-Time GPS Tracking**
     - **Validates: Requirements 9.1, 9.2, 9.4, 9.5**
 
@@ -171,7 +171,7 @@ This implementation plan converts the design into actionable coding tasks for bu
     - Add delivery status notifications with cultural context
     - _Requirements: 7.4, 9.4_
 
-  - [ ]* 11.2 Write property test for Egyptian cultural design consistency
+  - [ ] 11.2 Write property test for Egyptian cultural design consistency
     - **Property 5: Egyptian Cultural Design Consistency**
     - **Validates: Requirements 3.1, 3.2, 3.4**
 
@@ -182,7 +182,7 @@ This implementation plan converts the design into actionable coding tasks for bu
     - Implement Arabic keyboard input handling
     - _Requirements: 1.3, 4.4_
 
-  - [ ]* 12.2 Write property test for Arabic typography and formatting
+  - [ ] 12.2 Write property test for Arabic typography and formatting
     - **Property 6: Arabic Typography and Formatting**
     - **Validates: Requirements 3.3, 3.5, 4.5**
 
@@ -192,7 +192,7 @@ This implementation plan converts the design into actionable coding tasks for bu
     - Add order cart and checkout functionality
     - _Requirements: 1.1, 7.3_
 
-  - [ ]* 12.4 Write property test for Arabic text processing
+  - [ ] 12.4 Write property test for Arabic text processing
     - **Property 7: Arabic Text Processing**
     - **Validates: Requirements 4.3, 4.4**
 
@@ -229,7 +229,7 @@ This implementation plan converts the design into actionable coding tasks for bu
     - Validate Arabic content across all interfaces
     - _Requirements: All requirements_
 
-  - [ ]* 15.2 Write integration tests for complete workflows
+  - [ ] 15.2 Write integration tests for complete workflows
     - Test Arabic user registration to order completion
     - Test exception order processing with different user roles
     - Test GPS tracking from order placement to delivery
@@ -240,7 +240,7 @@ This implementation plan converts the design into actionable coding tasks for bu
 
 ## Notes
 
-- Tasks marked with `*` are optional and can be skipped for faster MVP
+- All tasks are required for comprehensive development from start
 - Each task references specific requirements for traceability
 - Checkpoints ensure incremental validation and user feedback
 - Property tests validate universal correctness properties from the design
