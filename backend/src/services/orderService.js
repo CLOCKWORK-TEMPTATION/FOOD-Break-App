@@ -2,15 +2,30 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 class OrderService {
-  // إنشاء طلب جديد مع التحقق من نافذة الطلب
+  // إنشاء طلب جديد مع التحقق من نافذة الطلب ومعالجة الاستثناءات
   async createOrder(orderData) {
     try {
+      let exceptionDetails = null;
+      let calculatedAmount = orderData.totalAmount;
+      let userPayAmount = 0;
+
       // التحقق من نافذة الطلب
       if (orderData.projectId) {
         const project = await prisma.project.findUnique({ where: { id: orderData.projectId } });
+
+        // إذا كانت النافذة مغلقة، يجب أن يكون طلب استثنائي
         if (project && !this.isWithinOrderWindow(project)) {
-          throw new Error('نافذة الطلب مغلقة. يمكنك الطلب فقط خلال الساعة الأولى من التصوير');
+          if (orderData.orderType !== 'EXCEPTION') {
+            throw new Error('نافذة الطلب مغلقة. يمكنك الطلب فقط خلال الساعة الأولى من التصوير أو تقديم طلب استثنائي');
+          }
         }
+      }
+
+      // معالجة الطلبات الاستثنائية
+      if (orderData.orderType === 'EXCEPTION') {
+        exceptionDetails = await this.handleExceptionOrder(orderData);
+        calculatedAmount = exceptionDetails.totalAmount;
+        userPayAmount = exceptionDetails.userPayAmount;
       }
 
       const items = Array.isArray(orderData.items) ? orderData.items : [];
@@ -20,12 +35,17 @@ class OrderService {
           userId: orderData.userId,
           projectId: orderData.projectId,
           restaurantId: orderData.restaurantId,
-          totalAmount: orderData.totalAmount,
-          status: 'PENDING',
+          orderType: orderData.orderType || 'REGULAR',
+          totalAmount: calculatedAmount,
+          userPayAmount: userPayAmount,
+          status: orderData.orderType === 'EXCEPTION' ? 'PENDING_APPROVAL' : 'PENDING',
           deliveryAddress: orderData.deliveryAddress,
           deliveryLat: orderData.deliveryLat,
           deliveryLng: orderData.deliveryLng,
           estimatedTime: orderData.estimatedTime,
+          exceptionType: orderData.exceptionType || null,
+          exceptionAmount: exceptionDetails ? exceptionDetails.exceptionAmount : null,
+          exceptionReason: orderData.exceptionReason || null,
           items: {
             create: items.map((i) => ({
               menuItemId: i.menuItemId,
@@ -42,10 +62,78 @@ class OrderService {
           items: { include: { menuItem: true } }
         }
       });
+
+      // إنشاء سجل الاستثناء إذا كان طلب استثنائي
+      if (orderData.orderType === 'EXCEPTION' && exceptionDetails) {
+        await prisma.exception.create({
+          data: {
+            userId: orderData.userId,
+            orderId: order.id,
+            projectId: orderData.projectId,
+            exceptionType: orderData.exceptionType,
+            requestedAmount: exceptionDetails.requestedAmount,
+            approvedAmount: 0, // سيتم التحديث عند الموافقة
+            reason: orderData.exceptionReason || 'طلب استثنائي',
+            status: 'PENDING'
+          }
+        });
+      }
+
       return order;
     } catch (error) {
       throw new Error(`خطأ في إنشاء الطلب: ${error.message}`);
     }
+  }
+
+  // معالجة حسابات الطلب الاستثنائي
+  async handleExceptionOrder(orderData) {
+    const totalAmount = orderData.totalAmount;
+    const exceptionType = orderData.exceptionType;
+    const regularBudget = orderData.regularBudget || 50; // الميزانية العادية الافتراضية
+
+    let userPayAmount = 0;
+    let exceptionAmount = 0;
+    let requestedAmount = 0;
+
+    switch (exceptionType) {
+      case 'FULL':
+        // استثناء كامل: الشركة تدفع كل شيء
+        userPayAmount = 0;
+        exceptionAmount = totalAmount;
+        requestedAmount = totalAmount;
+        break;
+
+      case 'LIMITED':
+        // استثناء محدود: الشركة تدفع الميزانية العادية، المستخدم يدفع الباقي
+        if (totalAmount > regularBudget) {
+          userPayAmount = totalAmount - regularBudget;
+          exceptionAmount = regularBudget;
+          requestedAmount = regularBudget;
+        } else {
+          userPayAmount = 0;
+          exceptionAmount = totalAmount;
+          requestedAmount = totalAmount;
+        }
+        break;
+
+      case 'SELF_PAID':
+        // مدفوع ذاتياً: المستخدم يدفع كل شيء
+        userPayAmount = totalAmount;
+        exceptionAmount = 0;
+        requestedAmount = 0;
+        break;
+
+      default:
+        throw new Error('نوع الاستثناء غير صحيح');
+    }
+
+    return {
+      totalAmount,
+      userPayAmount,
+      exceptionAmount,
+      requestedAmount,
+      exceptionType
+    };
   }
 
   // التحقق من نافذة الطلب
