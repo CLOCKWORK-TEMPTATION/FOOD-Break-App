@@ -1,0 +1,67 @@
+BreakApp Development TODO List
+قائمة المهام التطويرية لتطبيق BreakApp
+Phase 1: Foundation (MVP)
+1. Core Infrastructure
+Set up project repository and development environment
+Choose technology stack (mobile: React Native/Flutter, backend: Node.js/Python/Go)
+Set up database (PostgreSQL/MongoDB)
+Implement user authentication system
+Create API architecture (RESTful/GraphQL)
+Set up cloud infrastructure (AWS/GCP/Azure)
+Implement CI/CD pipeline
+Set up monitoring and logging (Sentry, DataDog, etc.)
+2. Part 1: Basic Menu System (القوائم الأساسية للطعام)
+Design and implement database schema for menus
+Create restaurant management system
+Implement **Core Menu (القائمة الثابتة المتجددة)**
+Restaurant partnership system
+Menu item management (CRUD operations)
+Quality and hygiene tracking
+Periodic review system (monthly/quarterly)
+Implement **Geographic/Proximity Menu (القائمة الجغرافية)**
+Location-based restaurant filtering (2-3 km radius)
+Daily/weekly menu rotation
+Integration with mapping services (Google Maps API)
+Distance calculation and delivery time estimation
+3. Part 2: Exception and Special Orders System (نظام الاستثناءات)
+Implement user role system
+Regular team members
+VIP/Key personnel ("النجوم")
+Create exception tracking system
+Exception quota management (once every 3 weeks for regular users)
+Unlimited exceptions for VIP users
+Implement **Exception Types**
+**Full Exception (الاستثناء التام)**: Any restaurant, fully paid by production
+**Limited Exception (الاستثناء في الحدود)**: Pay only the difference
+**Self-Paid Exception (الاستثناء المدفوع بالكامل)**: User pays everything
+Build cost tracking and differential payment system
+Create financial settlement system (weekly settlements with payroll)
+4. Part 3: Order Workflow (آلية عمل التطبيق)
+Implement QR code generation for projects
+Create QR code scanning and access management
+Build daily order submission system
+Order window (first hour of shooting)
+Meal selection interface
+Order confirmation
+Implement order aggregation for production team
+Create notification system
+Half-hourly reminders for non-submitters
+Order status updates
+Delivery notifications
+Build **GPS tracking feature** for delivery
+Real-time location tracking
+ETA calculation and display
+Map view for crew members
+5. Alert System for Cost Management
+Implement **Cost Threshold Alert System**
+Set maximum budget limits per VIP exception
+Automatic alert to producer/logistics manager
+Alert logging for financial monitoring
+Budget tracking dashboard
+6. Basic UI/UX
+Design mobile app UI (iOS and Android)
+Create user onboarding flow
+Implement menu browsing interface
+Build order cart and checkout
+Create order history view
+Design producer/admin dashboard (web)
