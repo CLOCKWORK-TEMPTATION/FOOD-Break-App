@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { emotionService } from '../services/emotionService';
 
 const MOODS = [
-    { id: 'HAPPY', emoji: '😊', label: 'Happy' },
-    { id: 'EXCITED', emoji: '🤩', label: 'Excited' },
-    { id: 'CALM', emoji: '😌', label: 'Calm' },
-    { id: 'FOCUSED', emoji: '🧠', label: 'Focused' },
-    { id: 'TIRED', emoji: '😴', label: 'Tired' },
-    { id: 'STRESSED', emoji: '😫', label: 'Stressed' },
-    { id: 'ANXIOUS', emoji: '😰', label: 'Anxious' },
-    { id: 'HUNGRY', emoji: '😡', label: 'Hangry' },
+    { id: 'HAPPY', emoji: '😊', label: 'سعيد' },
+    { id: 'EXCITED', emoji: '🤩', label: 'متحمس' },
+    { id: 'CALM', emoji: '😌', label: 'هادئ' },
+    { id: 'FOCUSED', emoji: '🧠', label: 'مركز' },
+    { id: 'TIRED', emoji: '😴', label: 'متعب' },
+    { id: 'STRESSED', emoji: '😫', label: 'متوتر' },
+    { id: 'ANXIOUS', emoji: '😰', label: 'قلق' },
+    { id: 'HUNGRY', emoji: '😡', label: 'جوعان' },
 ];
 
 export default function MoodTracker() {
@@ -47,7 +47,7 @@ export default function MoodTracker() {
         return (
             <div style={styles.container}>
                 <div style={styles.header}>
-                    <h3>AI Welfare Assistant</h3>
+                    <h3>مساعد الرفاهية الذكي</h3>
                     <button onClick={closeRecs} style={styles.closeBtn}>✕</button>
                 </div>
 
@@ -55,14 +55,14 @@ export default function MoodTracker() {
                     <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>
                         {MOODS.find(m => m.id === selectedMood)?.emoji}
                     </div>
-                    <p>We noticed you are feeling <strong>{selectedMood?.toLowerCase()}</strong>.</p>
+                    <p>لاحظنا أنك تشعر بـ <strong>{MOODS.find(m => m.id === selectedMood)?.label}</strong>.</p>
 
                     <div style={styles.suggestionBox}>
-                        <h4>💡 AI Suggestion</h4>
-                        <p>{recommendations.recommendationType === 'ENERGY_BOOST' ? '⚡ Boost your energy level' : '🧘 Take a moment for yourself'}</p>
+                        <h4>💡 اقتراح ذكي</h4>
+                        <p>{recommendations.recommendationType === 'ENERGY_BOOST' ? '⚡ عزز مستوى طاقتك' : '🧘 خذ لحظة لنفسك'}</p>
                     </div>
 
-                    <h4>Referred Menu Items:</h4>
+                    <h4>الأطباق المقترحة:</h4>
                     <div style={styles.itemsGrid}>
                         {recommendations.items.map((item: any) => (
                             <div key={item.id} style={styles.itemCard}>
@@ -70,7 +70,7 @@ export default function MoodTracker() {
                                 <div style={{ fontSize: '0.8rem', color: '#666' }}>{item.description?.substring(0, 50)}...</div>
                             </div>
                         ))}
-                        {recommendations.items.length === 0 && <p>No specific food matches, just stay hydrated! 💧</p>}
+                        {recommendations.items.length === 0 && <p>لا توجد أطباق محددة، فقط حافظ على ترطيب جسمك! 💧</p>}
                     </div>
                 </div>
             </div>
@@ -79,7 +79,7 @@ export default function MoodTracker() {
 
     return (
         <div style={styles.container}>
-            <h3 style={styles.title}>How are you feeling today?</h3>
+            <h3 style={styles.title}>كيف حالك اليوم؟</h3>
             <div style={styles.grid}>
                 {MOODS.map(mood => (
                     <button
@@ -94,7 +94,7 @@ export default function MoodTracker() {
                 ))}
             </div>
             <div style={{ marginTop: '10px', textAlign: 'center' }}>
-                <small style={{ color: '#888', fontSize: '0.7rem' }}>🔒 Your data is private & AI-processed securely.</small>
+                <small style={{ color: '#888', fontSize: '0.7rem' }}>🔒 بياناتك خاصة ومعالجة بأمان بالذكاء الاصطناعي.</small>
             </div>
         </div>
     );

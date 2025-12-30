@@ -134,11 +134,11 @@ export default function ProducerDashboard() {
       {/* Header */}
       <header className={styles.header}>
         <div className={styles.headerContent}>
-          <h1 className={styles.logo}>🎬 Production Control</h1>
+          <h1 className={styles.logo}>🎬 لوحة التحكم الإنتاجية</h1>
           <div className={styles.userSection}>
-            <span style={{ fontSize: '0.9rem', color: '#ccc' }}>Project: Desert Rose (Day 12/45)</span>
+            <span style={{ fontSize: '0.9rem', color: '#ccc' }}>المشروع: وردة الصحراء (اليوم 12/45)</span>
             <button className={styles.actionBtn}>⚙️</button>
-            <img src="https://via.placeholder.com/40" alt="Producer" className={styles.profileImg} />
+            <img src="https://via.placeholder.com/40" alt="المنتج" className={styles.profileImg} />
           </div>
         </div>
       </header>
@@ -147,16 +147,16 @@ export default function ProducerDashboard() {
       <nav className={styles.navbar}>
         <div className={styles.navContent}>
           <button className={`${styles.navItem} ${activeTab === 'overview' ? styles.active : ''}`} onClick={() => setActiveTab('overview')}>
-            📊 Overview
+            📊 نظرة عامة
           </button>
           <button className={`${styles.navItem} ${activeTab === 'schedule' ? styles.active : ''}`} onClick={() => setActiveTab('schedule')}>
-            📅 Schedule
+            📅 الجدول الزمني
           </button>
           <button className={`${styles.navItem} ${activeTab === 'budget' ? styles.active : ''}`} onClick={() => setActiveTab('budget')}>
-            💰 Budget & Analytics
+            💰 الميزانية والتحليلات
           </button>
           <button className={`${styles.navItem} ${activeTab === 'attendance' ? styles.active : ''}`} onClick={() => setActiveTab('attendance')}>
-            👥 Crew & Attendance
+            👥 الفريق والحضور
           </button>
         </div>
       </nav>
@@ -169,38 +169,38 @@ export default function ProducerDashboard() {
             <div className={styles.statCard} style={{ background: '#fff' }}>
               <div className={styles.statIcon} style={{ background: '#e3f2fd', color: '#1976d2' }}>📉</div>
               <div className={styles.statInfo}>
-                <h3>Total Spent</h3>
-                <p>287,000 SR <span className={`${styles.trend} ${styles.up}`}>+2.4%</span></p>
+                <h3>إجمالي المصروفات</h3>
+                <p>287,000 ر.س <span className={`${styles.trend} ${styles.up}`}>+2.4%</span></p>
               </div>
             </div>
             <div className={styles.statCard}>
               <div className={styles.statIcon} style={{ background: '#e8f5e9', color: '#2e7d32' }}>🎬</div>
               <div className={styles.statInfo}>
-                <h3>Schedule Adherence</h3>
-                <p>94% <span className={`${styles.trend} ${styles.up}`}>On Track</span></p>
+                <h3>الالتزام بالجدول</h3>
+                <p>94% <span className={`${styles.trend} ${styles.up}`}>في المسار</span></p>
               </div>
             </div>
             <div className={styles.statCard}>
               <div className={styles.statIcon} style={{ background: '#fff3e0', color: '#ef6c00' }}>⚠️</div>
               <div className={styles.statInfo}>
-                <h3>Pending Breaks</h3>
-                <p>12 <span className={styles.trend}>Orders</span></p>
+                <h3>الاستراحات المعلقة</h3>
+                <p>12 <span className={styles.trend}>طلب</span></p>
               </div>
             </div>
             <div className={styles.statCard}>
               <div className={styles.statIcon} style={{ background: '#ffebee', color: '#c62828' }}>🤒</div>
               <div className={styles.statInfo}>
-                <h3>Absences</h3>
-                <p>1 <span className={`${styles.trend} ${styles.down}`}>Critical</span></p>
+                <h3>الغياب</h3>
+                <p>1 <span className={`${styles.trend} ${styles.down}`}>حرج</span></p>
               </div>
             </div>
 
             {/* Quick Chart */}
             <div className={`${styles.card} ${styles.chartSection}`}>
               <div className={styles.sectionHeader}>
-                <h2>Daily Spending vs Forecast</h2>
+                <h2>الإنفاق اليومي مقابل التوقعات</h2>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <select className={styles.filterSelect}><option>This Week</option></select>
+                  <select className={styles.filterSelect}><option>هذا الأسبوع</option></select>
                 </div>
               </div>
               <div style={{ height: '300px', display: 'flex', alignItems: 'flex-end', gap: '20px', paddingBottom: '20px', borderBottom: '1px solid #eee' }}>
@@ -210,7 +210,7 @@ export default function ProducerDashboard() {
                     <div style={{ width: '100%', height: '100%', background: '#f5f5f5', borderRadius: '8px', position: 'relative', overflow: 'hidden' }}>
                       <div style={{ position: 'absolute', bottom: 0, width: '100%', height: `${h}%`, background: i === 3 ? '#ff7043' : '#5c6bc0', transition: 'height 0.5s' }}></div>
                     </div>
-                    <span style={{ fontSize: '0.8rem', color: '#666' }}>Day {i + 10}</span>
+                    <span style={{ fontSize: '0.8rem', color: '#666' }}>يوم {i + 10}</span>
                   </div>
                 ))}
               </div>
@@ -220,25 +220,25 @@ export default function ProducerDashboard() {
             <div className={`${styles.card} ${styles.sideSection}`}>
               <MoodTracker />
               <div style={{ marginTop: '1rem', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
-                <h3>Today's Call Sheet</h3>
+                <h3>جدول اليوم</h3>
                 <div style={{ marginTop: '1rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                    <span>Call Time</span>
-                    <strong>06:00 AM</strong>
+                    <span>وقت البدء</span>
+                    <strong>06:00 ص</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                    <span>Lunch Break</span>
-                    <strong>12:30 PM</strong>
+                    <span>استراحة الغداء</span>
+                    <strong>12:30 م</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                    <span>First Meal Order</span>
-                    <span style={{ color: '#4CAF50' }}>Confirmed (85 pax)</span>
+                    <span>طلب الوجبة الأولى</span>
+                    <span style={{ color: '#4CAF50' }}>مؤكد (85 شخص)</span>
                   </div>
                   <hr style={{ margin: '1rem 0', borderColor: '#eee' }} />
-                  <h4>Scenes</h4>
+                  <h4>المشاهد</h4>
                   <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    <span className={styles.statusBadge} style={{ background: '#eee' }}>INT. OFFICE - DAY</span>
-                    <span className={styles.statusBadge} style={{ background: '#eee' }}>EXT. PARK - DAY</span>
+                    <span className={styles.statusBadge} style={{ background: '#eee' }}>داخلي - مكتب - نهار</span>
+                    <span className={styles.statusBadge} style={{ background: '#eee' }}>خارجي - حديقة - نهار</span>
                   </div>
                 </div>
               </div>
