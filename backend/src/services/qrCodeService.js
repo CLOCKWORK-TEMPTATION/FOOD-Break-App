@@ -248,14 +248,90 @@ class QRCodeService {
   // التحقق من صحة المشروع
   async validateProjectAccess(projectId, userId) {
     try {
-      // هنا يمكن إضافة منطق التحقق من صلاحية المستخدم للوصول للمشروع
-      // مثل التحقق من قاعدة البيانات
-      
+      const { PrismaClient } = require('@prisma/client');
+      const prisma = new PrismaClient();
+
+      // التحقق من وجود المشروع
+      const project = await prisma.project.findUnique({
+        where: { id: projectId },
+        select: { id: true, isActive: true, name: true }
+      });
+
+      if (!project) {
+        return {
+          hasAccess: false,
+          projectId,
+          userId,
+          reason: 'المشروع غير موجود'
+        };
+      }
+
+      if (!project.isActive) {
+        return {
+          hasAccess: false,
+          projectId,
+          userId,
+          reason: 'المشروع غير نشط'
+        };
+      }
+
+      // التحقق من عضوية المستخدم في المشروع
+      const membership = await prisma.projectMember.findFirst({
+        where: {
+          projectId,
+          userId,
+          isActive: true
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              role: true,
+              isActive: true
+            }
+          }
+        }
+      });
+
+      // السماح للمديرين والمنتجين بالوصول دائماً
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true, isActive: true }
+      });
+
+      if (!user || !user.isActive) {
+        await prisma.$disconnect();
+        return {
+          hasAccess: false,
+          projectId,
+          userId,
+          reason: 'المستخدم غير نشط'
+        };
+      }
+
+      const isAdmin = user.role === 'ADMIN' || user.role === 'PRODUCER';
+      const isMember = membership !== null;
+
+      await prisma.$disconnect();
+
+      if (isAdmin || isMember) {
+        return {
+          hasAccess: true,
+          projectId,
+          userId,
+          accessLevel: isAdmin ? user.role : 'MEMBER',
+          membershipDetails: membership ? {
+            joinedAt: membership.joinedAt,
+            role: membership.role || 'MEMBER'
+          } : null
+        };
+      }
+
       return {
-        hasAccess: true,
+        hasAccess: false,
         projectId,
         userId,
-        accessLevel: 'MEMBER' // يمكن أن يكون MEMBER, VIP, ADMIN
+        reason: 'المستخدم ليس عضواً في المشروع'
       };
     } catch (error) {
       throw new Error(`خطأ في التحقق من صلاحية الوصول: ${error.message}`);

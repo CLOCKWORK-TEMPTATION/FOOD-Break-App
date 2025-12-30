@@ -1,0 +1,250 @@
+{
+  "app": {
+    "name": "بريك آب",
+    "tagline": "نظام طلب الطعام الذكي لفريق الإنتاج",
+    "description": "نظام متكامل لإدارة طلبات الطعام في مواقع التصوير السينمائي"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "logout": "تسجيل الخروج",
+    "register": "إنشاء حساب",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
+    "phoneNumber": "رقم الهاتف",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "rememberMe": "تذكرني",
+    "loginSuccess": "تم تسجيل الدخول بنجاح",
+    "logoutSuccess": "تم تسجيل الخروج بنجاح",
+    "invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+    "accountDisabled": "الحساب معطل. الرجاء التواصل مع الإدارة",
+    "sessionExpired": "انتهت صلاحية الجلسة. الرجاء تسجيل الدخول مرة أخرى"
+  },
+  "navigation": {
+    "home": "الرئيسية",
+    "orders": "الطلبات",
+    "menu": "القائمة",
+    "profile": "الملف الشخصي",
+    "dashboard": "لوحة التحكم",
+    "settings": "الإعدادات",
+    "help": "المساعدة"
+  },
+  "order": {
+    "title": "الطلبات",
+    "newOrder": "طلب جديد",
+    "myOrders": "طلباتي",
+    "orderHistory": "سجل الطلبات",
+    "orderNumber": "رقم الطلب",
+    "orderDate": "تاريخ الطلب",
+    "orderTime": "وقت الطلب",
+    "orderStatus": "حالة الطلب",
+    "totalAmount": "المبلغ الإجمالي",
+    "orderDetails": "تفاصيل الطلب",
+    "placeOrder": "تأكيد الطلب",
+    "cancelOrder": "إلغاء الطلب",
+    "reorder": "إعادة الطلب",
+    "status": {
+      "PENDING": "قيد الانتظار",
+      "CONFIRMED": "مؤكد",
+      "PREPARING": "قيد التحضير",
+      "OUT_FOR_DELIVERY": "في الطريق",
+      "DELIVERED": "تم التوصيل",
+      "CANCELLED": "ملغى"
+    },
+    "type": {
+      "REGULAR": "طلب عادي",
+      "EXCEPTION": "طلب استثنائي"
+    },
+    "exceptionType": {
+      "FULL": "استثناء كامل",
+      "LIMITED": "استثناء محدود",
+      "SELF_PAID": "مدفوع ذاتياً"
+    }
+  },
+  "restaurant": {
+    "title": "المطاعم",
+    "allRestaurants": "جميع المطاعم",
+    "nearbyRestaurants": "مطاعم قريبة",
+    "partnerRestaurants": "المطاعم الشريكة",
+    "rating": "التقييم",
+    "distance": "المسافة",
+    "cuisine": "نوع المطبخ",
+    "menu": "القائمة",
+    "viewMenu": "عرض القائمة",
+    "openNow": "مفتوح الآن",
+    "closed": "مغلق",
+    "deliveryTime": "وقت التوصيل",
+    "cuisineTypes": {
+      "عربي": "عربي",
+      "مصري": "مصري",
+      "سريع": "وجبات سريعة",
+      "صحي": "طعام صحي",
+      "مختلط": "مختلط"
+    }
+  },
+  "menu": {
+    "item": "عنصر",
+    "items": "عناصر",
+    "price": "السعر",
+    "addToCart": "إضافة للسلة",
+    "removeFromCart": "إزالة من السلة",
+    "quantity": "الكمية",
+    "description": "الوصف",
+    "nutritionalInfo": "المعلومات الغذائية",
+    "allergens": "مسببات الحساسية",
+    "dietaryLabels": "التصنيفات الغذائية",
+    "available": "متوفر",
+    "notAvailable": "غير متوفر",
+    "specialInstructions": "ملاحظات خاصة"
+  },
+  "cart": {
+    "title": "السلة",
+    "emptyCart": "السلة فارغة",
+    "itemsInCart": "عنصر في السلة",
+    "subtotal": "المجموع الفرعي",
+    "tax": "الضريبة",
+    "deliveryFee": "رسوم التوصيل",
+    "total": "الإجمالي",
+    "clearCart": "إفراغ السلة",
+    "checkout": "إتمام الطلب"
+  },
+  "profile": {
+    "title": "الملف الشخصي",
+    "personalInfo": "المعلومات الشخصية",
+    "editProfile": "تعديل الملف الشخصي",
+    "changePassword": "تغيير كلمة المرور",
+    "preferences": "التفضيلات",
+    "dietaryRestrictions": "القيود الغذائية",
+    "allergies": "الحساسيات",
+    "favoriteRestaurants": "المطاعم المفضلة",
+    "savedAddresses": "العناوين المحفوظة",
+    "paymentMethods": "طرق الدفع"
+  },
+  "notification": {
+    "title": "الإشعارات",
+    "markAllRead": "تحديد الكل كمقروء",
+    "noNotifications": "لا توجد إشعارات",
+    "types": {
+      "ORDER_CONFIRMED": "تم تأكيد الطلب",
+      "ORDER_READY": "الطلب جاهز",
+      "ORDER_DELIVERED": "تم توصيل الطلب",
+      "EXCEPTION_APPROVED": "تمت الموافقة على الاستثناء",
+      "REMINDER": "تذكير",
+      "SYSTEM": "إشعار النظام"
+    }
+  },
+  "payment": {
+    "title": "الدفع",
+    "selectMethod": "اختر طريقة الدفع",
+    "methods": {
+      "CASH": "نقدي",
+      "CARD": "بطاقة بنكية",
+      "VODAFONE_CASH": "فودافون كاش",
+      "ORANGE_MONEY": "أورانج موني",
+      "INSTAPAY": "إنستا باي",
+      "WALLET": "المحفظة"
+    },
+    "payNow": "ادفع الآن",
+    "paymentSuccess": "تمت عملية الدفع بنجاح",
+    "paymentFailed": "فشلت عملية الدفع"
+  },
+  "delivery": {
+    "title": "التوصيل",
+    "address": "العنوان",
+    "addAddress": "إضافة عنوان",
+    "selectAddress": "اختر العنوان",
+    "estimatedTime": "الوقت المتوقع",
+    "tracking": "تتبع الطلب",
+    "driverInfo": "معلومات السائق",
+    "contactDriver": "التواصل مع السائق",
+    "arrived": "وصل",
+    "onTheWay": "في الطريق"
+  },
+  "nutrition": {
+    "title": "المعلومات الغذائية",
+    "calories": "السعرات الحرارية",
+    "protein": "البروتين",
+    "carbs": "الكربوهيدرات",
+    "fat": "الدهون",
+    "fiber": "الألياف",
+    "sugar": "السكر",
+    "sodium": "الصوديوم",
+    "healthyChoice": "خيار صحي",
+    "dietaryGoals": "الأهداف الغذائية",
+    "trackNutrition": "تتبع التغذية"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "language": "اللغة",
+    "notifications": "الإشعارات",
+    "privacy": "الخصوصية",
+    "security": "الأمان",
+    "theme": "المظهر",
+    "darkMode": "الوضع الليلي",
+    "lightMode": "الوضع النهاري",
+    "autoMode": "تلقائي"
+  },
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "add": "إضافة",
+    "remove": "إزالة",
+    "confirm": "تأكيد",
+    "back": "رجوع",
+    "next": "التالي",
+    "previous": "السابق",
+    "search": "بحث",
+    "filter": "تصفية",
+    "sort": "ترتيب",
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ",
+    "success": "نجحت العملية",
+    "warning": "تحذير",
+    "info": "معلومة",
+    "yes": "نعم",
+    "no": "لا",
+    "ok": "موافق",
+    "close": "إغلاق",
+    "view": "عرض",
+    "download": "تحميل",
+    "share": "مشاركة",
+    "copyLink": "نسخ الرابط"
+  },
+  "time": {
+    "now": "الآن",
+    "today": "اليوم",
+    "yesterday": "أمس",
+    "tomorrow": "غداً",
+    "thisWeek": "هذا الأسبوع",
+    "thisMonth": "هذا الشهر",
+    "minutes": "دقائق",
+    "hours": "ساعات",
+    "days": "أيام",
+    "weeks": "أسابيع",
+    "months": "أشهر"
+  },
+  "errors": {
+    "networkError": "خطأ في الاتصال بالشبكة",
+    "serverError": "خطأ في الخادم",
+    "notFound": "الصفحة غير موجودة",
+    "unauthorized": "غير مصرح لك بالوصول",
+    "forbidden": "ممنوع الوصول",
+    "validation": "خطأ في التحقق من البيانات",
+    "required": "هذا الحقل مطلوب",
+    "invalidEmail": "البريد الإلكتروني غير صحيح",
+    "invalidPhone": "رقم الهاتف غير صحيح",
+    "weakPassword": "كلمة المرور ضعيفة",
+    "passwordMismatch": "كلمات المرور غير متطابقة"
+  },
+  "success": {
+    "saved": "تم الحفظ بنجاح",
+    "updated": "تم التحديث بنجاح",
+    "deleted": "تم الحذف بنجاح",
+    "added": "تمت الإضافة بنجاح",
+    "sent": "تم الإرسال بنجاح"
+  }
+}

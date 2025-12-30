@@ -38,6 +38,7 @@ model User {
   dietaryProfile    DietaryProfile?
   budgets           Budget[]
   emotionLogs       EmotionLog[]
+  invoices          Invoice[]
   
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -185,6 +186,127 @@ model Restaurant {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   
+  @@index([cuisineType])
+  @@index([isActive, isPartner])
+  @@index([rating])
+  @@index([createdAt])
+  @@index([nameArabic]) // فهرس للبحث بالعربية
+  @@map("restaurants")
+}
+  orders            Order[]
+  restaurants       ProjectRestaurant[]
+  shootingSchedules ShootingSchedule[]
+  scheduleSettings  ScheduleIntegrationSettings?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("projects")
+}
+
+<<<<<<< HEAD
+enum ProjectStatus {
+  ACTIVE      // نشط
+  PAUSED      // متوقف مؤقتاً
+  COMPLETED   // مكتمل
+  CANCELLED   // ملغي
+}
+
+// إحداثيات GPS
+type Coordinates {
+  latitude  Float
+  longitude Float
+}
+
+// جدول التصوير
+type ShootingSchedule {
+  startDate     DateTime
+  endDate       DateTime
+  dailyStart    String   // وقت بداية اليوم
+  dailyEnd      String   // وقت نهاية اليوم
+  breakTimes    String[] // أوقات الاستراحة
+}
+
+// نافذة الطلبات
+type OrderWindow {
+  duration      Int      // مدة النافذة بالدقائق (افتراضي: 60)
+  reminderTimes Int[]    // أوقات التذكير (بالدقائق قبل الإغلاق)
+}
+
+// عضوية المشروع
+model ProjectMember {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String @db.ObjectId
+  projectId String @db.ObjectId
+  role      ProjectRole @default(CREW)
+  joinedAt  DateTime @default(now())
+  
+  user      User    @relation(fields: [userId], references: [id])
+  project   Project @relation(fields: [projectId], references: [id])
+  
+  @@unique([userId, projectId])
+  @@map("project_members")
+}
+
+enum ProjectRole {
+  CREW       // طاقم
+  LEAD       // قائد فريق
+  MANAGER    // مدير
+  PRODUCER   // منتج
+}
+
+// نموذج المطعم - Restaurant Model
+model Restaurant {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  name            String   // اسم المطعم
+  nameArabic      String?  // اسم المطعم بالعربية
+  description     String?  // وصف المطعم
+  
+  // معلومات الاتصال
+  phone           String?  // رقم الهاتف
+  email           String?  // البريد الإلكتروني
+  website         String?  // الموقع الإلكتروني
+  
+  // العنوان والموقع
+  address         String   // العنوان
+  coordinates     Coordinates? // إحداثيات GPS
+  deliveryRadius  Float?   // نطاق التوصيل (كم)
+  
+  // معلومات التشغيل
+  cuisineType     String[] // نوع المطبخ
+  isActive        Boolean  @default(true)
+  isPartner       Boolean  @default(false) // مطعم شريك
+  
+  // أوقات العمل
+  workingHours    WorkingHours?
+  
+  // التقييم والجودة
+  rating          Float?   @default(0)
+  reviewCount     Int      @default(0)
+  hygieneRating   String?  // تقييم النظافة
+  lastInspection  DateTime? // آخر تفتيش
+  
+  // معلومات التوصيل
+  deliveryFee     Float?   // رسوم التوصيل
+  minimumOrder    Float?   // الحد الأدنى للطلب
+  avgDeliveryTime Int?     // متوسط وقت التوصيل (دقيقة)
+  
+  // العلاقات
+  menuItems       MenuItem[]
+  orders          Order[]
+  projects        ProjectRestaurant[]
+  reviews         RestaurantReview[]
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+=======
+  @@index([cuisineType])
+  @@index([isActive, isPartner])
+  @@index([rating])
+  @@index([createdAt])
+  @@index([nameAr]) // فهرس للبحث بالعربية
+>>>>>>> 0c836d0ec2c473a6eb6f99d322048a98a4bf3334
   @@map("restaurants")
 }
 
@@ -278,6 +400,7 @@ type NutritionInfo {
 
 // نموذج الطلب - Order Model
 model Order {
+<<<<<<< HEAD
   id                String      @id @default(auto()) @map("_id") @db.ObjectId
   userId            String      @db.ObjectId
   projectId         String?     @db.ObjectId
@@ -322,10 +445,47 @@ model Order {
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
   
+=======
+  id              String         @id @default(uuid())
+  userId          String
+  restaurantId    String?
+  projectId       String? // QR code project reference
+  status          OrderStatus    @default(PENDING)
+  orderType       OrderType      @default(REGULAR)
+  totalAmount     Float
+  userPayAmount   Float          @default(0) // المبلغ الذي يدفعه المستخدم
+  exceptionType   ExceptionType?
+  exceptionAmount Float? // المبلغ الاستثنائي الذي تدفعه الشركة
+  exceptionReason String? // سبب الطلب الاستثنائي
+  deliveryAddress String?
+  deliveryLat     Float?
+  deliveryLng     Float?
+  estimatedTime   DateTime?
+  deliveredAt     DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  // Relations
+  user            User        @relation(fields: [userId], references: [id])
+  restaurant      Restaurant? @relation(fields: [restaurantId], references: [id])
+  project         Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  items           OrderItem[]
+  notifications   Notification[]
+  trackingPoints  OrderTracking[]
+  payments        Payment[]
+  invoice         Invoice?
+
+  @@index([userId, createdAt])
+  @@index([projectId, status])
+  @@index([restaurantId, status])
+  @@index([status, createdAt])
+  @@index([orderType]) // فهرس لنوع الطلب
+>>>>>>> 0c836d0ec2c473a6eb6f99d322048a98a4bf3334
   @@map("orders")
 }
 
 enum OrderStatus {
+<<<<<<< HEAD
   PENDING           // في الانتظار
   CONFIRMED         // مؤكد
   PREPARING         // قيد التحضير
@@ -333,6 +493,15 @@ enum OrderStatus {
   DELIVERED         // تم التوصيل
   CANCELLED         // ملغي
   REFUNDED          // مسترد
+=======
+  PENDING
+  PENDING_APPROVAL // في انتظار الموافقة (للطلبات الاستثنائية)
+  CONFIRMED
+  PREPARING
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+>>>>>>> 0c836d0ec2c473a6eb6f99d322048a98a4bf3334
 }
 
 enum OrderType {
@@ -978,6 +1147,7 @@ enum ChangeType {
   POSTPONEMENT      // تأجيل
 }
 
+<<<<<<< HEAD
 // إعدادات تكامل الجدولة
 model ScheduleIntegrationSettings {
   id                String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -1008,3 +1178,129 @@ model ScheduleIntegrationSettings {
   
   @@map("schedule_integration_settings")
 }
+=======
+// نموذج الفواتير
+model Invoice {
+  id              String         @id @default(uuid())
+  userId          String
+  orderId         String?        @unique
+  paymentId       String?
+
+  // معلومات الفاتورة
+  invoiceNumber   String         @unique
+  amount          Float          // المبلغ الأساسي
+  tax             Float          @default(0) // الضريبة
+  discount        Float          @default(0) // الخصم
+  totalAmount     Float          // المبلغ الإجمالي
+  currency        String         @default("EGP")
+
+  // البنود
+  items           Json?          // بنود الفاتورة
+  notes           String?        // ملاحظات
+
+  // الحالة
+  status          InvoiceStatus  @default(PENDING)
+
+  // معلومات الدفع
+  paidAt          DateTime?
+  dueDate         DateTime?
+
+  // ملف PDF
+  pdfUrl          String?
+  pdfGenerated    Boolean        @default(false)
+
+  // التواريخ
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  // Relations
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order           Order?         @relation(fields: [orderId], references: [id])
+  payment         Payment?       @relation(fields: [paymentId], references: [id])
+
+  @@index([userId])
+  @@index([orderId])
+  @@index([paymentId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("invoices")
+}
+
+enum InvoiceStatus {
+  PENDING      // في الانتظار
+  PAID         // مدفوع
+  OVERDUE      // متأخر
+  CANCELLED    // ملغى
+  REFUNDED     // تم الاسترداد
+}
+
+// ============================================
+// نظام تقارير جاهزية الإنتاج (Production Readiness Reports)
+// ============================================
+
+// تقرير جاهزية الإنتاج
+model ProductionReadinessReport {
+  id                String   @id @default(uuid())
+  
+  // معلومات عامة
+  reportDate        DateTime
+  facilityName      String?
+  projectName       String?
+  reportingPeriod   String?
+  
+  // البيانات الخام
+  productionData    Json     // البيانات الأولية المقدمة
+  
+  // التقييمات (من 1-5)
+  equipmentStatus   Int?     // حالة المعدات
+  hrReadiness       Int?     // جاهزية الموارد البشرية
+  materialsStatus   Int?     // حالة المواد الخام
+  qualitySafety     Int?     // الجودة والسلامة
+  infrastructure    Int?     // البنية التحتية
+  
+  // التقييم العام
+  overallRating     ReadinessRating
+  overallNotes      String?
+  
+  // التحديات والمخاطر
+  challenges        Json?    // قائمة التحديات
+  risks             Json?    // قائمة المخاطر
+  
+  // التوصيات
+  recommendations   Json?    // قائمة التوصيات
+  
+  // التقرير المُنشأ
+  generatedReport   String   @db.Text // التقرير الكامل بصيغة markdown/text
+  reportPdfUrl      String?  // رابط PDF إن وُجد
+  
+  // بيانات إضافية
+  createdBy         String?
+  approvedBy        String?
+  approvalStatus    ApprovalStatus @default(PENDING)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([reportDate])
+  @@index([facilityName])
+  @@index([projectName])
+  @@index([overallRating])
+  @@index([approvalStatus])
+  @@map("production_readiness_reports")
+}
+
+enum ReadinessRating {
+  FULLY_READY           // جاهز تماماً
+  READY_WITH_NOTES      // جاهز مع ملاحظات
+  PARTIALLY_READY       // جاهز جزئياً
+  NOT_READY             // غير جاهز
+  REQUIRES_INTERVENTION // يتطلب تدخل
+}
+
+enum ApprovalStatus {
+  PENDING     // في الانتظار
+  APPROVED    // معتمد
+  REJECTED    // مرفوض
+  UNDER_REVIEW // قيد المراجعة
+}
+>>>>>>> 0c836d0ec2c473a6eb6f99d322048a98a4bf3334

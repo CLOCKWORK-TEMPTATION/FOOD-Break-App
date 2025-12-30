@@ -25,6 +25,7 @@ const reminderRoutes = require('./reminders');
 // const analyticsRoutes = require('./analytics');
 const productionIntegrationRoutes = require('./production');
 // const arabicReportsRoutes = require('./arabicReports');
+const productionReadinessRoutes = require('./productionReadiness');
 
 // Phase 4 Innovation Routes - مسارات المرحلة الرابعة المتقدمة
 const emergencyRoutes = require('./emergency');
@@ -61,6 +62,7 @@ router.use('/reminders', reminderRoutes);
 // // router.use('/analytics', analyticsRoutes);
 router.use('/production-integration', productionIntegrationRoutes);
 // router.use('/arabic-reports', arabicReportsRoutes);
+router.use('/production-readiness', productionReadinessRoutes);
 
 // Phase 4 Innovation Routes - مسارات المرحلة الرابعة المتقدمة
 router.use('/emergency', emergencyRoutes);
@@ -102,6 +104,7 @@ router.get('/', (req, res) => {
       // analytics: '/analytics',
       productionIntegration: '/production-integration',
       // arabicReports: '/arabic-reports',
+      productionReadiness: '/production-readiness',
       // Phase 4 Innovation Features - المميزات المتقدمة للمرحلة الرابعة
       emergency: '/emergency',
       medical: '/medical',
@@ -116,7 +119,8 @@ router.get('/', (req, res) => {
       medical: 'التنبيهات الطبية - Medical Alerts',
       voice: 'الطلب الصوتي - Voice Ordering',
       gpsTracking: 'تتبع التوصيل GPS - GPS Delivery Tracking',
-      scheduleIntegration: 'تكامل جداول التصوير - Schedule Integration'
+      scheduleIntegration: 'تكامل جداول التصوير - Schedule Integration',
+      productionReadiness: 'تقارير جاهزية الإنتاج - Production Readiness Reports'
     }
   });
 });
