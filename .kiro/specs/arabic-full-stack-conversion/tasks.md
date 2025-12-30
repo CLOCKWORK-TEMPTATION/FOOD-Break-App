@@ -1,342 +1,248 @@
-# BreakApp Development TODO List
-# قائمة المهام التطويرية لتطبيق BreakApp
+# Implementation Plan: Arabic Film Production Break App
 
-## 🎯 حالة المشروع الحالية | Current Project Status
+## Overview
 
-### ✅ المهام المكتملة | Completed Tasks
+This implementation plan converts the design into actionable coding tasks for building a comprehensive Arabic-language film production break request system. The plan follows an incremental approach, building core functionality first, then adding advanced features like GPS tracking and cultural adaptations.
 
-#### **Task 3: تكامل مع جداول التصوير** ✅ **COMPLETED** (تم في هذه الجلسة)
-- [x] نظام إدارة جداول التصوير الشامل
-- [x] إدارة فترات البريك التلقائية
-- [x] تكامل مع نظام الطلبات
-- [x] معالجة التأخيرات وتعديل الأوقات
-- [x] نظام Cron Jobs للمراقبة التلقائية
-- [x] تذكيرات الطلبات الذكية
-- [x] واجهات إدارة متقدمة للمديرين
-- [x] تقارير وإحصائيات شاملة
+## Tasks
 
-### 🔄 المهام قيد التطوير | In Progress Tasks
-*لا توجد مهام قيد التطوير حالياً*
+- [ ] 1. Project Setup and Core Infrastructure
+  - Set up monorepo structure with backend, frontend, and mobile apps
+  - Configure TypeScript, ESLint, and Prettier for all projects
+  - Set up PostgreSQL database with Prisma ORM
+  - Configure Redis for caching and session management
+  - Set up Docker containers for development environment
+  - _Requirements: All system requirements_
 
-### 📋 المهام المطلوبة | Required Tasks
+- [ ] 2. Database Schema and Models Implementation
+  - [ ] 2.1 Create core database schema with Prisma
+    - Implement User, FilmIndustryRole, and ExceptionQuota models
+    - Create Restaurant, MenuItem, and Menu management models
+    - Define Order, ExceptionOrder, and OrderItem models
+    - Set up GPS tracking and delivery models
+    - _Requirements: 2.1, 5.1, 6.1, 9.1_
 
-#### **Task 1: استعادة الهوية العربية لتطبيق البريك** ❌ **NOT STARTED**
-- [ ] تحويل التطبيق من تطبيق محاسبة عام إلى تطبيق طلب البريك للتصوير المصري
-- [ ] تحديث جميع الرسائل والواجهات لتعكس الهوية الأصلية
-- [ ] إنشاء صفحات عربية جديدة ومكونات مخصصة للبريك
-- [ ] إضافة مصطلحات مصرية أصيلة في جميع الواجهات
-- [ ] تطوير نظام التعريب الشامل (localization)
+  - [ ] 2.2 Write property test for database models
+    - **Property 15: Data Migration Integrity**
+    - **Validates: Requirements 10.1, 10.2, 10.3, 10.4, 10.5**
 
-#### **Task 2: نظام GPS Tracking للتوصيل** ❌ **NOT STARTED**
-- [ ] إنشاء نظام تتبع GPS كامل للتوصيل مع قاعدة بيانات متقدمة
-- [ ] تطوير خدمات Backend لتتبع مواقع السائقين
-- [ ] حساب المسافات وتقدير أوقات الوصول
-- [ ] إنشاء واجهات Frontend لتتبع التوصيل
-- [ ] لوحة تحكم للسائقين مع خرائط تفاعلية
-- [ ] إشعارات الوصول والتسليم
+  - [ ] 2.3 Create database migrations and seed data
+    - Generate initial migration files
+    - Create seed data for Egyptian film industry roles
+    - Add sample restaurants and menu items with Arabic content
+    - _Requirements: 2.1, 5.1_
 
----
+- [ ] 3. Authentication and User Management System
+  - [ ] 3.1 Implement JWT-based authentication system
+    - Create user registration and login endpoints
+    - Implement role-based access control middleware
+    - Set up password hashing with bcrypt
+    - _Requirements: 2.1, 2.3, 2.5_
 
-## Phase 1: Foundation (MVP)
+  - [ ] 3.2 Write property test for role-based access control
+    - **Property 4: Role-Based Access Control**
+    - **Validates: Requirements 2.3, 2.5, 6.1, 6.2**
 
-  ### 1. Core Infrastructure
-  -     Set up project repository and development environment
-  -     Choose technology stack (mobile: React Native/Flutter, backend: Node.js/Python/Go)
-  -     Set up database (PostgreSQL/MongoDB)
-  -     Implement user authentication system
-  -     Create API architecture (RESTful/GraphQL)
-  -     Set up cloud infrastructure (AWS/GCP/Azure)
-  -     Implement CI/CD pipeline
-  -     Set up monitoring and logging (Sentry, DataDog, etc.)
+  - [ ] 3.3 Create user profile management
+    - Implement user profile CRUD operations
+    - Add film industry role assignment logic
+    - Create user preference management (language, cultural settings)
+    - _Requirements: 2.1, 2.2, 2.4_
 
-  ### 2. Part 1: Basic Menu System (القوائم الأساسية للطعام)
-  -     Design and implement database schema for menus
-  -     Create restaurant management system
-  -     Implement **Core Menu (القائمة الثابتة المتجددة)**
-    -     Restaurant partnership system
-    -     Menu item management (CRUD operations)
-    -     Quality and hygiene tracking
-    -     Periodic review system (monthly/quarterly)
-  -     Implement **Geographic/Proximity Menu (القائمة الجغرافية)**
-    -     Location-based restaurant filtering (2-3 km radius)
-    -     Daily/weekly menu rotation
-    -     Integration with mapping services (Google Maps API)
-    -     Distance calculation and delivery time estimation
+- [ ] 4. Localization and Cultural Adaptation System
+  - [ ] 4.1 Implement core localization service
+    - Create translation management system with database storage
+    - Implement RTL layout detection and configuration
+    - Build Arabic text validation and formatting utilities
+    - _Requirements: 1.1, 1.3, 4.1, 4.4_
 
-  ### 3. Part 2: Exception and Special Orders System (نظام الاستثناءات)
-  -     Implement user role system
-    -     Regular team members
-    -     VIP/Key personnel ("النجوم")
-  -     Create exception tracking system
-    -     Exception quota management (once every 3 weeks for regular users)
-    -     Unlimited exceptions for VIP users
-  -     Implement **Exception Types**
-    -     **Full Exception (الاستثناء التام)**: Any restaurant, fully paid by production
-    -     **Limited Exception (الاستثناء في الحدود)**: Pay only the difference
-    -     **Self-Paid Exception (الاستثناء المدفوع بالكامل)**: User pays everything
-  -     Build cost tracking and differential payment system
-  -     Create financial settlement system (weekly settlements with payroll)
+  - [ ] 4.2 Write property test for Arabic language universality
+    - **Property 1: Arabic Language Universality**
+    - **Validates: Requirements 1.1, 1.2**
 
-### 4. Part 3: Order Workflow (آلية عمل التطبيق)
--     Implement QR code generation for projects
--     Create QR code scanning and access management
--     Build daily order submission system
-  -     Order window (first hour of shooting)
-  -     Meal selection interface
-  -     Order confirmation
--     Implement order aggregation for production team
--     Create notification system
-  -     Half-hourly reminders for non-submitters
-  -     Order status updates
-  -     Delivery notifications
--     Build **GPS tracking feature** for delivery
-  -     Real-time location tracking
-  -     ETA calculation and display
-  -     Map view for crew members
+  - [ ] 4.3 Write property test for RTL layout consistency
+    - **Property 2: RTL Layout Consistency**
+    - **Validates: Requirements 1.3, 4.2**
 
-### 5. Alert System for Cost Management
--     Implement **Cost Threshold Alert System**
-  -     Set maximum budget limits per VIP exception
-  -     Automatic alert to producer/logistics manager
-  -     Alert logging for financial monitoring
-  -     Budget tracking dashboard
+  - [ ] 4.4 Create film industry terminology mapping
+    - Build Egyptian film industry terminology database
+    - Implement business term to film term conversion logic
+    - Create cultural expression and greeting systems
+    - _Requirements: 1.2, 1.4, 2.2, 2.4_
 
-### 6. Basic UI/UX
--     Design mobile app UI (iOS and Android)
--     Create user onboarding flow
--     Implement menu browsing interface
--     Build order cart and checkout
--     Create order history view
--     Design producer/admin dashboard (web)
+  - [ ] 4.5 Write property test for film industry role mapping
+    - **Property 3: Film Industry Role Mapping**
+    - **Validates: Requirements 2.1, 2.2, 2.4, 1.4**
 
-### 7. Payment Integration
--     Integrate payment gateway (Stripe/PayPal/Local)
--     Implement payment processing for exceptions
--     Create billing and invoice system
--     Build financial reporting
+- [ ] 5. Menu Management and Restaurant System
+  - [ ] 5.1 Implement restaurant management system
+    - Create restaurant CRUD operations with Arabic content support
+    - Implement Core Menu and Geographic Menu filtering
+    - Add restaurant quality tracking and rating system
+    - _Requirements: 5.1, 5.4_
 
-## Phase 2: Intelligence (AI/ML)
+  - [ ]* 5.2 Write property test for geographic menu filtering
+    - **Property 8: Geographic Menu Filtering**
+    - **Validates: Requirements 5.2, 5.5**
 
-### 8. Feature #1: Smart Recommendations (نظام التوصيات الذكية)
--     Set up ML infrastructure (TensorFlow/PyTorch)
--     Collect and prepare training data
-  -     User order history
-  -     Weather data integration
-  -     Nutritional preferences
--     Build recommendation engine
-  -     Weather-based recommendations (warm meals in winter, light in summer)
-  -     Personalized suggestions based on order history
-  -     "Try this, similar to your favorite" feature
-  -     Dietary diversity alerts ("No vegetables for a week")
--     Implement recommendation UI in app
--     A/B test recommendation effectiveness
+  - [ ] 5.3 Create menu item management with localization
+    - Implement menu item CRUD with Arabic descriptions
+    - Add cultural food categorization and dietary information
+    - Create menu rotation scheduling system
+    - _Requirements: 5.1, 5.3_
 
-### 9. Feature #2: Predictive Ordering (التنبؤ بالطلبات)
--     Build predictive ML models
-  -     User behavior analysis
-  -     Pattern recognition for regular orderers
-  -     Quantity forecasting
--     Implement auto-order suggestions
-  -     Pre-fill orders for regular users (with edit option)
-  -     Smart defaults based on history
--     Optimize delivery scheduling
-  -     Predict peak times
-  -     Optimize route planning
--     Build restaurant negotiation tools
-  -     Quantity predictions for bulk discounts
-  -     Demand forecasting reports
+  - [ ]* 5.4 Write property test for menu management consistency
+    - **Property 9: Menu Management Consistency**
+    - **Validates: Requirements 5.1, 5.3, 5.4**
 
+- [ ] 6. Order Management and Exception System
+  - [ ] 6.1 Implement core order processing system
+    - Create order placement and validation logic
+    - Implement break window timing and validation
+    - Add order aggregation for production teams
+    - _Requirements: 7.1, 7.5_
 
-## Phase 5: Ecosystem (Platform)
+  - [ ]* 6.2 Write property test for break window order management
+    - **Property 11: Break Window Order Management**
+    - **Validates: Requirements 7.1, 7.4**
 
-### 21. Analytics & Financial Intelligence
+  - [ ] 6.3 Create exception order system
+    - Implement Full, Limited, and Self-Paid exception processing
+    - Add exception quota tracking and validation
+    - Create cost calculation and differential payment logic
+    - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
 
-#### Feature #17: Production Dashboard (لوحة تحكم الإنتاج)
--     Build comprehensive analytics system
-  -     Daily/weekly/monthly spending reports
-  -     Budget forecasting based on patterns
-  -     Cross-project cost comparisons
--     Create producer admin panel
--     Implement data visualization (charts, graphs)
--     Build export functionality (PDF, Excel)
--     Create custom report builder
+  - [ ]* 6.4 Write property test for exception order processing
+    - **Property 10: Exception Order Processing**
+    - **Validates: Requirements 6.3, 6.4, 6.5, 8.3**
 
-#
-### 10. Production Integration Features
+- [ ] 7. QR Code and Project Access System
+  - [ ] 7.1 Implement QR code generation and management
+    - Create project-specific QR code generation
+    - Implement QR code scanning and validation
+    - Add access control based on QR codes
+    - _Requirements: 7.2_
 
-#### Feature #25: Sync with Shooting Schedule (التزامن مع جداول التصوير) ✅ **COMPLETED**
-- [x] Integrate with production scheduling software
-- [x] Auto-adjust delivery times based on breaks
-- [x] Implement schedule change handling
-  - [x] Delays
-  - [x] Cancellations
-  - [x] Time modifications
-- [x] Create automatic crew notifications
-- [x] Build conflict resolution system
-- [x] **Backend Implementation:**
-  - [x] Database models for shooting schedules and breaks
-  - [x] Schedule integration service with delay handling
-  - [x] Schedule controller with full CRUD operations
-  - [x] Schedule routes with authentication and validation
-  - [x] Cron jobs for automatic break monitoring
-  - [x] Order reminder system
-  - [x] Delay detection and notification system
-- [x] **Frontend Implementation:**
-  - [x] Schedule manager component with real-time updates
-  - [x] Create schedule form with break management
-  - [x] Break control interface for managers
-  - [x] Schedule status visualization
-  - [x] Arabic localization for all schedule features
-- [x] **System Integration:**
-  - [x] Automatic break start/end based on schedule
-  - [x] Order window management
-  - [x] Delivery time adjustment for delays
-  - [x] Real-time notifications for schedule changes
-  - [x] Data cleanup and maintenance jobs
+  - [ ]* 7.2 Write property test for QR code and order aggregation
+    - **Property 12: QR Code and Order Aggregation**
+    - **Validates: Requirements 7.2, 7.5**
 
-#### Feature #26: Attendance Integration (تكامل مع نظام الحضور)
--     Integrate with crew attendance systems
--     Auto-cancel orders for absent crew
--     Link check-in to order activation
--     Generate combined attendance + meal reports
--     Build absence pattern analysis
+- [ ] 8. Checkpoint - Core Backend Complete
+  - Ensure all tests pass, ask the user if questions arise.
 
-### 11. Futuristic Features
+- [ ] 9. Egyptian Payment Integration System
+  - [ ] 9.1 Implement Egyptian payment gateway integration
+    - Integrate with Vodafone Cash and Orange Money APIs
+    - Add bank card processing for Egyptian banks
+    - Implement InstaPay integration
+    - _Requirements: 8.1, 8.4_
 
+  - [ ]* 9.2 Write property test for Egyptian payment processing
+    - **Property 13: Egyptian Payment Processing**
+    - **Validates: Requirements 8.2, 8.5**
 
-#### Feature #28: Emotion-Based AI (نظام الطلب التنبؤي بالذكاء العاطفي) ✅ **COMPLETED**
-- [x] Build mood analysis system
-  - [x] Quick daily surveys ("How do you feel?")
-  - [x] Sentiment analysis from interactions
-- [x] Create emotion-based recommendations
-  - [x] Comfort food for stressful days
-  - [x] Energy meals for long shooting days
-  - [x] Celebratory options for achievements
-- [x] Implement psychological care features
-- [x] Ensure ethical AI practices and privacy
+  - [ ] 9.3 Create Arabic invoice generation system
+    - Implement EGP currency formatting with Arabic numerals
+    - Create Arabic invoice templates with cultural formatting
+    - Add tax calculation and regulatory compliance
+    - _Requirements: 8.2, 8.5_
 
-## Additional Cross-Cutting Tasks
+- [ ] 10. GPS Tracking and Delivery System
+  - [ ] 10.1 Implement real-time GPS tracking backend
+    - Create driver location tracking with WebSocket connections
+    - Implement ETA calculation with traffic data integration
+    - Add geofencing for delivery notifications
+    - _Requirements: 9.1, 9.2, 9.4_
 
-### 12. Security & Compliance
--     Implement data encryption (at rest and in transit)
--     Ensure GDPR compliance
--     Implement HIPAA compliance for medical data
--     Set up regular security audits
--     Implement secure payment processing (PCI DSS)
--     Create privacy policy and terms of service
--     Build user consent management system
--     Implement role-based access control (RBAC)
+  - [ ]* 10.2 Write property test for real-time GPS tracking
+    - **Property 14: Real-Time GPS Tracking**
+    - **Validates: Requirements 9.1, 9.2, 9.4, 9.5**
 
-### 25. Testing
--     Write unit tests (target 80%+ coverage)
--     Write integration tests
--     Write end-to-end tests
--     Perform load testing
--     Conduct security penetration testing
--     User acceptance testing (UAT)
--     Beta testing with real production crews
+  - [ ] 10.3 Create delivery status management system
+    - Implement delivery workflow state management
+    - Add delivery confirmation and completion tracking
+    - Create delivery history and analytics
+    - _Requirements: 9.5_
 
-### 13. Documentation
--     Create API documentation
--     Write user manuals (Arabic and English)
--     Create admin guides
--     Document system architecture
--     Write deployment guides
--     Create troubleshooting documentation
--     Build in-app help system
+- [ ] 11. Notification and Communication System
+  - [ ] 11.1 Implement Arabic notification system
+    - Create SMS and push notification services
+    - Implement half-hourly order reminders
+    - Add delivery status notifications with cultural context
+    - _Requirements: 7.4, 9.4_
 
-### 27. Localization
--     Implement i18n framework
--     Create Arabic translations (primary)
--     Create English translations
--     Add RTL (Right-to-Left) support for Arabic
--     Test localization across all features
--     Create locale-specific content
+  - [ ]* 11.2 Write property test for Egyptian cultural design consistency
+    - **Property 5: Egyptian Cultural Design Consistency**
+    - **Validates: Requirements 3.1, 3.2, 3.4**
 
-### 14. Performance Optimization
--     Optimize database queries
--     Implement caching strategies (Redis/Memcached)
--     Optimize image loading and storage
--     Implement lazy loading
--     Minimize API calls
--     Optimize mobile app size
--     Implement progressive web app (PWA) features
+- [ ] 12. Mobile App Development (React Native)
+  - [ ] 12.1 Set up React Native project with Arabic support
+    - Configure RTL layout support and Arabic fonts
+    - Set up navigation with Arabic text support
+    - Implement Arabic keyboard input handling
+    - _Requirements: 1.3, 4.4_
 
-### 15
+  - [ ]* 12.2 Write property test for Arabic typography and formatting
+    - **Property 6: Arabic Typography and Formatting**
+    - **Validates: Requirements 3.3, 3.5, 4.5**
 
-## Resources & Dependencies
+  - [ ] 12.3 Create core mobile app screens
+    - Implement user registration and login screens
+    - Create menu browsing with Arabic content
+    - Add order cart and checkout functionality
+    - _Requirements: 1.1, 7.3_
 
-### Required Skills
-- Mobile development (React Native/Flutter)
-- Backend development (Node.js/Python/Django/Go)
-- Database design (PostgreSQL/MongoDB)
-- API development (REST/GraphQL)
-- Cloud infrastructure (AWS/GCP/Azure)
-- Machine learning (TensorFlow/PyTorch)
-- Payment integration
-- DevOps (Docker, Kubernetes, CI/CD)
+  - [ ]* 12.4 Write property test for Arabic text processing
+    - **Property 7: Arabic Text Processing**
+    - **Validates: Requirements 4.3, 4.4**
 
-### Third-Party Services
-- Payment gateway (Stripe/PayPal)
-- Maps API (Google Maps)
-- SMS/Push notifications (Twilio, Firebase)
-- Video calling (Zoom SDK, WebRTC)
-- Cloud storage (S3, GCS)
-- CDN (CloudFront, Cloudflare)
-- Analytics (Mixpanel, Amplitude)
-- Error tracking (Sentry)
+- [ ] 13. Web Application Development (Next.js)
+  - [ ] 13.1 Set up Next.js project with Arabic localization
+    - Configure RTL CSS and Arabic typography
+    - Set up i18n routing for Arabic content
+    - Implement responsive design for Arabic layouts
+    - _Requirements: 1.3, 4.2_
 
-### Hardware (for advanced features)
-- Smart warming lockers (custom or vendor)
-- Drones (for delivery feature)
-- Mobile kitchen equipment
+  - [ ] 13.2 Create admin dashboard for production managers
+    - Implement order management and aggregation views
+    - Create restaurant and menu management interfaces
+    - Add production analytics and reporting
+    - _Requirements: 7.5_
 
----
+- [ ] 14. GPS Tracking Mobile Interface
+  - [ ] 14.1 Implement interactive delivery tracking
+    - Create real-time map view with Arabic interface
+    - Add delivery progress indicators
+    - Implement driver communication features
+    - _Requirements: 9.3_
 
-## 📊 إحصائيات التقدم | Progress Statistics
+  - [ ] 14.2 Create driver mobile application
+    - Implement driver login and order assignment
+    - Add GPS location sharing and route optimization
+    - Create delivery confirmation interface
+    - _Requirements: 9.1, 9.5_
 
-### 🎯 المهام الرئيسية | Main Tasks
-- **المكتملة**: 1 مهمة ✅ (Task 3 فقط)
-- **المطلوبة**: 2 مهمة ❌ (Task 1 & Task 2)
-- **المخططة**: 25+ مهمة 📋
+- [ ] 15. Integration and System Testing
+  - [ ] 15.1 Implement end-to-end API integration
+    - Connect mobile and web apps to backend services
+    - Test complete order workflow from placement to delivery
+    - Validate Arabic content across all interfaces
+    - _Requirements: All requirements_
 
-### 🏗️ المكونات المطورة | Developed Components
+  - [ ]* 15.2 Write integration tests for complete workflows
+    - Test Arabic user registration to order completion
+    - Test exception order processing with different user roles
+    - Test GPS tracking from order placement to delivery
+    - _Requirements: All requirements_
 
-#### ✅ تم تطويره (Task 3 فقط):
-- نظام إدارة جداول التصوير
-- خدمات تتبع البريكات
-- مهام مجدولة (Cron Jobs)
-- واجهات إدارة الجداول
-- تقارير الجداول والإحصائيات
+- [ ] 16. Final Checkpoint - System Complete
+  - Ensure all tests pass, ask the user if questions arise.
 
-#### ❌ يحتاج تطوير:
-- الهوية العربية الأساسية (Task 1)
-- نظام GPS للتوصيل (Task 2)
-- جميع المكونات الأساسية الأخرى
+## Notes
 
-### 🎨 الهوية العربية | Arabic Identity
-- ❌ **يحتاج تطوير** - الواجهات الأساسية
-- ❌ **يحتاج تطوير** - المصطلحات المصرية
-- ❌ **يحتاج تطوير** - RTL Support
-- ✅ **مكتمل جزئياً** - رسائل جداول التصوير فقط
-- ❌ **يحتاج تطوير** - التوثيق الأساسي
-
-### 🚀 الميزات المتقدمة | Advanced Features
-- ❌ **يحتاج تطوير** - تتبع GPS
-- ✅ **مكتمل** - جداول التصوير التلقائية
-- ✅ **مكتمل** - إدارة البريكات الذكية
-- ✅ **مكتمل** - التذكيرات المجدولة
-- ✅ **مكتمل** - معالجة التأخيرات التلقائية
-- ✅ **مكتمل** - تقارير الجداول
-
----
-
-## 🎬 BreakApp - تطبيق البريك في التصوير المصري
-**"مشروع تحت التطوير لاستعادة الهوية العربية لتطبيق طلب الطعام في مواقع التصوير"**
-
-### الوضع الحالي:
-- ✅ **Task 3 مكتمل**: نظام جداول التصوير متقدم
-- ❌ **Task 1 مطلوب**: استعادة الهوية العربية الأساسية  
-- ❌ **Task 2 مطلوب**: نظام GPS للتوصيل
-
-**المشروع يحتاج إكمال المهام الأساسية ليصبح تطبيقاً عربياً أصيلاً للتصوير المصري.**
+- Tasks marked with `*` are optional and can be skipped for faster MVP
+- Each task references specific requirements for traceability
+- Checkpoints ensure incremental validation and user feedback
+- Property tests validate universal correctness properties from the design
+- Unit tests validate specific examples and edge cases
+- The implementation follows Arabic-first design principles throughout
