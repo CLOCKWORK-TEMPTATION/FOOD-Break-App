@@ -110,9 +110,9 @@ export default function ProducerDashboard() {
 
   if (loading) {
     return (
-      <div className={styles.container}>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-          <div>جاري التحميل...</div>
+      <div className={styles.container} style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#333' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>جاري التحميل...</div>
         </div>
       </div>
     );
